@@ -21,6 +21,8 @@
         self.firebaseAuthLogin = firebaseAuthLogin;
         self.addCountyParams = addCountyParams;
         self.getCounties = getCounties;
+        self.getCategories = getCategories;
+        self.category = '';
         self.county = '';
         self.newUser = {};
         self.post = {};
@@ -153,7 +155,9 @@
         function saveBlog() {
             self.user.$ref().child('blogs').update(self.blogs);
         }
-
+        function getCategories(catParam) {
+            
+        }
         function getCounties(cParam) {
             self.blogs.$loaded()
                 .then(function() {

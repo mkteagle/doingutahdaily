@@ -24,6 +24,7 @@
         self.login = login;
         self.post = blogService.post;
         self.county = blogService.county;
+        self.category = blogService.category;
         self.addPostParam = addPostParam;
         self.currentPage = 1;
         self.pageSize = 5;
@@ -89,6 +90,12 @@
                 console.log("This is an error message");
                 // Error callback
             });
+        }
+        function getCategory() {
+            self.category = $stateParams.catParam;
+        }
+        function getCategories() {
+            
         }
         function getCounty() {
             self.county = $stateParams.cParam;
