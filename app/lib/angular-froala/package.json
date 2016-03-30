@@ -1,0 +1,111 @@
+{
+  "_args": [
+    [
+      "angular-froala",
+      "/Users/i68066/Developer/mkteagle.github.io/portfolio.new/blog"
+    ]
+  ],
+  "_from": "angular-froala@latest",
+  "_id": "angular-froala@2.2.1",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/angular-froala",
+  "_nodeVersion": "5.1.0",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/angular-froala-2.2.1.tgz_1456948442758_0.18092907359823585"
+  },
+  "_npmUser": {
+    "email": "stefan@froala.com",
+    "name": "froala"
+  },
+  "_npmVersion": "3.3.12",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "angular-froala",
+    "raw": "angular-froala",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/angular-froala/-/angular-froala-2.2.1.tgz",
+  "_shasum": "0b3350ec30937229e9271daf0a0f25fce44ee99c",
+  "_shrinkwrap": null,
+  "_spec": "angular-froala",
+  "_where": "/Users/i68066/Developer/mkteagle.github.io/portfolio.new/blog",
+  "bugs": {
+    "url": "https://github.com/froala/angular-froala/issues"
+  },
+  "contributors": [
+    {
+      "name": "Cameron Gallarno",
+      "email": "cgallarno@gmail.com"
+    },
+    {
+      "name": "Stefan Neculai",
+      "email": "stefan@froala.com"
+    }
+  ],
+  "dependencies": {},
+  "description": "Angular.js bindings for Froala WYSIWYG HTML rich text editor",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-contrib-uglify": "^0.11.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-karma": "^0.12.1",
+    "jasmine-core": "^2.4.1",
+    "jshint-stylish": "^2.1.0",
+    "karma": "^0.13.19",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-jasmine": "^0.3.6",
+    "karma-phantomjs-launcher": "^0.2.3",
+    "phantomjs": "^1.9.19",
+    "sinon": "^1.17.2"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "0b3350ec30937229e9271daf0a0f25fce44ee99c",
+    "tarball": "http://registry.npmjs.org/angular-froala/-/angular-froala-2.2.1.tgz"
+  },
+  "gitHead": "c1b29b27cd72c4f975819cd1273b30a4f85179d1",
+  "homepage": "https://www.froala.com/wysiwyg-editor",
+  "keywords": [
+    "angular.js",
+    "editor",
+    "froala",
+    "html",
+    "javascript",
+    "jquery",
+    "jquery-plugin",
+    "rich editor",
+    "rich text editor",
+    "rte",
+    "text",
+    "wysisyg"
+  ],
+  "license": "MIT",
+  "main": "src/angular-froala.js",
+  "maintainers": [
+    {
+      "name": "froala",
+      "email": "stefan@froala.com"
+    }
+  ],
+  "name": "angular-froala",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/froala/angular-froala.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "2.2.1"
+}

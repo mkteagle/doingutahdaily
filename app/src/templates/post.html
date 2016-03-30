@@ -1,0 +1,24 @@
+<div ng-init="uc.getPost()">
+</div>
+<div class="featured"
+     ng-style="{'background-image' : 'url(' + uc.post.featured + ')','background-size': 'cover','background-position': 'center center'}"></div>
+<div class="flexbox">
+    <div class="blogContainer">
+    <div class="title" ng-bind="uc.post.title"></div>
+    <div layout="row" class="postline">
+        <span class="postdate">{{ uc.post.date | dated | date : 'longDate' }}</span>
+        <ul class="filters">
+            <md-chip><i>{{ uc.post.category }},</i></md-chip>
+            <md-chip><i>{{ uc.post.county | addCounty }},</i></md-chip>
+            <md-chip><i>{{ uc.post.season }}</i></md-chip>
+        </ul>
+    </div>
+
+    <p>
+    <div class="blogContent messagestyle" froala-view="uc.post.content"></div>
+    </p>
+    <strong><a ng-href="#/edit/{{uc.post.param}}" ng-click="uc.getPost(uc.post)">Edit Blog</a></strong>
+    <comment-dir></comment-dir>
+    </div>
+</div>
+<!--<footer class="footer" ng-include="'./src/templates/footer.html'"></footer>-->
