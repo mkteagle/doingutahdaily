@@ -3,8 +3,8 @@
         .module('blogController', [])
         .controller('BlogController', BlogController)
         .controller('DialogController', DialogController);
-    BlogController.$inject = ['blogService', '$mdSidenav', '$mdBottomSheet', '$mdDialog', '$mdMedia', '$stateParams', '$scope', '$location'];
-    function BlogController(blogService, $mdSidenav, $mdBottomSheet, $mdDialog, $mdMedia, $stateParams, $scope, $location) {
+    BlogController.$inject = ['blogService', '$mdSidenav', '$mdBottomSheet', '$mdDialog', '$mdMedia', '$stateParams', '$scope', '$location', '$filter'];
+    function BlogController(blogService, $mdSidenav, $mdBottomSheet, $mdDialog, $mdMedia, $stateParams, $scope, $location, $filter) {
         var self = this;
         var svgArr = ['svg-1', 'svg-2', 'svg-3', 'svg-4', 'svg-5'];
         var svgindex = 0;
@@ -43,6 +43,7 @@
         self.deleteFeatured = deleteFeatured;
         self.addCategoryParams = addCategoryParams;
         self.addCountyParams = addCountyParams;
+        self.createCategory = createCategory;
         self.uploadFiles = function (files) {
             blogService.uploadFiles(files);
         };
@@ -53,12 +54,16 @@
             self.sortKey = keyname; //set the sortKey to the param passed
             self.reverse = !self.reverse; //if true make it false and vice versa
         };
+        function createCategory (category) {
+            self.categoryParam = $filter('spaceless')(category);
+            self.addCategoryParams(self.post, self.categoryParam);
+        }
         function addCategory() {
             blogService.addCategory(self.categoryName);
             self.categoryName = '';
         }
-        function addCategoryParams () {
-            blogService.addCategoryParams(self.post, self.category);
+        function addCategoryParams (post, category) {
+            blogService.addCategoryParams(post, category);
         }
         function addCountyParams () {
             blogService.addCountyParams(self.post, self.county);
