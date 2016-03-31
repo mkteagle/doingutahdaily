@@ -107,7 +107,7 @@
             });
         }
         function getCategory() {
-            self.category = $stateParams.catParam;
+            self.category = $filter('spaces')($stateParams.catParam);
         }
         function getCategories(catParam) {
             blogService.getCategories(catParam);

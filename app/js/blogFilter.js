@@ -95,6 +95,12 @@
                     return input.replace(/\s+/g,'+');
                 }
             }
-        });
+        })
+        .filter('spaces', function() {
+            return function(input) {
+                if (input) {
+                    return input.replace(/\+/g,' ');
+                }
+            }
+    })
 }());
-

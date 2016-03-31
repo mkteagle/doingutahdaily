@@ -176,26 +176,6 @@ h2 {
     position: relative;
     z-index: 101;
 }
-#logo-text {
-    position: absolute;
-    z-index: 1000;
-    left: 85px;
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 2em;
-    z-index: 200;
-}
-
-#logo:before {
-    content: "";
-    position: absolute;
-    left: 0;
-    border-bottom: 29px solid #45484B;
-    border-left: 29px solid rgb(0,0,0);
-    border-right: 29px solid rgb(0,0,0);
-    width: 92px;
-    height: 0;
-}
 .filters {
     list-style-type: none;
     text-align: center;
@@ -206,18 +186,6 @@ h2 {
     text-decoration: wavy;
 }
 
-#logo:after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    border-top: 29px solid #45484B;
-    border-left: 29px solid rgb(0,0,0);
-    border-right: 29px solid rgb(0,0,0);
-    width: 92px;
-    height: 0;
-    z-index: 101;
-}
 #menu-wrapper {
     left: 225px;
     position: absolute;

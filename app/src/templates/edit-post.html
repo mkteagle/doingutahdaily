@@ -17,8 +17,8 @@
                 </md-input-container>
                 <md-input-container flex aria-label="...">
                     <md-select-label aria-label="..." class="gray" aria-label="...">Category</md-select-label>
-                    <md-select aria-label="..." ng-model="uc.post.category" ng-change="uc.getChange(uc.post); uc.addCategoryParams(uc.post)" aria-label="...">
-                        <md-option aria-label="..." class="blackify" ng-repeat="category in uc.categories" ng-click="uc.CreateCategory(category.name)" aria-label="...">{{ category.name }}</md-option>
+                    <md-select aria-label="..." ng-model="uc.post.category" ng-change="uc.getChange(uc.post)" aria-label="...">
+                        <md-option aria-label="..." class="blackify" ng-repeat="category in uc.categories" ng-click="uc.createCategory(category.name)" aria-label="...">{{ category.name }}</md-option>
                     </md-select>
                 </md-input-container>
                <button ng-if="uc.post.category === 'Add'" ng-click="uc.addCategory(uc.categoryName)">Add Category</button>
