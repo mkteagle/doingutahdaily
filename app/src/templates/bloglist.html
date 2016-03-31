@@ -1,7 +1,7 @@
 <md-sidenav class="site-sidenav md-sidenav-right"
             md-component-id="right"
             md-is-locked-open="$mdMedia('gt-sm')">
-    <div layout="row"><div class="bloglistheading"><h3>List</h3></div><div class="addbutton"><a ng-click="uc.addBlog()"><i class="fa fa-plus"></i></a></div></div>
+    <div layout="row"><div class="bloglistheading"><h3>List</h3></div><div class="addbutton"><a ng-click="uc.addBlog(); uc.addPostParam()"><i class="fa fa-plus"></i></a></div></div>
     <div class="bloglist_ctrls">
         <label for="search">Search:</label>
         <input ng-model="q" id="search" class="form-control" placeholder="Filter text">

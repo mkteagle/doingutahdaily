@@ -33,6 +33,7 @@
         self.addCategory = addCategory;
         self.file = {};
         self.Files = {};
+        self.index = 1;
         self.file.Success = false;
         self.file.progress = 0;
         self.counties = [
@@ -218,22 +219,42 @@
 
         function addBlog() {
             self.blogs.$add({
-                name: 'Jennifer Teagle',
-                postDate: '',
-                date: newdate,
-                avatar: '',
-                url: '/jen',
-                content: '',
-                title: 'Placeholder',
-                category: '',
-                location: '',
-                season: '',
-                county: '',
-                cparam: '',
-                featured: '',
-                posted: false
-            });
-        }
+                      name: 'Jennifer Teagle',
+                      postDate: '',
+                      date: newdate,
+                      avatar: '',
+                      url: '/jen',
+                      content: '',
+                      title: 'Placeholder ' + self.index,
+                      category: '',
+                      location: '',
+                      season: '',
+                      county: '',
+                      cparam: '',
+                      featured: '',
+                      param: 'placeholder' + '+' + self.index,
+                      posted: false
+                    });
+            self.index++;
+          }
+
+            // self.blogs.$add({
+            //     name: 'Jennifer Teagle',
+            //     postDate: '',
+            //     date: newdate,
+            //     avatar: '',
+            //     url: '/jen',
+            //     content: '',
+            //     title: 'Placeholder',
+            //     category: '',
+            //     location: '',
+            //     season: '',
+            //     county: '',
+            //     cparam: '',
+            //     featured: '',
+            //     param: 'placeholder',
+            //     posted: false
+            // });
 
         function firebaseAuthLogin(provider) {
             self.authObj.$authWithOAuthPopup(provider).then(function (authData) {
