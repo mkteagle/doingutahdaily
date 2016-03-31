@@ -81,6 +81,11 @@
                 templateUrl: "./src/templates/counties.html",
                 controller: "BlogController as uc"
             })
+            .state("categories", {
+                url:"/categories/:catParam",
+                templateUrl: "./src/templates/categories.html",
+                controller: "BlogController as uc"
+            })
             .state("posts", {
                 url: "/posts",
                 templateUrl: "./src/templates/posts.html",

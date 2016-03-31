@@ -20,6 +20,7 @@
         self.addPostParam = addPostParam;
         self.firebaseAuthLogin = firebaseAuthLogin;
         self.addCountyParams = addCountyParams;
+        self.addCategoryParams = addCategoryParams;
         self.getCounties = getCounties;
         self.getCategories = getCategories;
         self.category = '';
@@ -156,7 +157,15 @@
             self.user.$ref().child('blogs').update(self.blogs);
         }
         function getCategories(catParam) {
-            
+            self.blogs.$loaded()
+                .then(function() {
+                    angular.forEach(self.blogs, function(blog) {
+                        if (blog.catParam == catParam) {
+                            self.category = blog.category;
+                            console.log(self.category);
+                        }
+                    })
+                })
         }
         function getCounties(cParam) {
             self.blogs.$loaded()
@@ -174,6 +183,10 @@
         };
         function addCountyParams(blog, county) {
             blog.cParam = county;
+            self.blogs.$save(blog);
+        }
+        function addCategoryParams(blog, category) {
+            blog.catParam = category;
             self.blogs.$save(blog);
         }
 

@@ -38,7 +38,11 @@
         self.file = blogService.file;
         self.categoryName = '';
         self.addCategory = addCategory;
+        self.getCategories = getCategories;
+        self.getCategory = getCategory;
         self.deleteFeatured = deleteFeatured;
+        self.addCategoryParams = addCategoryParams;
+        self.addCountyParams = addCountyParams;
         self.uploadFiles = function (files) {
             blogService.uploadFiles(files);
         };
@@ -52,6 +56,12 @@
         function addCategory() {
             blogService.addCategory(self.categoryName);
             self.categoryName = '';
+        }
+        function addCategoryParams () {
+            blogService.addCategoryParams(self.post, self.category);
+        }
+        function addCountyParams () {
+            blogService.addCountyParams(self.post, self.county);
         }
         self.showAdvanced = function (ev, post) {
             $mdDialog.show({
@@ -94,12 +104,11 @@
         function getCategory() {
             self.category = $stateParams.catParam;
         }
-        function getCategories() {
-            
+        function getCategories(catParam) {
+            blogService.getCategories(catParam);
         }
         function getCounty() {
             self.county = $stateParams.cParam;
-            console.log(self.county);
         }
         function getPost() {
             blogService.getPost();

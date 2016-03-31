@@ -17,9 +17,9 @@
                     <li ng-repeat="blog in uc.blogs | unique:'county'" ng-if="blog.county"><a ng-href="#/counties/{{ blog.cParam }}" ng-click="uc.getCounties(blog.cParam)">{{ blog.county }}</a></li>
                 </ul>
             </li>
-            <li class="navli"><a class="nava" ui-sref="counties">CATEGORIES <i class="fa fa-caret-down"></i></a>
+            <li class="navli"><a class="nava" ui-sref="categories">CATEGORIES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu">
-                    <li ng-repeat="blog in uc.blogs | unique:'category'" ng-if="blog.category"><a ng-href="#/counties/{{ blog.cParam }}" ng-click="uc.getCounties(blog.cParam)">{{ blog.category }}</a></li>
+                    <li ng-repeat="blog in uc.blogs | unique:'category'" ng-if="blog.category"><a ng-href="#/categories/{{ blog.catParam }}" ng-click="uc.getCategories(blog.catParam)">{{ blog.category }}</a></li>
                 </ul>
             </li>
             <li class="navli"><a class="nava" href="#">SEASONS</a></li>
