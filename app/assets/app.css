@@ -835,6 +835,13 @@ input[type="checkbox"]{display:none;}
     color: black;
     background: transparent;
 }
+.title a:hover {
+    text-decoration: none;
+    color: gray;
+}
+.title a {
+    color: black;
+}
 .title:focus {
     outline: 0;
 }
@@ -1370,4 +1377,21 @@ NAV
         text-decoration:none;
         color:#66a992;
     }
+}
+.boxed {
+    width: 100px;
+    text-align: center;
+    border: 1px solid black;
+    font-family: 'Cabin', sans-serif;
+    font-size: 1.25em;
+}
+.boxed a:hover {
+    text-decoration: none;
+    color: lightgray;
+}
+.boxed a {
+    color: black;
+}
+.blogContent {
+    padding: 10px 10px 10px 10px;
 }

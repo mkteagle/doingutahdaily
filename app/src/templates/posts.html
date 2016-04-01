@@ -1,16 +1,22 @@
-<div  aria-label="..." ng-repeat="blog in uc.blogs | filter: {posted: true}">
+<div  aria-label="..." dir-paginate="blog in uc.blogs | filter: {posted: true} | orderBy:uc.sortKey:uc.reverse | filter:search| itemsPerPage: uc.pageSize">
 <div>
-        <div>
+        <div class="blogContent">
             <div class="newpost" ng-style="{'background-image' : 'url(' + blog.featured + ')','background-size': 'cover','background-position': 'center center'}"></div>
-            <div class="title" ng-bind="blog.title"></div>
+            <div class="title"><a ng-href="#/posts/{{blog.param}}">{{blog.title}}</a></div>
             <ul>
-                <md-chip><i>{{ blog.category }}</i></md-chip>
-                <md-chip><i>{{ blog.county }}</i></md-chip>
+                <md-chip><span class="postdate">{{ blog.date | dated | date : 'longDate' }}</span></md-chip>
+                <md-chip><i><a ng-href="#/categories/{{blog.catParam}}">{{ blog.category }}</a></i></md-chip> /
+                <!--<md-chip><i>{{ blog.county }}</i></md-chip>-->
                 <md-chip><i>{{ blog.season }}</i></md-chip>
             </ul>
-            <p><div class="blogContent messagestyle" froala-view="blog.content | characters: 300: false"></div></p>
-            <div><a ng-href="#/posts/{{blog.param}}">Read more</a></div>
+            <p><div class="messagestyle" froala-view="blog.content | characters: 300: false"></div></p>
+            <div class="boxed"><a ng-href="#/posts/{{blog.param}}">Read more</a></div>
             <div>Comments</div>
         </div>
     </div>
 </div>
+<dir-pagination-controls
+        max-size="5"
+        direction-links="true"
+        boundary-links="true" >
+</dir-pagination-controls>
