@@ -9,7 +9,7 @@
                 <!--<md-chip><i>{{ blog.county }}</i></md-chip>-->
                 <md-chip><i>{{ blog.season }}</i></md-chip>
             </ul>
-            <p><div class="messagestyle" froala-view="blog.content | characters: 300: false"></div></p>
+            <p><div class="messagestyle" ng-bind="blog.content | htmlToPlaintext | characters: 300: false"></div></p>
             <div class="boxed"><a ng-href="#/posts/{{blog.param}}">Read more</a></div>
             <div>Comments</div>
         </div>
@@ -17,6 +17,5 @@
 </div>
 <dir-pagination-controls
         max-size="5"
-        direction-links="true"
-        boundary-links="true" >
+        direction-links="true">
 </dir-pagination-controls>
