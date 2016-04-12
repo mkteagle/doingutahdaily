@@ -6,12 +6,10 @@
             'blogService',
             'blogController',
             'blogDirective',
-            'firebase',
             'froala',
             'blogFilter',
             'ui.bootstrap',
             'truncate',
-            'commentService',
             'loginController',
             'dirPagination',
             'md.data.table',
@@ -21,9 +19,8 @@
             'ngFileUpload',
             'uploaderApp'
         ])
-        .constant('firebaseUrl', "https://doingutahdaily.firebaseio.com/")
         .config(function ($stateProvider, $urlRouterProvider, $mdIconProvider) {
-        //$urlRouterProvider.otherwise("/login");
+        $urlRouterProvider.otherwise("/edit");
         $mdIconProvider
             .defaultIconSet("./assets/svg/avatars.svg", 128)
             .icon("menu", "./assets/svg/menu.svg", 24)
@@ -54,42 +51,42 @@
             .state("post", {
                 url: "/posts/:blogParam",
                 templateUrl: "./src/templates/post.html",
-                controller: "BlogController as uc"
+                controller: "BlogController as bc"
             })
             .state("edit", {
                 url: "/edit/:blogParam",
                 templateUrl: "./src/templates/edit-post.html",
-                controller: "BlogController as uc"
+                controller: "BlogController as bc"
             })
             .state("editor", {
                 url:"/editor",
                 templateUrl: "./src/templates/editor.html",
-                controller: "BlogController as uc"
+                controller: "BlogController as bc"
             })
             .state("masterlist", {
                 url:"/master",
                 templateUrl: "./src/templates/masterlist.html",
-                controller: "BlogController as uc"
+                controller: "BlogController as bc"
             })
             .state("about", {
                 url:"/about",
                 templateUrl: "./src/templates/about.html",
-                controller: "BlogController as uc"
+                controller: "BlogController as bc"
             })
             .state("counties", {
                 url:"/counties/:cParam",
                 templateUrl: "./src/templates/counties.html",
-                controller: "BlogController as uc"
+                controller: "BlogController as bc"
             })
             .state("categories", {
                 url:"/categories/:catParam",
                 templateUrl: "./src/templates/categories.html",
-                controller: "BlogController as uc"
+                controller: "BlogController as bc"
             })
             .state("posts", {
                 url: "/posts",
                 templateUrl: "./src/templates/posts.html",
-                controller: 'BlogController as uc'
+                controller: 'BlogController as bc'
             });
 
         // if none of the above states are matched, use this as the fallback

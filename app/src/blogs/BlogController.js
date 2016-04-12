@@ -3,13 +3,14 @@
         .module('blogController', [])
         .controller('BlogController', BlogController)
         .controller('DialogController', DialogController);
-    BlogController.$inject = ['blogService', '$mdSidenav', '$mdBottomSheet', '$mdDialog', '$mdMedia', '$stateParams', '$scope', '$location', '$filter'];
-    function BlogController(blogService, $mdSidenav, $mdBottomSheet, $mdDialog, $mdMedia, $stateParams, $scope, $location, $filter) {
+    BlogController.$inject = ['blogService', '$mdSidenav', '$mdBottomSheet', '$mdDialog', '$mdMedia', '$stateParams', '$scope', '$location', '$filter', '$http'];
+    function BlogController(blogService, $mdSidenav, $mdBottomSheet, $mdDialog, $mdMedia, $stateParams, $scope, $location, $filter, $http) {
         var self = this;
         var svgArr = ['svg-1', 'svg-2', 'svg-3', 'svg-4', 'svg-5'];
         var svgindex = 0;
         self.selected = null;
-        self.blogs = blogService.blogs;
+        self.$http = $http;
+        self.blogs = [];
         self.selectBlog = selectBlog;
         self.toggleList = toggleBlogsList;
         self.toggleIt = toggleIt;
@@ -27,7 +28,7 @@
         self.category = blogService.category;
         self.addPostParam = addPostParam;
         self.currentPage = 1;
-        self.pageSize = 5;
+        self.pageSize = 20;
         self.reverse = '';
         self.getCounty = getCounty;
         self.getCounties = getCounties;
@@ -37,6 +38,7 @@
         self.Files = blogService.Files;
         self.file = blogService.file;
         self.categoryName = '';
+        self.isActive = 'master';
         self.addCategory = addCategory;
         self.getCategories = getCategories;
         self.getCategory = getCategory;
@@ -44,9 +46,17 @@
         self.addCategoryParams = addCategoryParams;
         self.addCountyParams = addCountyParams;
         self.createCategory = createCategory;
+        self.init = init;
+        self.initPost = initPost;
         self.uploadFiles = function (files) {
             blogService.uploadFiles(files);
         };
+        init();
+        function init() {
+            self.$http.get('/api/blogs').then(response => {
+                self.blogs = response.data;
+            });
+        }
         function deleteFeatured () {
             blogService.deleteFeatured();
         }
@@ -82,7 +92,6 @@
         };
         function showEditBlog() {
             var reg = /^(?:((?:https?|s?ftp):)\/\/)([^:\/\s]+)(?::(\d*))?(?:\/([^\s?#]+)?([?][^?#]*)?(#.*)?)?/;
-            console.log(reg.test(self.location));
             //regex to get first part of path and return it
             if (self.location = '/edit/') {
                 self.show = true;
@@ -115,16 +124,20 @@
         function getCounty() {
             self.county = $stateParams.cParam;
         }
-        function getPost() {
-            blogService.getPost();
-            self.blogs.$loaded()
-                .then(function () {
+        function initPost() {
+            // blogService.getPost();
+            self.$http.get('/api/blogs').then(response => {
+                self.blogs = response.data;
                 angular.forEach(self.blogs, function (blogname) {
                     if (blogname.param === $stateParams.blogParam) {
                         self.post = blogname;
                     }
                 });
+                console.log(response.data);
             });
+        }
+        function getPost(blog) {
+            self.post = blog;
         }
         // *********************************
         // Internal methods
@@ -141,7 +154,14 @@
             blogService.addPostParam(blog);
         }
         function getChange(blog) {
-            blogService.getChange(blog);
+            self.$http.put('/api/updatePost', blog).then(function(response) {
+                // self.blogs = response.data;
+                self.$http.get('/api/blogs').then(response => {
+                    self.blogs = response.data;
+                    console.log(response.data);
+                });
+            });
+
         }
         function addBlog() {
             blogService.addBlog(svgArr, svgindex);

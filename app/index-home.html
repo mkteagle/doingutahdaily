@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Doing Utah Daily</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <!--<link rel='stylesheet' href='./bower_components/textAngular/dist/textAngular.css'>-->
+    <link href='https://fonts.googleapis.com/css?family=Candal|Cabin' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
+    <link rel="stylesheet" href="./assets/froala_editor.min.css">
+    <link rel="stylesheet" href="./assets/froala_style.min.css">
+    <link rel="stylesheet" href="./assets/plugins/char_counter.min.css">
+    <link rel="stylesheet" href="./assets/plugins/code_view.min.css">
+    <link rel="stylesheet" href="./assets/plugins/colors.min.css">
+    <link rel="stylesheet" href="./assets/plugins/file.min.css">
+    <link rel="stylesheet" href="./assets/plugins/image.min.css">
+    <link rel="stylesheet" href="./assets/plugins/image_manager.min.css">
+    <link rel="stylesheet" href="./assets/plugins/line_breaker.min.css">
+    <link rel="stylesheet" href="./assets/plugins/emoticons.min.css">
+    <link rel="stylesheet" href="./assets/plugins/table.min.css">
+    <link rel="stylesheet" href="./assets/plugins/video.min.css">
+    <link rel="stylesheet" href="./assets/plugins/char_counter.min.css">
+    <link rel="stylesheet" href="./assets/plugins/fullscreen.min.css">
+    <link rel="stylesheet" href="./lib/angular-material.min.css">
+    <link rel="stylesheet" href="./lib/md-data-table.min.css">
+    <link rel="stylesheet" href="./lib/ui-bootstrap-csp.css">
+    <link rel="stylesheet" href="./lib/bootstrap.min.css">
+    <link rel="stylesheet" href="./lib/flexslider.css">
+    <link rel="stylesheet" href="assets/style.scss">
+    <link rel="stylesheet" href="assets/app.css"/>
+
+    <style type="text/css">
+        /**
+         * Hide when Angular is not yet loaded and initialized
+         */
+        [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+            display: none !important;
+        }
+    </style>
+
+</head>
+
+<body ng-app="myApp" ng-cloak>
+<div class="page-wrapper">
+        <div class="navbar" ng-include="'./src/templates/nav.html'"></div>
+        <div class="logobar" ng-include="'./src/templates/logo.html'"></div>
+        <div class="page-content" ui-view></div>
+</div>
+<footer ng-include="'./src/templates/footer.html'"></footer>
+
+<script src="./lib/jquery/dist/jquery.min.js"></script>
+<script src="./lib/angular.min.js"></script>
+<script src="./lib/angular-animate.min.js"></script>
+<script src="./lib/angular-aria.min.js"></script>
+<script src="./lib/angular-material.min.js"></script>
+<script src="./lib/ui-bootstrap.js"></script>
+<script src="./lib/ng-file-upload-shim.min.js"></script>
+<script src="./lib/ng-file-upload.min.js"></script>
+<script src="./js/froala_editor.min.js"></script>
+<script src="./js/plugins/align.min.js"></script>
+<script src="./js/plugins/code_beautifier.min.js"></script>
+<script src="./js/plugins/code_view.min.js"></script>
+<script src="./js/plugins/image.min.js"></script>
+<script src="./js/plugins/image_manager.min.js"></script>
+<script src="./js/plugins/link.min.js"></script>
+<script src="./js/plugins/lists.min.js"></script>
+<script src="./js/plugins/paragraph_format.min.js"></script>
+<script src="./js/plugins/paragraph_style.min.js"></script>
+<script src="./js/plugins/table.min.js"></script>
+<script src="./js/plugins/video.min.js"></script>
+<script src="./js/plugins/url.min.js"></script>
+<script src="./js/plugins/entities.min.js"></script>
+<script src="./lib/angular-froala.js"></script>
+<script src="./lib/md-data-table.min.js"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.48.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/1.10.3/TweenMax.min.js"></script>
+<!--<script src="./js/uploader.js"></script>-->
+<script src="./js/s3upload-service.js"></script>
+<script src="./js/truncate.js"></script>
+<script src="./lib/dirPagination.js"></script>
+<script src="js/navController.js"></script>
+<script src="src/blogs/homeController.js"></script>
+<script src="src/blogs/BlogController.js"></script>
+<script src="src/blogs/BlogService.js"></script>
+<script src="./js/blogFilter.js"></script>
+<script src="./src/blogs/loginController.js"></script>
+<script src="js/blogDirective.js"></script>
+<script src="js/classie.js"></script>
+<script src="js/script.js"></script>
+<script src="lib/demo.js"></script>
+<script src="./js/app.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<svg id="f7468b52-98ee-4850-b371-963ec2ddb1f5" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 66 66">
+  <defs>
+    <style>
+      .\31 2f75ce9-b707-489a-ba17-c9598e3a27bc, .\31 f1159e1-0746-4287-aa66-75447f3af13e, .\35 2ddbd5f-1353-4fe1-bb17-97ff6ee4d4ef {
+        fill: none;
+      }
+
+      .\35 2ddbd5f-1353-4fe1-bb17-97ff6ee4d4ef {
+        clip-rule: evenodd;
+      }
+
+      .\36 744b5da-9079-4ef1-8764-271c0e15a2d5 {
+        clip-path: url(#b0d20647-d8e0-4985-b756-9303c3e97164);
+      }
+
+      .\31 b6217e6-5cd3-4b98-9581-6733a614e560 {
+        clip-path: url(#189bc3d1-215d-4d17-8529-e079bea3ef2d);
+      }
+
+      .\32 324bdff-e4ef-4976-96e5-567526bcdec8 {
+        clip-path: url(#b4d882cb-8fab-4eec-a1a6-ca8467113c0c);
+      }
+
+      .c32d9969-28a9-4537-a712-12b9a03a066b {
+        fill: #fafafa;
+      }
+
+      .\31 f1159e1-0746-4287-aa66-75447f3af13e {
+        stroke: #cdcccc;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+
+      .b2f72611-e5c8-44c3-a228-72eee59fe908 {
+        clip-path: url(#0e228f73-4677-4a86-a7d6-766c1e5a821a);
+      }
+
+      .\37 a630f2f-ff45-405a-9051-f54661232bfc {
+        fill: #010101;
+        opacity: 0.54;
+      }
+    </style>
+    <clipPath id="b0d20647-d8e0-4985-b756-9303c3e97164" transform="translate(-264.5 -312.76)">
+      <path class="52ddbd5f-1353-4fe1-bb17-97ff6ee4d4ef" d="M297.5,377.26a31.5,31.5,0,1,1,31.5-31.5A31.5,31.5,0,0,1,297.5,377.26Zm0,1a32.5,32.5,0,1,0-32.5-32.5A32.5,32.5,0,0,0,297.5,378.26Zm-52.5-85H350v105H245v-105Z"/>
+    </clipPath>
+    <clipPath id="189bc3d1-215d-4d17-8529-e079bea3ef2d" transform="translate(-264.5 -312.76)">
+      <circle class="12f75ce9-b707-489a-ba17-c9598e3a27bc" cx="297.5" cy="345.76" r="32"/>
+    </clipPath>
+    <clipPath id="b4d882cb-8fab-4eec-a1a6-ca8467113c0c" transform="translate(-264.5 -312.76)">
+      <rect class="12f75ce9-b707-489a-ba17-c9598e3a27bc" x="-514.5" y="-536.24" width="1600" height="1500"/>
+    </clipPath>
+    <clipPath id="0e228f73-4677-4a86-a7d6-766c1e5a821a" transform="translate(-264.5 -312.76)">
+      <path class="52ddbd5f-1353-4fe1-bb17-97ff6ee4d4ef" d="M305.5,341.76a2,2,0,1,0-2-2,2,2,0,0,0,2,2h0Zm4,14h-24v-20h24v20Zm-2-2v-8l-7.06,3.76-12.94-7.76v12h20Zm-26-22h32v28h-32v-28Z"/>
+    </clipPath>
+  </defs>
+  <title>Untitled-1</title>
+  <g class="6744b5da-9079-4ef1-8764-271c0e15a2d5">
+    <g class="1b6217e6-5cd3-4b98-9581-6733a614e560">
+      <g class="2324bdff-e4ef-4976-96e5-567526bcdec8">
+        <circle class="c32d9969-28a9-4537-a712-12b9a03a066b" cx="33" cy="33" r="32"/>
+      </g>
+    </g>
+  </g>
+  <g class="1b6217e6-5cd3-4b98-9581-6733a614e560">
+    <g class="2324bdff-e4ef-4976-96e5-567526bcdec8">
+      <circle class="1f1159e1-0746-4287-aa66-75447f3af13e" cx="33" cy="33" r="32"/>
+    </g>
+  </g>
+  <g class="b2f72611-e5c8-44c3-a228-72eee59fe908">
+    <g class="2324bdff-e4ef-4976-96e5-567526bcdec8">
+      <rect class="7a630f2f-ff45-405a-9051-f54661232bfc" x="12" y="14" width="42" height="38"/>
+    </g>
+  </g>
+</svg>

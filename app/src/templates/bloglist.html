@@ -1,6 +1,12 @@
 <md-sidenav class="site-sidenav md-sidenav-right"
             md-component-id="right"
-            md-is-locked-open="$mdMedia('gt-sm')">
+            md-is-locked-open="$mdMedia('gt-md')">
+    <div class="light-toolbar">
+        <div class="row">
+            <img class="imgclass" src="../../img/logo-gray.png">
+            <h1 class="md-toolbar-tools">Blog CMS</h1>
+        </div>
+    </div>
     <div layout="row"><div class="bloglistheading"><h3>List</h3></div><div class="addbutton"><a ng-click="uc.addBlog(); uc.addPostParam()"><i class="fa fa-plus"></i></a></div></div>
     <div class="bloglist_ctrls">
         <label for="search">Search:</label>
@@ -11,7 +17,7 @@
     <md-list class="bloglist">
         <md-subheader>Posts</md-subheader>
         <md-list-item class="bloglist-item" ng-init="uc.firstList()" dir-paginate="it in uc.blogs | filter: {posted: true} | filter:q | itemsPerPage: uc.pageSize" currentPage="uc.currentPage">
-            <a ng-href="#/edit/{{it.param}}" ng-click="uc.getPost(uc.post)">
+            <a ng-href="#/edit/{{it.param}}" ng-click="uc.getPost(uc.post); uc.isActive ='article' ">
                 {{it.title}}
             </a>
         </md-list-item>

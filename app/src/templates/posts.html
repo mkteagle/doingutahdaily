@@ -1,17 +1,19 @@
-<div  aria-label="..." dir-paginate="blog in uc.blogs | filter: {posted: true} | orderBy:uc.sortKey:uc.reverse | filter:search| itemsPerPage: uc.pageSize">
-<div>
-        <div class="blogContent">
-            <div class="newpost" ng-style="{'background-image' : 'url(' + blog.featured + ')','background-size': 'cover','background-position': 'center center'}"></div>
-            <div class="title"><a ng-href="#/posts/{{blog.param}}">{{blog.title}}</a></div>
-            <ul>
-                <md-chip><span class="postdate">{{ blog.date | dated | date : 'longDate' }}</span></md-chip>
-                <md-chip><i><a ng-href="#/categories/{{blog.catParam}}">{{ blog.category }}</a></i></md-chip> /
-                <!--<md-chip><i>{{ blog.county }}</i></md-chip>-->
-                <md-chip><i>{{ blog.season }}</i></md-chip>
-            </ul>
+<div class="flexbox2">
+<div dir-paginate="blog in bc.blogs | filter: {posted: true} | orderBy:bc.sortKey:bc.reverse | filter:search| itemsPerPage: uc.pageSize">
+    <div class="blogPost">
+                <div class="center">
+                    <ul class="blogul">
+                        <md-chip class="blogli"><i><a ng-href="#/categories/{{blog.catParam}}">{{ blog.category }}</a></i></md-chip> /
+                        <md-chip class="blogli"><i><a ng-href="#/county/{{blog.cParam}}">{{ blog.county }}</a></i></md-chip> /
+                        <md-chip class="blogli"><i>{{ blog.season }}</i></md-chip>
+                    </ul>
+                </div>
+            <div class="postdate center">Posted On {{ blog.date | dated | date : 'fullDate' }}</div>
+            <div class="title center"><a ng-href="#/posts/{{blog.param}}">{{blog.title}}</a></div>
+            <div class="newpost centerimg" ng-style="{'background-image' : 'url(' + blog.featured + ')','background-size': 'cover','background-position': 'center center'}"></div>
             <p><div class="messagestyle" ng-bind="blog.content | htmlToPlaintext | characters: 300: false"></div></p>
-            <div class="boxed"><a ng-href="#/posts/{{blog.param}}">Read more</a></div>
-            <div>Comments</div>
+            <div class="boxed"><a ng-href="#/posts/{{blog.param}}">Read more ></a></div>
+            {{blog.comments.length}} Comments
         </div>
     </div>
 </div>
