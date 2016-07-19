@@ -35,6 +35,7 @@
         self.location = $location;
         self.showEditBlog = showEditBlog;
         self.show = false;
+        self.showdate = false;
         self.Files = blogService.Files;
         self.file = blogService.file;
         self.categoryName = '';

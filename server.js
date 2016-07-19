@@ -13,17 +13,37 @@ var date = Date.now();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+var mongoose = require('mongoose');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 var ObjectId = require('mongodb').ObjectID;
-var url = 'mongodb://localhost:27017/doingutahdaily';
+var url = 'mongodb://localhost:27017/dud';
+// Connect to MongoDB
+mongoose.connect(url);
+// var passport = require('passport');
+// var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+// var clientID = '1019472639964-m41ltjh9a81grb1t5uhuvt70ovu4mli3.apps.googleusercontent.com';
+// var clientSecret = 'pH75btqoEAxrbDQM_uhEzysu';
+// var callbackURL = 'http://localhost:5000/auth/google/callback';
 
 app.use('/', express.static(__dirname + '/app'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 app.use('/api', router);
+// passport.use(new GoogleStrategy({
+//         clientID: clientID,
+//         clientSecret: clientSecret,
+//         callbackURL: callbackURL
+//     },
+//     function(accessToken, refreshToken, profile, done) {
+//         User.findOrCreate({ googleId: profile.id }, function (err, user) {
+//             return done(err, user);
+//         });
+//     }
+// ));
 
 var port = (process.env.PORT || 5000);
+var Blog = require('./controllers/doingutahdaily.server.controller');
+
 
 function findBlogs(db, callback) {
     var cursor = db.collection('blogs').find();
@@ -126,6 +146,12 @@ MongoClient.connect(url, (err, db) => {
         // db.close();
     });
 });
+router.route('/allblogs') .get(function (req, res) {
+    return Blog.getBlog(req, res);
+});
+router.route('/addBlog') .post(function(req, res) {
+    return Blog.create(req, res);
+});
 router.route('/blogs')
     .get(function(req, res) {
         blogs = [];
@@ -137,6 +163,7 @@ router.route('/blogs')
             });
         });
     });
+
 router.route('/categories')
     .get(function(req, res) {
         res.json(categories);
@@ -169,7 +196,7 @@ router.route('/updatePost')
                 res.end();
             });
         });
-        
+
     });
 router.route('/comment')
     .put(function(req, res) {

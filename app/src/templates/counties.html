@@ -1,5 +1,5 @@
-<div ng-init="uc.getCounty()"></div>
-<div  aria-label="..." ng-repeat="blog in uc.blogs | filter: uc.county | filter: {posted: true}">
+<div ng-init="bc.getCounty()"></div>
+<div  aria-label="..." ng-repeat="blog in bc.blogs | filter: bc.county | filter: {posted: true}">
 <div>
     <div>
         <div class="newpost" ng-style="{'background-image' : 'url(' + blog.featured + ')','background-size': 'cover','background-position': 'center center'}"></div>

@@ -178,9 +178,11 @@
                 comments: []
             }).then(response => {
                 self.blogs = response.data;
+                self.$http.get('/api/blogs').then(response => {
+                    self.blogs = response.data;
+                });
             });
             index++;
-            self.gB();
         }
     }
 })();

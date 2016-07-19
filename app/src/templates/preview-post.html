@@ -11,10 +11,11 @@
         </md-toolbar>
         <md-dialog-content>
             <div class="md-dialog-content">
-                <div class="panel callout" ng-hide="uc.blogs.length == 0">
+                <div class="panel callout" ng-hide="bc.blogs.length == 0">
                     <div class="title">
                         <span ng-bind="blog.title"></span>
                     </div>
+                    <div class="featured"></div>
                     <div id="authorDateLine">
                         <p><span ng-repeat="tag in blog.tags track by $index"><span ng-class-even="'even'" ng-class-odd="'odd'"><span ng-bind="tag" class="tag"></span></span></span>
                             <em> By <a ui-sref="jen" href="{{blog.url}}"><span ng-bind="blog.name"></span></a></em> On <span ng-bind="blog.date | date:'MM/dd/yyyy'"></span></p><span><md-icon md-svg-icon="{{blog.avatar}}" class="avatar"></md-icon></span>
