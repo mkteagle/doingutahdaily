@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -10,12 +10,13 @@ import {
 } from "@/utils/MDXMetadataHelpers";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const slug = (await params).slug;
   try {
     const postsDirectory = path.join(process.cwd(), "content/blog");
-    const fullPath = path.join(postsDirectory, `${params.slug}.mdx`);
+    const fullPath = path.join(postsDirectory, `${slug}.mdx`);
 
     const fileContents = await fs.readFile(fullPath, "utf8");
     const { data, content } = matter(fileContents);
@@ -25,7 +26,7 @@ export async function GET(
 
     const meta = {
       ...defaultedData,
-      slug: params.slug,
+      slug,
       readingTime: calculateReadingTime(content),
     };
 
@@ -40,7 +41,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error(`Error loading post ${params.slug}:`, error);
+    console.error(`Error loading post ${slug}:`, error);
     return NextResponse.json({ error: "Post not found" }, { status: 404 });
   }
 }

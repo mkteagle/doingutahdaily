@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import type { Category } from "@/types/blog";
 import { useImageBrightness } from "@/context/ImageBrightnessContext";
 import { getFallbackImage } from "@/utils/imageFallbacks";
-import { Skeleton } from "../ui/skeleton";
 
 const calculateBrightness = (
   imageUrl: string,
@@ -109,6 +108,8 @@ export function OptimizedImage({
       sizes={sizes}
       placeholder="blur"
       blurDataURL="/api/placeholder/50/50?blur=20"
+      width={width}
+      height={height}
     />
   );
 }
