@@ -1,4 +1,5 @@
 "use client";
+
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { SiteHeader } from "./SiteHeader";
 import { MobileNavigation } from "./MobileNavigation";
