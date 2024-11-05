@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { EnhancedLoadingScreen } from "@/components/Loading/EnhancedLoadingScreen";
 import MDXWrapper from "./MdxWrapper";
 import { ImageBrightnessProvider } from "@/context/ImageBrightnessContext";
-import { SiteLayout } from "../components/Layout/SiteLayout";
+import { SiteLayout } from "@/components/Layout/SiteLayout";
 
 export const metadata: Metadata = {
   title: "Doing Utah Daily",
