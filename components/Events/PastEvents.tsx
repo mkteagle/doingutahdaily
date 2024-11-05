@@ -6,6 +6,7 @@ import { H2 } from "@/components/ui/typography";
 import type { CalendarEvent } from "@/lib/googleCalendar";
 import { getGoogleCalendarUrl } from "@/utils/categoryHelpers";
 import { EventGrid } from "./EventGrid";
+import { ViewCalendarLink } from "./ViewCalendarLink";
 
 const PAST_EVENTS_PER_PAGE = 6;
 
@@ -39,10 +40,7 @@ export function PastEvents({ events, loading }: PastEventsProps) {
             Load More <ChevronDown className="w-4 h-4" />
           </Button>
         )}
-
-        <Button onClick={openCalendar} className="gap-2">
-          View Full Calendar <Calendar className="w-4 h-4" />
-        </Button>
+        <ViewCalendarLink />
       </div>
     </div>
   );

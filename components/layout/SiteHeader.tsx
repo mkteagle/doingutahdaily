@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import ThemedLogo from "@/components/layout/ThemedLogo";
+import ThemedLogo from "@/components/Layout/ThemedLogo";
 import { useTheme } from "@/theme/theme";
 import { cn } from "@/lib/utils";
-import { HeaderThemeControls } from "./HeaderThemeControls";
 import { NavLink } from "../ui/typography";
+import { HeaderThemeControls } from "@/components/Layout/HeaderThemeControls";
 
 const navigationLinks = [
   { href: "/", label: "Home" },

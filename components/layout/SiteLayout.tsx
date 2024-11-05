@@ -1,31 +1,34 @@
 "use client";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { SiteHeader } from "./SiteHeader";
+import { MobileNavigation } from "./MobileNavigation";
 import { SiteFooter } from "./SiteFooter";
 import { useTheme } from "@/theme/theme";
 import { cn } from "@/lib/utils";
 
-interface SiteLayoutProps {
-  children: React.ReactNode;
-}
-
-export function SiteLayout({ children }: SiteLayoutProps) {
+export function SiteLayout({ children }: { children: React.ReactNode }) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const { colorMode } = useTheme();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <SiteHeader />
+    <div className="min-h-screen flex flex-col relative">
+      {isMobile ? <MobileNavigation /> : <SiteHeader />}
+
       <main
         className={cn(
           "flex-grow",
           colorMode === "dark"
-            ? "bg-gray-800/95 backdrop-blur-sm" // Dark mode with the specific style
-            : "bg-gray-50", // Light mode stays the same
-          "transition-colors duration-200"
+            ? "bg-gray-800/95 backdrop-blur-sm"
+            : "bg-gray-50",
+          "transition-colors duration-200",
+          "relative z-0",
+          isMobile && "mb-20"
         )}
       >
         {children}
       </main>
-      <SiteFooter />
+
+      {!isMobile && <SiteFooter />}
     </div>
   );
 }

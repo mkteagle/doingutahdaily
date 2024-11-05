@@ -2,7 +2,7 @@
 import { useBlogPost } from "@/hooks/useBlogPosts";
 import { useRouter } from "next/navigation";
 import { EnhancedLoadingScreen } from "../Loading/EnhancedLoadingScreen";
-import { BlogPostLayout } from "./BlogPostLayout";
+import { BlogPostLayout } from "@/components/Blog/BlogPostLayout";
 
 export function BlogPost({ slug }: { slug: string }) {
   const router = useRouter();

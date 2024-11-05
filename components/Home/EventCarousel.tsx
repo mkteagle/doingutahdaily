@@ -5,6 +5,7 @@ import { useTheme } from "@/theme/theme";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent } from "@/lib/googleCalendar";
 import { EventCarouselCard } from "./EventCarouselCard";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface EventCarouselProps {
   events: CalendarEvent[];
@@ -15,8 +16,11 @@ interface EventCarouselProps {
 export function EventCarousel({ events, loading, error }: EventCarouselProps) {
   const { colors, colorMode } = useTheme();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const itemsPerSlide = 3;
+  // Change items per slide based on screen size
+  const itemsPerSlide = isMobile ? 1 : 3;
+
   const slides = Array.from(
     { length: Math.ceil(events.length / itemsPerSlide) },
     (_, i) => events.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide)
@@ -36,7 +40,7 @@ export function EventCarousel({ events, loading, error }: EventCarouselProps) {
       disabled={disabled}
       className={cn(
         "absolute top-1/2 -translate-y-1/2 z-10",
-        "w-12 h-12 flex items-center justify-center",
+        "w-10 h-10 md:w-12 md:h-12 flex items-center justify-center", // Smaller on mobile
         "rounded-full transition-all duration-200",
         "backdrop-blur-sm",
         colorMode === "dark"
@@ -50,7 +54,10 @@ export function EventCarousel({ events, loading, error }: EventCarouselProps) {
               "border border-gray-200",
               disabled && "bg-white/40 cursor-not-allowed",
             ],
-        direction === "left" ? "-left-16" : "-right-16"
+        // Adjust positioning for mobile
+        direction === "left"
+          ? "left-2 md:left-[-3rem]"
+          : "right-2 md:right-[-3rem]"
       )}
       style={{
         color: disabled
@@ -71,8 +78,8 @@ export function EventCarousel({ events, loading, error }: EventCarouselProps) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[...Array(isMobile ? 1 : 3)].map((_, i) => (
           <div
             key={i}
             className={cn(
@@ -100,7 +107,7 @@ export function EventCarousel({ events, loading, error }: EventCarouselProps) {
   }
 
   return (
-    <div className="relative px-20">
+    <div className="relative px-4 md:px-20">
       {slides.length > 1 && (
         <>
           <NavigationArrow
@@ -130,7 +137,11 @@ export function EventCarousel({ events, loading, error }: EventCarouselProps) {
           {slides.map((slideEvents, slideIndex) => (
             <div
               key={slideIndex}
-              className="w-full flex-shrink-0 grid grid-cols-3 gap-6"
+              className={cn(
+                "w-full flex-shrink-0",
+                // Adjust grid based on screen size
+                isMobile ? "grid grid-cols-1 gap-4" : "grid grid-cols-3 gap-6"
+              )}
               style={{ minWidth: "100%" }}
             >
               {slideEvents.map((event) => (
@@ -145,7 +156,7 @@ export function EventCarousel({ events, loading, error }: EventCarouselProps) {
 
       {/* Pagination Dots */}
       {slides.length > 1 && (
-        <div className="flex justify-center gap-3 mt-10">
+        <div className="flex justify-center gap-2 mt-6">
           {slides.map((_, index) => (
             <button
               key={index}

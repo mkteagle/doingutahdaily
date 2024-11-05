@@ -138,7 +138,7 @@ export function BlogPostHero({
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-end">
-        <div className="container mx-auto px-4 pb-16">
+        <div className={cn("container mx-auto px-4 pb-16")}>
           <div className="max-w-4xl space-y-6">
             {/* Categories */}
             {categories.length > 0 && (

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SiteLayout } from "@/components/layout/SiteLayout";
+import { SiteLayout } from "@/components/Layout/SiteLayout";
 import "./globals.css";
 import { ThemeProvider } from "@/theme/theme";
 import { Suspense } from "react";
