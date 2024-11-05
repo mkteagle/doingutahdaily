@@ -1,9 +1,9 @@
 "use client";
 
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { SiteHeader } from "./SiteHeader";
-import { MobileNavigation } from "./MobileNavigation";
-import { SiteFooter } from "./SiteFooter";
+import { SiteHeader } from "@/components/Layout/SiteHeader";
+import { MobileNavigation } from "@/components/Layout/MobileNavigation";
+import { SiteFooter } from "@/components/Layout/SiteFooter";
 import { useTheme } from "@/theme/theme";
 import { cn } from "@/lib/utils";
 
