@@ -144,8 +144,8 @@ export function EventCarousel({ events, loading, error }: EventCarouselProps) {
               )}
               style={{ minWidth: "100%" }}
             >
-              {slideEvents.map((event) => (
-                <div key={event.id}>
+              {slideEvents.map((event, eventIndex) => (
+                <div key={`${event.id}-${event.start}-${slideIndex}-${eventIndex}`}>
                   <EventCarouselCard event={event} />
                 </div>
               ))}

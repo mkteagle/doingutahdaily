@@ -1,23 +1,29 @@
-"use client";
 import BlogList from "@/components/screens/BlogList";
-import { useBlogPosts } from "@/hooks/useBlogPosts";
-import { EnhancedLoadingScreen } from "@/components/Loading/EnhancedLoadingScreen";
+import type { Metadata } from "next";
 
-export default function BlogPage() {
-  const { posts, loading, error } = useBlogPosts();
-
-  if (loading) {
-    return <EnhancedLoadingScreen />;
+export const metadata: Metadata = {
+  title: "Blog - Utah Family Adventures & Event Guides",
+  description: "Discover the best things to do in Utah with our comprehensive guides, seasonal activity ideas, and insider tips for families exploring the Beehive State.",
+  keywords: ["Utah blog", "Utah family blog", "Utah travel blog", "things to do Utah", "Utah activities blog", "Utah family adventures"],
+  openGraph: {
+    title: "Blog - Utah Family Adventures & Event Guides",
+    description: "Discover the best things to do in Utah with our comprehensive guides, seasonal activity ideas, and insider tips for families.",
+    url: "https://doingutahdaily.com/blog",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog - Utah Family Adventures & Event Guides",
+    description: "Discover the best things to do in Utah with our comprehensive guides, seasonal activity ideas, and insider tips for families."
   }
+};
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl font-bold mb-4">Error Loading Posts</h2>
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
+export default async function BlogPage() {
+  // Fetch posts server-side for better SEO
+  const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+  const response = await fetch(`${baseUrl}/api/blog`, { cache: 'no-store' });
+  const data = await response.json();
+  const posts = data.posts || [];
 
   return <BlogList initialPosts={posts} />;
 }

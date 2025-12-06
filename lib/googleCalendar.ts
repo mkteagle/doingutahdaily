@@ -1,16 +1,20 @@
 import { Category } from "@/constants/categories";
 import { processEventsWithCategories } from "@/utils/categoryHelpers";
 import { google } from "googleapis";
+import { randomUUID } from "crypto";
 
-const calendar = google.calendar({
-  version: "v3",
-  auth: new google.auth.JWT(
-    process.env.GOOGLE_CLIENT_EMAIL,
-    undefined,
-    process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    ["https://www.googleapis.com/auth/calendar.readonly"]
-  ),
-});
+function getCalendar() {
+  const auth = new google.auth.JWT({
+    email: process.env.GOOGLE_CLIENT_EMAIL,
+    key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
+  });
+
+  return google.calendar({
+    version: "v3",
+    auth,
+  });
+}
 
 export interface CalendarEvent {
   id: string;
@@ -44,6 +48,7 @@ export async function getEventsForMonth(month: number, year: number) {
       endDate: endISO,
     });
 
+    const calendar = getCalendar();
     const response = await calendar.events.list({
       calendarId: process.env.GOOGLE_CALENDAR_ID,
       timeMin: startISO,
@@ -61,7 +66,7 @@ export async function getEventsForMonth(month: number, year: number) {
       const isAllDay = Boolean(event.start?.date && !event.start?.dateTime);
 
       return {
-        id: event.id || crypto.randomUUID(),
+        id: event.id || randomUUID(),
         title: event.summary || "Untitled Event",
         description: transformNullToUndefined(event.description),
         start: isAllDay
