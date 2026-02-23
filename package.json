@@ -13,5 +13,8 @@
     "db:migrate": "pnpm --filter db migrate dev",
     "db:push": "pnpm --filter db push",
     "db:seed": "pnpm --filter db seed"
+  },
+  "devDependencies": {
+    "next": "^16.0.7"
   }
 }
