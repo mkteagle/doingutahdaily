@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, Sun, Moon, Mountain } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
+import ThemedLogo from "@/components/Layout/ThemedLogo";
 import { useTheme } from "@/theme/theme";
 import { cn } from "@/lib/utils";
 
@@ -49,18 +50,8 @@ export function SiteHeader() {
           <div className="flex items-center justify-between h-16 md:h-20">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105 group-hover:rotate-3">
-                <Mountain size={18} strokeWidth={2.5} />
-              </span>
-              <div className="leading-none">
-                <div className="font-display text-[15px] tracking-tight text-foreground">
-                  Doing Utah
-                </div>
-                <div className="font-body text-[10px] font-semibold tracking-[0.2em] text-primary uppercase">
-                  Daily
-                </div>
-              </div>
+            <Link href="/" className="flex-shrink-0 hover:scale-105 transition-transform duration-300">
+              <ThemedLogo className="h-12 md:h-16 w-auto" />
             </Link>
 
             {/* Desktop nav + dark mode */}

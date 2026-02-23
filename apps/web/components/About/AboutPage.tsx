@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, Camera, MapPin, Mail, Mountain, ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
@@ -32,6 +33,17 @@ export default function AboutPage() {
       {/* Story */}
       <section className="py-16 sm:py-20 bg-background">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          {/* Hero Image */}
+          <div className="relative h-96 sm:h-[450px] rounded-2xl overflow-hidden border border-border shadow-lg mb-16">
+            <Image
+              src="/assets/images/about.jpg"
+              alt="Doing Utah Daily - Our family adventures"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
             {/* Text */}
             <div className="lg:col-span-7 space-y-6 font-serif text-base sm:text-lg text-foreground/80 leading-relaxed">
@@ -60,7 +72,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            {/* Sidebar */}
+            {/* Sidebar - Stats & Values */}
             <div className="lg:col-span-5 space-y-6">
               {/* Stats */}
               <div className="grid grid-cols-2 gap-4">
