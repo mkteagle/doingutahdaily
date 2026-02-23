@@ -1,5 +1,5 @@
 {
   "buildCommand": "pnpm --filter=admin build",
-  "installCommand": "pnpm install",
-  "outputDirectory": "apps/admin/.next"
+  "installCommand": "corepack enable && pnpm install",
+  "outputDirectory": ".next"
 }
