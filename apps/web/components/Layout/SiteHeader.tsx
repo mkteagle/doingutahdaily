@@ -63,46 +63,46 @@ export function SiteHeader() {
               </div>
             </Link>
 
-            {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-0.5">
-              {NAV_LINKS.map(({ href, label, cta }) => {
-                const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      "relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-                      cta
-                        ? "ml-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                        : active
-                        ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )}
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Right: dark mode + hamburger */}
-            <div className="flex items-center gap-1">
+            {/* Desktop nav + dark mode */}
+            <div className="hidden md:flex items-center gap-0.5">
+              <nav className="flex items-center gap-0.5">
+                {NAV_LINKS.map(({ href, label, cta }) => {
+                  const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={cn(
+                        "relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                        cta
+                          ? "ml-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                          : active
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+              </nav>
               <button
                 onClick={toggleColorMode}
                 aria-label="Toggle color mode"
-                className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                className="ml-2 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 {colorMode === "dark" ? <Sun size={17} /> : <Moon size={17} />}
               </button>
-              <button
-                onClick={() => setMenuOpen((v) => !v)}
-                aria-label="Toggle menu"
-                className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                {menuOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
             </div>
+
+            {/* Mobile: hamburger only */}
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Toggle menu"
+              className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
       </header>
