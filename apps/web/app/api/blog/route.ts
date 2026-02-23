@@ -1,55 +1,42 @@
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
-import matter from "gray-matter";
 import { serialize } from "next-mdx-remote/serialize";
 import { calculateReadingTime } from "@/utils/blogHelpers";
-import {
-  validateFrontmatter,
-  getDefaultedFrontmatter,
-} from "@/utils/MDXMetadataHelpers";
+import { prisma } from "@dud/db";
 import type { Blog } from "@/types/blog";
-
-const postsDirectory = path.join(process.cwd(), "content/blog");
 
 export async function GET() {
   try {
-    const files = await fs.readdir(postsDirectory);
-    const slugs = files.filter((file) => file.endsWith(".mdx"));
+    const posts = await prisma.post.findMany({
+      where: { published: true },
+      include: { categories: true },
+      orderBy: { publishedAt: "desc" },
+    });
 
-    const posts = await Promise.all(
-      slugs.map(async (slug) => {
-        const fullPath = path.join(postsDirectory, slug);
-        const fileContents = await fs.readFile(fullPath, "utf8");
-        const { data, content } = matter(fileContents);
-
-        const validatedData = validateFrontmatter(data);
-        const defaultedData = getDefaultedFrontmatter(validatedData);
-
+    const serializedPosts = await Promise.all(
+      posts.map(async (post) => {
         const meta = {
-          ...defaultedData,
-          slug: slug.replace(/\.mdx$/, ""),
-          readingTime: calculateReadingTime(content),
+          slug: post.slug,
+          title: post.title,
+          date: post.publishedAt?.toISOString() || new Date().toISOString(),
+          excerpt: post.excerpt,
+          author: { name: post.author, picture: undefined },
+          coverImage: post.coverImage,
+          categories: post.categories.map((c) => c.name),
+          readingTime: calculateReadingTime(post.content),
         };
 
-        const serializedContent = await serialize(content, {
+        const content = await serialize(post.content, {
           parseFrontmatter: true,
         });
 
         return {
           meta,
-          content: serializedContent,
+          content,
         };
       })
     );
 
-    // Sort posts by date
-    const sortedPosts = posts.sort(
-      (a, b) =>
-        new Date(b.meta.date).getTime() - new Date(a.meta.date).getTime()
-    );
-
-    return NextResponse.json({ posts: sortedPosts });
+    return NextResponse.json({ posts: serializedPosts });
   } catch (error) {
     console.error("Error loading blog posts:", error);
     return NextResponse.json(

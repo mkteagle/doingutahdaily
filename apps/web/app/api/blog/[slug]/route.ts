@@ -1,43 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
-import matter from "gray-matter";
 import { serialize } from "next-mdx-remote/serialize";
 import { calculateReadingTime } from "@/utils/blogHelpers";
-import {
-  validateFrontmatter,
-  getDefaultedFrontmatter,
-} from "@/utils/MDXMetadataHelpers";
+import { prisma } from "@dud/db";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const slug = (await params).slug;
   try {
-    const postsDirectory = path.join(process.cwd(), "content/blog");
-    const fullPath = path.join(postsDirectory, `${slug}.mdx`);
+    const post = await prisma.post.findUnique({
+      where: { slug },
+      include: { categories: true },
+    });
 
-    const fileContents = await fs.readFile(fullPath, "utf8");
-    const { data, content } = matter(fileContents);
-
-    const validatedData = validateFrontmatter(data);
-    const defaultedData = getDefaultedFrontmatter(validatedData);
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
 
     const meta = {
-      ...defaultedData,
-      slug,
-      readingTime: calculateReadingTime(content),
+      slug: post.slug,
+      title: post.title,
+      date: post.publishedAt?.toISOString() || new Date().toISOString(),
+      excerpt: post.excerpt,
+      author: { name: post.author, picture: undefined },
+      coverImage: post.coverImage,
+      categories: post.categories.map((c) => c.name),
+      readingTime: calculateReadingTime(post.content),
     };
 
-    const serializedContent = await serialize(content, {
+    const content = await serialize(post.content, {
       parseFrontmatter: true,
     });
 
     return NextResponse.json({
       post: {
         meta,
-        content: serializedContent,
+        content,
       },
     });
   } catch (error) {
