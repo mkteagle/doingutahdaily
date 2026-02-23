@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/lib/api";
 import type { CategoryStats } from "@/constants/categories";
 
 export function useCategoryStats() {
@@ -10,7 +11,7 @@ export function useCategoryStats() {
   useEffect(() => {
     async function fetchCategoryStats() {
       try {
-        const response = await fetch("/api/categories");
+        const response = await fetch(getApiUrl("/categories"));
         if (!response.ok) throw new Error("Failed to fetch category stats");
         const data = await response.json();
         setCategoryStats(data.categoryStats);

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/lib/api";
 import type { Blog } from "@/types/blog";
 
 export function useCategoryPosts(category: string) {
@@ -10,7 +11,7 @@ export function useCategoryPosts(category: string) {
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const response = await fetch(`/api/categories/${category}`);
+        const response = await fetch(getApiUrl(`/categories/${category}`));
         if (!response.ok) throw new Error("Failed to fetch category posts");
         const data = await response.json();
         setPosts(data.posts);

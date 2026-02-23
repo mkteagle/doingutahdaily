@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/lib/api";
 import type { Blog } from "@/types/blog";
 
 export function useBlogPosts() {
@@ -11,7 +12,7 @@ export function useBlogPosts() {
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const response = await fetch("/api/blog");
+        const response = await fetch(getApiUrl("/blog"));
         if (!response.ok) throw new Error("Failed to fetch posts");
         const data = await response.json();
         setPosts(data.posts);
@@ -36,7 +37,7 @@ export function useBlogPost(slug: string) {
   useEffect(() => {
     async function fetchPost() {
       try {
-        const response = await fetch(`/api/blog/${slug}`);
+        const response = await fetch(getApiUrl(`/blog/${slug}`));
         if (!response.ok) throw new Error("Failed to fetch post");
         const data = await response.json();
         setPost(data.post);

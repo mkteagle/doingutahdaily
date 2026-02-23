@@ -1,0 +1,21 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/about/page": "/about",
+  "/api/blog/[slug]/route": "/api/blog/[slug]",
+  "/api/blog/route": "/api/blog",
+  "/api/events/route": "/api/events",
+  "/api/instagram/media/route": "/api/instagram/media",
+  "/api/unsplash/route": "/api/unsplash",
+  "/apple-icon.png/route": "/apple-icon.png",
+  "/blog/[slug]/page": "/blog/[slug]",
+  "/blog/page": "/blog",
+  "/contact/page": "/contact",
+  "/events/page": "/events",
+  "/favicon.ico/route": "/favicon.ico",
+  "/icon.svg/route": "/icon.svg",
+  "/loading/page": "/loading",
+  "/page": "/",
+  "/privacy/page": "/privacy",
+  "/terms/page": "/terms"
+}

@@ -1,6 +1,7 @@
 // hooks/useCalendarEvents.ts
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { getApiUrl } from "@/lib/api";
 import type { CalendarEvent } from "@/lib/googleCalendar";
 
 export interface UseCalendarEventsOptions {
@@ -30,7 +31,7 @@ export function useCalendarEvents({
       if (onlyUpcoming) params.set("onlyUpcoming", "true");
       if (maxEvents) params.set("maxEvents", maxEvents.toString());
 
-      const response = await fetch(`/api/events?${params.toString()}`);
+      const response = await fetch(`${getApiUrl("/events")}?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch events");
       }
