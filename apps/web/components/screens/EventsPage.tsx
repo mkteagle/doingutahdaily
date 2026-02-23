@@ -1,231 +1,317 @@
-// components/Events/EventsPage.tsx
 "use client";
+
 import { useState, useMemo } from "react";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import type { CalendarEvent } from "@/lib/googleCalendar";
 import type { Category } from "@/constants/categories";
-import { EventsError } from "../Events/EventError";
-import { EventsSearch } from "../Events/EventsSearch";
-import { EventsList } from "../Events/EventsList";
-import { PastEvents } from "../Events/PastEvents";
-import { useTheme } from "@/theme/theme";
-import { Calendar, Sparkles, TrendingUp, Clock } from "lucide-react";
+import { format, parseISO, isPast } from "date-fns";
+import {
+  Search,
+  MapPin,
+  Calendar,
+  X,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// ─── Category filters ─────────────────────────────────────────────────────────
+
+const FILTER_CATEGORIES: Category[] = [
+  "Family Activities",
+  "Outdoor Adventures",
+  "Indoor Activities",
+  "Seasonal Events",
+  "Holiday Events",
+  "Food & Dining",
+  "Arts & Culture",
+];
+
+// ─── Event Card ────────────────────────────────────────────────────────────────
+
+function EventCard({ event, past }: { event: CalendarEvent; past?: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+
+  let day = "–", month = "–", fullDate = "", time = "";
+  try {
+    const d = parseISO(event.start);
+    day = format(d, "d");
+    month = format(d, "MMM");
+    fullDate = format(d, "EEEE, MMMM d, yyyy");
+    time = event.isAllDay ? "All day" : format(d, "h:mm a");
+  } catch { /* noop */ }
+
+  const googleCalUrl = event.start
+    ? `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start.replace(/[-:]/g, "").split(".")[0]}/${event.end?.replace(/[-:]/g, "").split(".")[0]}`
+    : null;
+
+  return (
+    <div
+      className={cn(
+        "bg-card border border-border rounded-2xl overflow-hidden transition-all duration-200",
+        past ? "opacity-70" : "hover:border-primary/30 hover:shadow-card"
+      )}
+    >
+      <div className="flex gap-4 p-5">
+        {/* Date badge */}
+        <div
+          className={cn(
+            "shrink-0 w-14 flex flex-col items-center justify-center rounded-xl py-2 text-center",
+            past ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
+          )}
+        >
+          <span className="font-display text-xl leading-none">{day}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{month}</span>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <h3 className="font-display text-sm leading-snug text-foreground line-clamp-2">
+              {event.title}
+            </h3>
+            {event.description && (
+              <button
+                onClick={() => setExpanded((v) => !v)}
+                className="shrink-0 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mb-2">
+            <span className="flex items-center gap-1">
+              <Calendar size={11} className="shrink-0" />
+              {fullDate}
+              {time && ` · ${time}`}
+            </span>
+            {event.location && (
+              <span className="flex items-center gap-1">
+                <MapPin size={11} className="shrink-0" />
+                <span className="truncate max-w-[180px]">{event.location}</span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {event.categories?.slice(0, 2).map((cat) => (
+              <span
+                key={cat}
+                className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent/10 text-accent"
+              >
+                {cat}
+              </span>
+            ))}
+            {googleCalUrl && (
+              <a
+                href={googleCalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                Add to calendar <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {expanded && event.description && (
+        <div className="px-5 pb-5 border-t border-border">
+          <p className="text-sm text-muted-foreground leading-relaxed font-serif pt-4 whitespace-pre-line line-clamp-6">
+            {event.description.replace(/<[^>]+>/g, "")}
+          </p>
+          {event.link && (
+            <a
+              href={event.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-primary hover:underline"
+            >
+              More info <ExternalLink size={12} />
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CardSkeleton() {
+  return (
+    <div className="bg-card border border-border rounded-2xl p-5 flex gap-4">
+      <div className="w-14 h-14 rounded-xl bg-muted animate-pulse shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3.5 bg-muted rounded animate-pulse w-3/4" />
+        <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+        <div className="h-3 bg-muted rounded animate-pulse w-1/3" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ─────────────────────────────────────────────────────────────────
+
 export default function EventsPage() {
-  const { colorMode } = useTheme();
   const currentYear = new Date().getFullYear();
   const { events, loading, error } = useCalendarEvents({
     yearRange: [currentYear - 1, currentYear],
   });
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [search, setSearch] = useState("");
+  const [activeCategories, setActiveCategories] = useState<Category[]>([]);
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
-  const { upcomingEvents, pastEvents } = useMemo(() => {
-    const today = new Date();
-    const filtered = events.filter((event) => {
+  const toggleCategory = (cat: Category) => {
+    setActiveCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const { upcoming, past } = useMemo(() => {
+    const q = search.toLowerCase();
+    const filtered = events.filter((e) => {
       const matchesSearch =
-        searchQuery === "" ||
-        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (event.description?.toLowerCase() || "").includes(
-          searchQuery.toLowerCase()
-        );
-
-      const matchesCategories =
-        selectedCategories.length === 0 ||
-        selectedCategories.some((category) =>
-          event.categories?.includes(category)
-        );
-
-      return matchesSearch && matchesCategories;
+        !q ||
+        e.title.toLowerCase().includes(q) ||
+        (e.description?.toLowerCase() || "").includes(q);
+      const matchesCat =
+        activeCategories.length === 0 ||
+        activeCategories.some((c) => e.categories?.includes(c));
+      return matchesSearch && matchesCat;
     });
 
     return {
-      upcomingEvents: filtered.filter(
-        (event) => new Date(event.start) >= today
-      ),
-      pastEvents: filtered.filter((event) => new Date(event.start) < today),
+      upcoming: filtered.filter((e) => !isPast(parseISO(e.start))),
+      past: filtered.filter((e) => isPast(parseISO(e.start))),
     };
-  }, [events, searchQuery, selectedCategories]);
+  }, [events, search, activeCategories]);
 
-  if (error) {
-    return <EventsError error={error} />;
-  }
+  const displayed = tab === "upcoming" ? upcoming : past;
 
   return (
     <>
-      {/* Hero Section - Dramatic Seasonal */}
-      <section className="relative overflow-hidden seasonal-gradient min-h-[75vh] flex items-center grain">
-        {/* Animated background blobs */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-[600px] h-[600px] rounded-full bg-[hsl(var(--seasonal-secondary))] opacity-20 blur-3xl -top-48 -left-48 animate-float"></div>
-          <div className="absolute w-[500px] h-[500px] rounded-full bg-[hsl(var(--seasonal-accent))] opacity-20 blur-3xl top-1/3 right-0 animate-float" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute w-[400px] h-[400px] rounded-full bg-[hsl(var(--seasonal-primary))] opacity-30 blur-3xl bottom-0 left-1/3 animate-float" style={{ animationDelay: '4s' }}></div>
-        </div>
-
-        {/* Decorative geometric shapes */}
-        <div className="absolute top-20 right-20 w-32 h-32 border-4 border-white/20 rotate-12 animate-rotate-slow"></div>
-        <div className="absolute bottom-40 left-10 w-24 h-24 bg-white/10 rounded-full animate-pulse-glow"></div>
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 border-4 border-white/15 rounded-full"></div>
-
-        {/* Dot pattern overlay */}
-        <div className="absolute inset-0 dot-pattern opacity-10"></div>
-
-        <div className="relative container mx-auto px-6 lg:px-12 py-20 z-10">
-          <div className="max-w-4xl">
-            {/* Eyebrow text */}
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8 animate-slide-up">
-              <Calendar className="w-4 h-4 text-white" />
-              <span className="text-white font-medium text-sm tracking-wide">
-                UTAH EVENTS & ACTIVITIES
-              </span>
-            </div>
-
-            {/* Main headline */}
-            <h1 className="font-display text-6xl lg:text-8xl text-white mb-6 leading-[0.95] animate-slide-up delay-100">
-              <span className="block text-balance">Discover</span>
-              <span className="block font-serif italic text-white/90 text-5xl lg:text-7xl mt-2">
-                What's Happening
-              </span>
-            </h1>
-
-            {/* Subheading */}
-            <p className="font-serif text-2xl lg:text-3xl text-white/95 mb-12 max-w-2xl leading-relaxed animate-slide-up delay-200">
-              From weekend adventures to seasonal celebrations, find family-friendly
-              events happening all across Utah.
-            </p>
-
-            {/* Stats badges */}
-            <div className="flex flex-wrap gap-6 animate-slide-up delay-300">
-              <div className="bg-white/15 backdrop-blur-md px-6 py-3 rounded-xl border border-white/20">
-                <div className="flex items-center gap-3 text-white/90">
-                  <Sparkles className="w-5 h-5" />
-                  <div>
-                    <div className="text-3xl font-display text-white">{upcomingEvents.length}</div>
-                    <div className="text-sm font-medium">Upcoming Events</div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white/15 backdrop-blur-md px-6 py-3 rounded-xl border border-white/20">
-                <div className="flex items-center gap-3 text-white/90">
-                  <TrendingUp className="w-5 h-5" />
-                  <div>
-                    <div className="text-3xl font-display text-white">Daily</div>
-                    <div className="text-sm font-medium">Updated</div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white/15 backdrop-blur-md px-6 py-3 rounded-xl border border-white/20">
-                <div className="flex items-center gap-3 text-white/90">
-                  <Clock className="w-5 h-5" />
-                  <div>
-                    <div className="text-3xl font-display text-white">Free</div>
-                    <div className="text-sm font-medium">Access</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom wave divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-            <path
-              d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill={colorMode === 'dark' ? 'hsl(15, 25%, 12%)' : 'hsl(45, 35%, 97%)'}
-            />
-          </svg>
+      {/* Hero */}
+      <section className="relative overflow-hidden py-16 sm:py-20 bg-background border-b border-border">
+        <div className="absolute inset-0 dot-pattern opacity-30" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/8 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
+          <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">
+            Discover
+          </p>
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl text-foreground mb-4">
+            Utah Events
+          </h1>
+          <p className="font-serif text-lg text-muted-foreground max-w-xl">
+            Family-friendly events, festivals, and activities happening across the
+            Beehive State.
+          </p>
         </div>
       </section>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-6 lg:px-12 py-16">
-        {/* Search Section */}
-        <div className="mb-16">
-          <div
-            className={cn(
-              "p-8 rounded-3xl border-2",
-              colorMode === "dark"
-                ? "bg-[hsl(var(--foreground))]/5 border-[hsl(var(--seasonal-primary))]/30"
-                : "bg-white border-[hsl(var(--seasonal-primary))]/20"
-            )}
-          >
-            <EventsSearch
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              selectedCategories={selectedCategories}
-              onCategoriesChange={setSelectedCategories}
+      {/* Filters */}
+      <div className="sticky top-16 md:top-20 z-30 bg-background/95 backdrop-blur-md border-b border-border">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4">
+          {/* Search */}
+          <div className="relative mb-4">
+            <Search
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search events..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 focus:bg-background transition-colors"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Category chips */}
+          <div className="flex flex-wrap gap-2">
+            {FILTER_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => toggleCategory(cat)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150",
+                  activeCategories.includes(cat)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+            {activeCategories.length > 0 && (
+              <button
+                onClick={() => setActiveCategories([])}
+                className="px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+              >
+                <X size={11} /> Clear
+              </button>
+            )}
           </div>
         </div>
-
-        {/* Upcoming Events Section */}
-        <div className="mb-20">
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-1 w-12 bg-[hsl(var(--seasonal-primary))]"></div>
-              <span className="text-[hsl(var(--seasonal-primary))] font-bold text-sm tracking-widest uppercase">
-                Coming Soon
-              </span>
-            </div>
-            <h2 className="font-display text-4xl lg:text-5xl text-[hsl(var(--foreground))]">
-              Upcoming
-              <span className="block font-serif italic text-[hsl(var(--seasonal-primary))]">
-                Adventures
-              </span>
-            </h2>
-          </div>
-
-          <EventsList
-            title=""
-            events={upcomingEvents}
-            loading={loading}
-          />
-        </div>
-
-        {/* Past Events Section */}
-        {pastEvents.length > 0 && (
-          <div>
-            <div className="mb-10">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-1 w-12 bg-[hsl(var(--muted-foreground))]"></div>
-                <span className="text-[hsl(var(--muted-foreground))] font-bold text-sm tracking-widest uppercase">
-                  Archive
-                </span>
-              </div>
-              <h2 className="font-display text-4xl lg:text-5xl text-[hsl(var(--foreground))]">
-                Past
-                <span className="block font-serif italic text-[hsl(var(--muted-foreground))]">
-                  Events
-                </span>
-              </h2>
-            </div>
-
-            <PastEvents events={pastEvents} loading={loading} />
-          </div>
-        )}
       </div>
 
-      {/* CTA Section */}
-      <section className="relative py-24 overflow-hidden bg-gradient-to-br from-[hsl(var(--seasonal-primary))] to-[hsl(var(--seasonal-accent))] grain">
-        <div className="absolute inset-0 dot-pattern opacity-10"></div>
-        <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
-
-        <div className="relative container mx-auto px-6 lg:px-12 text-center">
-          <Calendar className="w-16 h-16 text-white mx-auto mb-6" />
-          <h2 className="font-display text-4xl lg:text-5xl text-white mb-6">
-            Never Miss
-            <span className="block font-serif italic mt-2">An Event</span>
-          </h2>
-          <p className="font-serif text-xl text-white/90 max-w-2xl mx-auto mb-10">
-            Get weekly event highlights and exclusive updates delivered straight to your inbox.
-          </p>
-          <button className="px-8 py-4 bg-white text-[hsl(var(--seasonal-primary))] font-bold rounded-xl hover:bg-white/90 transition-all shadow-lg hover-lift">
-            Subscribe to Updates
-          </button>
+      {/* Tabs + list */}
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
+        {/* Tab row */}
+        <div className="flex items-center gap-1 mb-6 p-1 bg-muted rounded-xl w-fit">
+          {(["upcoming", "past"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={cn(
+                "px-5 py-2 rounded-lg text-sm font-medium transition-all duration-150 capitalize",
+                tab === t
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {t}
+              <span className="ml-2 text-xs opacity-60">
+                ({t === "upcoming" ? upcoming.length : past.length})
+              </span>
+            </button>
+          ))}
         </div>
-      </section>
+
+        {error && (
+          <div className="p-6 rounded-2xl bg-destructive/10 border border-destructive/20 text-sm text-destructive mb-6">
+            Failed to load events. Please try again later.
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {loading
+            ? Array.from({ length: 8 }).map((_, i) => <CardSkeleton key={i} />)
+            : displayed.length > 0
+            ? displayed.map((event) => (
+                <EventCard key={event.id} event={event} past={tab === "past"} />
+              ))
+            : (
+              <div className="lg:col-span-2 py-20 text-center">
+                <Calendar size={40} className="mx-auto mb-4 text-muted-foreground/40" />
+                <p className="font-display text-xl text-foreground mb-2">No events found</p>
+                <p className="text-sm text-muted-foreground">
+                  Try adjusting your search or filters
+                </p>
+              </div>
+            )}
+        </div>
+      </div>
     </>
   );
 }

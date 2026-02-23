@@ -1,168 +1,141 @@
 "use client";
+
 import Link from "next/link";
-import { useTheme } from "@/theme/theme";
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  Heart,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
-import ThemedLogo from "./ThemedLogo";
-import { cn } from "@/lib/utils";
+import { Mountain, Instagram, Facebook, Mail, MapPin, ArrowRight } from "lucide-react";
+
+const LINKS = {
+  explore: [
+    { label: "Events", href: "/events" },
+    { label: "Blog", href: "/blog" },
+    { label: "About", href: "/about" },
+    { label: "Partner with us", href: "/contact" },
+  ],
+  legal: [
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Use", href: "/terms" },
+  ],
+};
 
 export function SiteFooter() {
-  const { colorMode } = useTheme();
-
-  const socialLinks = [
-    { name: "Facebook", icon: Facebook, href: "#" },
-    { name: "Twitter", icon: Twitter, href: "#" },
-    { name: "Instagram", icon: Instagram, href: "#" },
-  ];
-
-  const quickLinks = [
-    { name: "Events", href: "/events" },
-    { name: "Blog", href: "/blog" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ];
-
   return (
-    <footer className="relative overflow-hidden grain text-white seasonal-gradient">
-      {/* Dark overlay for dark mode */}
-      {colorMode === "dark" && (
-        <div className="absolute inset-0 bg-black/40"></div>
-      )}
+    <footer className="bg-foreground text-background">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 lg:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
 
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 opacity-5 diagonal-stripe"></div>
-      <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-white/5 blur-3xl"></div>
-      <div className="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-white/5 blur-2xl"></div>
+          {/* Brand */}
+          <div className="md:col-span-5">
+            <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
+              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground">
+                <Mountain size={19} strokeWidth={2.5} />
+              </span>
+              <div className="leading-none">
+                <div className="font-display text-base text-background">Doing Utah Daily</div>
+              </div>
+            </Link>
 
-      <div className="relative container mx-auto px-6 lg:px-12 py-16 lg:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
-          {/* Brand Section */}
-          <div className="lg:col-span-2">
-            <ThemedLogo className="w-48 lg:w-56 h-auto mb-6" />
-            <p className="font-serif text-lg lg:text-xl text-white/90 mb-6 max-w-md leading-relaxed">
-              Discover Utah&apos;s magic every single day. Your trusted guide to
-              family-friendly events and unforgettable adventures across the
-              Beehive State.
+            <p className="font-serif text-background/75 leading-relaxed mb-8 max-w-sm italic">
+              Your trusted guide to family-friendly events and unforgettable
+              adventures across the Beehive State.
             </p>
 
-            {/* Social Links */}
-            <div className="flex gap-4">
-              {socialLinks.map(({ name, icon: Icon, href }) => (
+            {/* Social */}
+            <div className="flex items-center gap-3 mb-8">
+              {[
+                { icon: Instagram, label: "Instagram", href: "#" },
+                { icon: Facebook, label: "Facebook", href: "#" },
+                { icon: Mail, label: "Email", href: "mailto:hello@doingutahdaily.com" },
+              ].map(({ icon: Icon, label, href }) => (
                 <a
-                  key={name}
+                  key={label}
                   href={href}
-                  className="group p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 hover:scale-110 transition-all duration-300"
-                  aria-label={name}
+                  aria-label={label}
+                  className="p-2.5 rounded-lg bg-background/10 hover:bg-background/20 text-background transition-colors"
                 >
-                  <Icon className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                  <Icon size={17} />
                 </a>
               ))}
             </div>
 
             {/* Newsletter */}
-            <div className="mt-8 p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-5 h-5 text-white" />
-                <h3 className="font-display text-lg">Stay Updated</h3>
-              </div>
-              <p className="text-sm text-white/80 mb-4">
-                Get weekly event highlights delivered to your inbox
+            <div>
+              <p className="text-sm font-medium text-background/80 mb-3">
+                Weekly event highlights, straight to your inbox
               </p>
-              <div className="flex gap-2">
+              <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
                 <input
                   type="email"
-                  placeholder="Your email"
-                  className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-white/40 text-sm"
+                  placeholder="your@email.com"
+                  className="flex-1 min-w-0 px-4 py-2.5 rounded-lg bg-background/10 border border-background/20 text-background placeholder:text-background/40 text-sm focus:outline-none focus:border-background/40 focus:bg-background/15 transition-colors"
                 />
-                <button className="px-4 py-2 rounded-lg bg-white text-[hsl(var(--primary))] font-bold hover:bg-white/90 transition-colors whitespace-nowrap">
-                  <ArrowRight className="w-4 h-4" />
+                <button
+                  type="submit"
+                  className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shrink-0"
+                >
+                  <ArrowRight size={16} />
                 </button>
-              </div>
+              </form>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-display text-xl mb-6 flex items-center gap-2">
-              <Heart className="w-5 h-5" />
+          {/* Explore links */}
+          <div className="md:col-span-3 md:col-start-7">
+            <h3 className="text-xs font-semibold tracking-widest uppercase text-background/50 mb-5">
               Explore
             </h3>
             <ul className="space-y-3">
-              {quickLinks.map(({ name, href }) => (
-                <li key={name}>
+              {LINKS.explore.map(({ label, href }) => (
+                <li key={href}>
                   <Link
                     href={href}
-                    className="group inline-flex items-center gap-2 text-white/80 hover:text-white font-medium transition-colors"
+                    className="text-background/70 hover:text-background text-sm font-medium transition-colors"
                   >
-                    <span className="w-0 h-0.5 bg-white group-hover:w-4 transition-all duration-300"></span>
-                    {name}
+                    {label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact Information */}
-          <div>
-            <h3 className="font-display text-xl mb-6 flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              Connect
+          {/* Contact */}
+          <div className="md:col-span-3">
+            <h3 className="text-xs font-semibold tracking-widest uppercase text-background/50 mb-5">
+              Contact
             </h3>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-white/70 shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-sm text-white/60 mb-1">Email</div>
-                  <a
-                    href="mailto:hello@doingutahdaily.com"
-                    className="text-white/90 hover:text-white font-medium transition-colors"
-                  >
-                    hello@doingutahdaily.com
-                  </a>
-                </div>
+              <li className="flex items-start gap-2.5">
+                <Mail size={15} className="text-background/50 mt-0.5 shrink-0" />
+                <a
+                  href="mailto:hello@doingutahdaily.com"
+                  className="text-sm text-background/70 hover:text-background transition-colors"
+                >
+                  hello@doingutahdaily.com
+                </a>
               </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-white/70 shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-sm text-white/60 mb-1">Location</div>
-                  <span className="text-white/90 font-medium">
-                    Salt Lake City, Utah
-                  </span>
-                </div>
+              <li className="flex items-start gap-2.5">
+                <MapPin size={15} className="text-background/50 mt-0.5 shrink-0" />
+                <span className="text-sm text-background/70">
+                  Salt Lake City, Utah
+                </span>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-white/70">
+        {/* Bottom bar */}
+        <div className="mt-16 pt-8 border-t border-background/15 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-background/40">
             © {new Date().getFullYear()} Doing Utah Daily. All rights reserved.
-            Made with <Heart className="w-4 h-4 inline text-red-400" /> in Utah.
           </p>
-          <div className="flex gap-6 text-sm">
-            <Link
-              href="/privacy"
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              Terms of Use
-            </Link>
+          <div className="flex gap-6">
+            {LINKS.legal.map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="text-xs text-background/40 hover:text-background/70 transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

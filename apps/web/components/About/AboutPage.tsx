@@ -1,163 +1,132 @@
 "use client";
-import { Camera, Mail, Instagram, Heart, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useTheme } from "@/theme/theme";
-import { cn } from "@/lib/utils";
-import { H1, H2, Body, BlockQuote } from "@/components/ui/typography";
-import { OptimizedImage } from "../OptimizedImage";
 
-export function AboutPage() {
-  const { colors, colorMode } = useTheme();
+import Link from "next/link";
+import { Heart, Camera, MapPin, Mail, Mountain, ArrowRight } from "lucide-react";
 
+export default function AboutPage() {
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <div className="relative h-[40vh] min-h-[400px]">
-        <OptimizedImage
-          src="/assets/images/about.jpg"
-          alt="Our Story"
-          slug="about-hero"
-          fill={true}
-          priority={true}
-          className="z-0 object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30 z-10">
-          <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-16">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-2 mb-4">
-                <Camera className="w-6 h-6 text-white" />
-                <span className="text-sm font-medium uppercase tracking-wider text-white">
-                  Our Story
-                </span>
+    <>
+      {/* Hero */}
+      <section className="relative py-20 sm:py-28 bg-background border-b border-border overflow-hidden">
+        <div className="absolute inset-0 dot-pattern opacity-30" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/8 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Mountain size={14} className="text-primary" />
+            <span className="text-xs font-semibold tracking-widest uppercase text-primary">
+              Our story
+            </span>
+          </div>
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl text-foreground leading-[1.0] mb-6 max-w-3xl">
+            Capturing Utah&apos;s Magic,{" "}
+            <span className="text-gradient">One Adventure</span>{" "}
+            at a Time
+          </h1>
+          <p className="font-serif text-xl text-muted-foreground max-w-2xl leading-relaxed">
+            We&apos;re a family-run guide to the best events and adventures across the
+            Beehive State — built by Utah parents, for Utah families.
+          </p>
+        </div>
+      </section>
+
+      {/* Story */}
+      <section className="py-16 sm:py-20 bg-background">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+            {/* Text */}
+            <div className="lg:col-span-7 space-y-6 font-serif text-base sm:text-lg text-foreground/80 leading-relaxed">
+              <p>
+                My first job was as a photographer. I grew up taking pictures and
+                loved creating memories for people. Later, I graduated with a
+                Bachelor of Science degree majoring in English. The best way to
+                combine my two passions was blogging — and I started blogging as
+                soon as I learned about them back in the day.
+              </p>
+              <p>
+                Doing Utah Daily began as a way to share the amazing family-friendly
+                experiences Utah has to offer. What started as personal blog posts
+                about local events grew into something much bigger — a trusted guide
+                for thousands of Utah families looking for their next adventure.
+              </p>
+              <blockquote className="border-l-4 border-primary pl-6 italic text-xl text-foreground font-serif my-8">
+                &ldquo;Utah is one of the most extraordinary places in the world to
+                raise a family. We want every family to discover that.&rdquo;
+              </blockquote>
+              <p>
+                From SeaQuest aquariums to Luminaria light shows, from baby animal
+                days at botanical gardens to Christmas light festivals — we cover it
+                all. If it&apos;s happening in Utah and it&apos;s worth your family&apos;s time,
+                you&apos;ll find it here.
+              </p>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-5 space-y-6">
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { value: "10+", label: "Years blogging" },
+                  { value: "500+", label: "Events monthly" },
+                  { value: "50K+", label: "Utah families" },
+                  { value: "12+", label: "Cities covered" },
+                ].map(({ value, label }) => (
+                  <div
+                    key={label}
+                    className="p-5 rounded-2xl bg-card border border-border text-center"
+                  >
+                    <div className="font-display text-3xl text-primary mb-1">{value}</div>
+                    <div className="text-sm text-muted-foreground">{label}</div>
+                  </div>
+                ))}
               </div>
-              <H1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Capturing Utah's Magic,{" "}
-                <span style={{ color: colors.primary }}>
-                  One Adventure at a Time
-                </span>
-              </H1>
+
+              {/* Values */}
+              <div className="p-6 rounded-2xl bg-primary/5 border border-primary/15 space-y-5">
+                <h3 className="font-display text-lg text-foreground">What we stand for</h3>
+                {[
+                  { icon: Heart, text: "Family-first recommendations" },
+                  { icon: Camera, text: "Authentic first-hand experiences" },
+                  { icon: MapPin, text: "Hyperlocal Utah focus" },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Icon size={15} className="text-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-foreground">{text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid lg:grid-cols-12 gap-16">
-          {/* Main Content */}
-          <div className="lg:col-span-8 space-y-8">
-            <div className="space-y-6">
-              <Body
-                className={
-                  colorMode === "dark" ? "text-gray-200" : "text-gray-800"
-                }
-              >
-                My first job was as a photographer, I grew up taking pictures
-                and loved my time creating memories for people. Later, I
-                graduated with a Bachelor of Science degree majoring in English.
-                The best way to combine my two passions was blogging. I started
-                blogging as soon as I learned about them back in the day.
-              </Body>
-
-              <Body
-                className={
-                  colorMode === "dark" ? "text-gray-200" : "text-gray-800"
-                }
-              >
-                Since then I have become a mom. I now have a new passion of
-                creating daily adventures for my kids where we can create
-                memories and while they can learn and explore in a variety of
-                settings.
-              </Body>
-
-              <Body
-                className={
-                  colorMode === "dark" ? "text-gray-200" : "text-gray-800"
-                }
-              >
-                I had a lot of friends and family ask for more information on
-                some of the things that we have done, so I decided to create
-                this page. Highlighting our favorite things to do in Utah, and
-                occasionally our adventures outside of Utah as well. Our state
-                has so much to offer, and so much of it is free!
-              </Body>
-
-              <Body
-                className={
-                  colorMode === "dark" ? "text-gray-200" : "text-gray-800"
-                }
-              >
-                Let me know if you are curious about a specific area, we have
-                traveled all over, I just haven't gotten posts up for everything
-                yet. And if you know of something fun for families, please tag
-                us @DoingUtahDaily. We would love to see your adventures too!
-              </Body>
-
-              <BlockQuote
-                className={
-                  colorMode === "dark"
-                    ? "text-gray-300 border-primary"
-                    : "text-gray-700 border-primary"
-                }
-              >
-                Don't wait for everything to be perfect before you decide to
-                enjoy your life.
-                <footer className="mt-2">- Joyce Meyer</footer>
-              </BlockQuote>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-4">
-            <div className="sticky top-24">
-              <div
-                className={cn(
-                  "rounded-xl border p-6 mb-8",
-                  colorMode === "dark"
-                    ? "bg-gray-800/50 border-gray-700 text-gray-200"
-                    : "bg-white border-gray-200 text-gray-800"
-                )}
-              >
-                <H2 className="text-xl font-semibold mb-6">Get in Touch</H2>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Mail
-                      className="w-5 h-5"
-                      style={{ color: colors.primary }}
-                    />
-                    <span>hello@doingutahdaily.com</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Instagram
-                      className="w-5 h-5"
-                      style={{ color: colors.primary }}
-                    />
-                    <span>@DoingUtahDaily</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin
-                      className="w-5 h-5"
-                      style={{ color: colors.primary }}
-                    />
-                    <span>Salt Lake City, Utah</span>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                className="w-full gap-2 text-white"
-                style={{ backgroundColor: colors.primary }}
-              >
-                <Heart className="w-5 h-5" />
-                Follow Our Journey
-              </Button>
-            </div>
+      {/* CTA */}
+      <section className="py-16 bg-muted/50 border-t border-border">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 text-center">
+          <h2 className="font-display text-3xl sm:text-4xl text-foreground mb-4">
+            Want to work together?
+          </h2>
+          <p className="font-serif text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+            We partner with Utah venues, event organizers, and family-focused
+            businesses to spread the word about amazing local experiences.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
+            >
+              Get in touch <ArrowRight size={16} />
+            </Link>
+            <a
+              href="mailto:hello@doingutahdaily.com"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-border text-foreground font-semibold hover:bg-muted transition-colors"
+            >
+              <Mail size={16} /> Email us
+            </a>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }
-
-export default AboutPage;
