@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@dud/db";
+import { postService } from "@dud/db";
 import { slugify } from "@/lib/utils";
 
 export async function GET() {
   try {
-    const posts = await prisma.post.findMany({
-      include: { categories: true },
-      orderBy: { updatedAt: "desc" },
-    });
+    const posts = await postService.getAllPosts();
     return NextResponse.json({ posts });
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -17,27 +14,16 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { title, content, excerpt, coverImage, categories, published } = body;
-
-    const slug = slugify(title);
-
-    const post = await prisma.post.create({
-      data: {
-        slug,
-        title,
-        content: content || "",
-        excerpt: excerpt || "",
-        coverImage: coverImage || null,
-        published: published ?? false,
-        publishedAt: published ? new Date() : null,
-        categories: {
-          create: (categories || []).map((name: string) => ({ name })),
-        },
-      },
-      include: { categories: true },
+    const { title, content, excerpt, coverImage, categories, published } = await req.json();
+    const post = await postService.createPost({
+      slug: slugify(title),
+      title,
+      content: content || "",
+      excerpt: excerpt || "",
+      coverImage,
+      published: published ?? false,
+      categories: categories ?? [],
     });
-
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {
     console.error("Error creating post:", error);

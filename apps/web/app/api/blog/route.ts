@@ -1,47 +1,31 @@
 import { NextResponse } from "next/server";
 import { serialize } from "next-mdx-remote/serialize";
 import { calculateReadingTime } from "@/utils/blogHelpers";
-import { prisma } from "@dud/db";
-import type { Blog } from "@/types/blog";
+import { postService } from "@dud/db";
 
 export async function GET() {
   try {
-    const posts = await prisma.post.findMany({
-      where: { published: true },
-      include: { categories: true },
-      orderBy: { publishedAt: "desc" },
-    });
+    const posts = await postService.getPublishedPosts();
 
     const serializedPosts = await Promise.all(
-      posts.map(async (post) => {
-        const meta = {
+      posts.map(async (post) => ({
+        meta: {
           slug: post.slug,
           title: post.title,
-          date: post.publishedAt?.toISOString() || new Date().toISOString(),
+          date: post.publishedAt?.toISOString() ?? new Date().toISOString(),
           excerpt: post.excerpt,
-          author: { name: post.author, picture: undefined },
+          author: { name: post.author },
           coverImage: post.coverImage,
           categories: post.categories.map((c) => c.name),
           readingTime: calculateReadingTime(post.content),
-        };
-
-        const content = await serialize(post.content, {
-          parseFrontmatter: true,
-        });
-
-        return {
-          meta,
-          content,
-        };
-      })
+        },
+        content: await serialize(post.content, { parseFrontmatter: true }),
+      }))
     );
 
     return NextResponse.json({ posts: serializedPosts });
   } catch (error) {
     console.error("Error loading blog posts:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch blog posts" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch blog posts" }, { status: 500 });
   }
 }

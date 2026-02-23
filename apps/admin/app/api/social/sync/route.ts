@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@dud/db";
+import { socialService } from "@dud/db";
 
 interface InstagramMedia {
   id: string;
@@ -17,7 +17,6 @@ async function fetchInstagramMedia(): Promise<InstagramMedia[]> {
     console.warn("INSTAGRAM_GRAPH_TOKEN not set");
     return [];
   }
-
   try {
     const res = await fetch(
       `https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&access_token=${token}`
@@ -33,43 +32,24 @@ async function fetchInstagramMedia(): Promise<InstagramMedia[]> {
 
 export async function POST() {
   try {
-    // Fetch Instagram media
     const instagramMedia = await fetchInstagramMedia();
 
-    // Store in database
     for (const media of instagramMedia) {
-      await prisma.socialPost.upsert({
-        where: { id: media.id },
-        update: {
-          caption: media.caption || null,
-          mediaUrl: media.media_url,
-          thumbnailUrl: media.thumbnail_url || null,
-          timestamp: new Date(media.timestamp),
-          cachedAt: new Date(),
-        },
-        create: {
-          id: media.id,
-          platform: "instagram",
-          caption: media.caption || null,
-          mediaUrl: media.media_url,
-          thumbnailUrl: media.thumbnail_url || null,
-          mediaType: media.media_type,
-          permalink: media.permalink,
-          timestamp: new Date(media.timestamp),
-        },
+      await socialService.upsertInstagramPost({
+        id: media.id,
+        caption: media.caption,
+        mediaUrl: media.media_url,
+        thumbnailUrl: media.thumbnail_url,
+        mediaType: media.media_type,
+        permalink: media.permalink,
+        timestamp: media.timestamp,
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      synced: instagramMedia.length,
-    });
+    return NextResponse.json({ success: true, synced: instagramMedia.length });
   } catch (error) {
     console.error("Social sync error:", error);
-    return NextResponse.json(
-      { error: "Sync failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Sync failed" }, { status: 500 });
   }
 }
 

@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@dud/db";
+import { postService } from "@dud/db";
 
 export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const post = await prisma.post.findUnique({
-      where: { id: params.id },
-      include: { categories: true },
-    });
+    const post = await postService.getPostById(params.id);
     if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ post });
   } catch (error) {
@@ -23,28 +20,15 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await req.json();
-    const { title, content, excerpt, coverImage, categories, published } = body;
-
-    // Delete old categories and recreate
-    await prisma.postCategory.deleteMany({ where: { postId: params.id } });
-
-    const post = await prisma.post.update({
-      where: { id: params.id },
-      data: {
-        title,
-        content,
-        excerpt,
-        coverImage: coverImage || null,
-        published: published ?? false,
-        publishedAt: published ? new Date() : null,
-        categories: {
-          create: (categories || []).map((name: string) => ({ name })),
-        },
-      },
-      include: { categories: true },
+    const { title, content, excerpt, coverImage, categories, published } = await req.json();
+    const post = await postService.updatePost(params.id, {
+      title,
+      content,
+      excerpt,
+      coverImage,
+      published,
+      categories,
     });
-
     return NextResponse.json({ post });
   } catch (error) {
     console.error("Error updating post:", error);
@@ -57,7 +41,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.post.delete({ where: { id: params.id } });
+    await postService.deletePost(params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting post:", error);

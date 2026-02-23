@@ -1,13 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+// Prisma client
+export { prisma } from "./client";
+export * from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['query'],
-  })
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-
-export * from '@prisma/client'
+// Service layer
+export * as postService from "./services/posts";
+export * as socialService from "./services/social";
+export * as eventService from "./services/events";
