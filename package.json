@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "doingutahdaily monorepo with public site and admin dashboard",
   "private": true,
-  "packageManager": "pnpm@9.9.0",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "pnpm --filter web dev",
     "dev:all": "pnpm -r dev",
