@@ -17,7 +17,7 @@ interface PostEditorProps {
     id: string;
     title: string;
     content: string;
-    excerpt: string;
+    excerpt: string | null;
     coverImage: string | null;
     published: boolean;
     categories: { id: string; name: string }[];

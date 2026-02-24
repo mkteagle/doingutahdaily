@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { formatDate } from "@/lib/utils";
 
 interface SocialPost {
@@ -12,6 +11,7 @@ interface SocialPost {
   caption: string | null;
   timestamp: string;
   cachedAt: string;
+  permalink?: string;
 }
 
 export default function SocialPage() {

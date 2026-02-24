@@ -5,10 +5,10 @@ import { prisma } from "@dud/db";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { category: string } }
+  { params }: { params: Promise<{ category: string }> }
 ) {
   try {
-    const { category } = params;
+    const { category } = await params;
 
     const posts = await prisma.post.findMany({
       where: {
@@ -24,7 +24,7 @@ export async function GET(
     });
 
     const serializedPosts = await Promise.all(
-      posts.map(async (post) => {
+      posts.map(async (post: any) => {
         const meta = {
           slug: post.slug,
           title: post.title,
@@ -32,7 +32,7 @@ export async function GET(
           excerpt: post.excerpt,
           author: { name: post.author, picture: undefined },
           coverImage: post.coverImage,
-          categories: post.categories.map((c) => c.name),
+          categories: post.categories.map((c: any) => c.name),
           readingTime: calculateReadingTime(post.content),
         };
 

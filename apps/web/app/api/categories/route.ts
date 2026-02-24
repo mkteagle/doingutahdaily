@@ -12,13 +12,13 @@ export async function GET() {
           published: true,
           categories: {
             some: {
-              name: category.name,
+              name: category,
             },
           },
         },
       });
       categoryStats.push({
-        name: category.name,
+        name: category,
         count,
       });
     }

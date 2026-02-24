@@ -21,7 +21,7 @@ export async function GET(
           excerpt: post.excerpt,
           author: { name: post.author },
           coverImage: post.coverImage,
-          categories: post.categories.map((c) => c.name),
+          categories: post.categories.map((c: any) => c.name),
           readingTime: calculateReadingTime(post.content),
         },
         content: await serialize(post.content, { parseFrontmatter: true }),

@@ -8,7 +8,7 @@ export async function GET() {
     const posts = await postService.getPublishedPosts();
 
     const serializedPosts = await Promise.all(
-      posts.map(async (post) => ({
+      posts.map(async (post: any) => ({
         meta: {
           slug: post.slug,
           title: post.title,
@@ -16,7 +16,7 @@ export async function GET() {
           excerpt: post.excerpt,
           author: { name: post.author },
           coverImage: post.coverImage,
-          categories: post.categories.map((c) => c.name),
+          categories: post.categories.map((c: any) => c.name),
           readingTime: calculateReadingTime(post.content),
         },
         content: await serialize(post.content, { parseFrontmatter: true }),
