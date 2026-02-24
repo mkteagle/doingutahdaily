@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter=admin build",
+  "buildCommand": "pnpm --filter=db prisma generate && pnpm --filter=admin build",
   "installCommand": "corepack enable && pnpm install",
   "outputDirectory": ".next"
 }
