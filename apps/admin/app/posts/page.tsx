@@ -34,7 +34,7 @@ export default async function PostsPage() {
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-          {posts.map((post) => (
+          {posts.map((post: any) => (
             <div key={post.id} className="flex items-center justify-between px-5 py-4 hover:bg-gray-50">
               <div className="flex-1 min-w-0">
                 <Link href={`/posts/${post.id}`} className="font-medium text-gray-900 hover:text-red-700 truncate block">
@@ -49,7 +49,7 @@ export default async function PostsPage() {
                     {post.published ? "Published" : "Draft"}
                   </span>
                   <span className="text-xs text-gray-400">{formatDate(post.updatedAt)}</span>
-                  {post.categories.slice(0, 2).map((cat) => (
+                  {post.categories.slice(0, 2).map((cat: any) => (
                     <span key={cat.id} className="text-xs text-gray-400">{cat.name}</span>
                   ))}
                 </div>
