@@ -1,4 +1,5 @@
 {
+  "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter=db generate && pnpm --filter=admin build",
   "outputDirectory": ".next"
 }
