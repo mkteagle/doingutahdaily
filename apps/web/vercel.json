@@ -1,5 +1,5 @@
 {
   "buildCommand": "pnpm --filter=db generate && pnpm --filter=web build",
-  "installCommand": "corepack enable && pnpm install",
+  "installCommand": "npm i -g pnpm@10.30.2 && pnpm install",
   "outputDirectory": ".next"
 }
