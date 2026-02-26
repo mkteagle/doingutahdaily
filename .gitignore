@@ -10,7 +10,7 @@
 /coverage
 
 # next.js
-/.next/
+.next/
 /out/
 
 # production
@@ -31,7 +31,6 @@ yarn-error.log*
 .env*.local
 
 # pnpm
-pnpm-lock.yaml
 .pnpm-store/
 
 # vercel
