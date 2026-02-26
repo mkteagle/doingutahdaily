@@ -16,6 +16,7 @@
     "@prisma/client": "^5.8.0"
   },
   "devDependencies": {
+    "gray-matter": "^4.0.3",
     "prisma": "^5.8.0",
     "ts-node": "^10.9.2"
   }
