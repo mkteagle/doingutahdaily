@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdxEditor } from "@mkteagle/mdx-wysiwyg";
 import "@mkteagle/mdx-wysiwyg/styles";
+import { Loader2, Trash2 } from "lucide-react";
 
 const CATEGORIES = [
   "Family Activities", "Outdoor Adventures", "Indoor Activities",
@@ -96,19 +97,19 @@ export function PostEditor({ post }: PostEditorProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-sand bg-cream">
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleSave(false)}
             disabled={saving}
-            className="text-sm px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            className="text-sm px-3 py-1.5 border border-ink/15 rounded-lg text-ink/70 hover:bg-sand disabled:opacity-50 transition-colors"
           >
-            {saving ? "Saving..." : "Save Draft"}
+            {saving ? <Loader2 size={14} className="animate-spin" /> : "Save Draft"}
           </button>
           <button
             onClick={() => handleSave(true)}
             disabled={saving}
-            className="text-sm px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors"
+            className="text-sm px-3 py-1.5 bg-canyon text-white rounded-lg hover:bg-canyon-deep disabled:opacity-50 transition-colors"
           >
             {published ? "Update" : "Publish"}
           </button>
@@ -116,15 +117,15 @@ export function PostEditor({ post }: PostEditorProps) {
         {!isNew && (
           <button
             onClick={handleDelete}
-            className="text-sm text-red-400 hover:text-red-600 transition-colors"
+            className="text-sm text-ink/30 hover:text-red-600 transition-colors"
           >
-            Delete
+            <Trash2 size={16} />
           </button>
         )}
       </div>
 
       {error && (
-        <div className="mx-6 mt-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md">
+        <div className="mx-6 mt-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
           {error}
         </div>
       )}
@@ -137,70 +138,87 @@ export function PostEditor({ post }: PostEditorProps) {
             placeholder="Post title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-3xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none bg-transparent mb-6"
+            className="w-full text-3xl font-bold text-ink placeholder-ink/20 border-none outline-none bg-transparent mb-6"
           />
           <MdxEditor value={content} onChange={setContent} />
         </div>
 
         {/* Sidebar */}
-        <aside className="w-64 border-l border-gray-200 bg-white overflow-auto px-5 py-6 space-y-6 shrink-0">
+        <aside className="w-64 border-l border-sand bg-cream overflow-auto px-5 py-6 space-y-6 shrink-0">
           {/* Status */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</label>
+            <label className="text-[10px] font-bold text-ink/40 uppercase tracking-[0.15em]">
+              Status
+            </label>
             <div className="mt-2 flex items-center gap-2">
               <button
                 onClick={() => setPublished(!published)}
                 className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                  published ? "bg-green-500" : "bg-gray-300"
+                  published ? "bg-sage" : "bg-ink/20"
                 }`}
               >
-                <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
-                  published ? "translate-x-4.5" : "translate-x-0.5"
-                }`} />
+                <span
+                  className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
+                    published ? "translate-x-4.5" : "translate-x-0.5"
+                  }`}
+                />
               </button>
-              <span className="text-sm text-gray-600">{published ? "Published" : "Draft"}</span>
+              <span className="text-sm text-ink/60">
+                {published ? "Published" : "Draft"}
+              </span>
             </div>
           </div>
 
           {/* Excerpt */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Excerpt</label>
+            <label className="text-[10px] font-bold text-ink/40 uppercase tracking-[0.15em]">
+              Excerpt
+            </label>
             <textarea
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
               rows={3}
               placeholder="Brief description..."
-              className="mt-2 w-full text-sm border border-gray-200 rounded-md p-2.5 outline-none focus:border-red-400 resize-none text-gray-700 placeholder-gray-300"
+              className="mt-2 w-full text-sm border border-ink/10 rounded-lg p-2.5 outline-none focus:border-canyon/40 resize-none text-ink placeholder-ink/25 bg-sand"
             />
           </div>
 
           {/* Cover Image */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Cover Image URL</label>
+            <label className="text-[10px] font-bold text-ink/40 uppercase tracking-[0.15em]">
+              Cover Image URL
+            </label>
             <input
               type="text"
               value={coverImage}
               onChange={(e) => setCoverImage(e.target.value)}
               placeholder="https://..."
-              className="mt-2 w-full text-sm border border-gray-200 rounded-md p-2.5 outline-none focus:border-red-400 text-gray-700 placeholder-gray-300"
+              className="mt-2 w-full text-sm border border-ink/10 rounded-lg p-2.5 outline-none focus:border-canyon/40 text-ink placeholder-ink/25 bg-sand"
             />
             {coverImage && (
-              <img src={coverImage} alt="Cover" className="mt-2 w-full h-24 object-cover rounded-md" />
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={coverImage}
+                alt="Cover"
+                className="mt-2 w-full h-24 object-cover rounded-lg"
+              />
             )}
           </div>
 
           {/* Categories */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Categories</label>
+            <label className="text-[10px] font-bold text-ink/40 uppercase tracking-[0.15em]">
+              Categories
+            </label>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => toggleCategory(cat)}
-                  className={`text-xs px-2 py-1 rounded-full border transition-colors ${
+                  className={`text-xs px-2 py-1 rounded-lg border transition-colors ${
                     selectedCategories.includes(cat)
-                      ? "bg-red-50 border-red-300 text-red-700"
-                      : "bg-white border-gray-200 text-gray-500 hover:border-gray-400"
+                      ? "bg-canyon/10 border-canyon/30 text-canyon font-medium"
+                      : "bg-sand border-ink/10 text-ink/50 hover:border-ink/25"
                   }`}
                 >
                   {cat}
