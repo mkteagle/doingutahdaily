@@ -1,28 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@dud/db";
+import { postService } from "@dud/db";
 import { CATEGORIES } from "@/constants/categories";
 
 export async function GET() {
   try {
-    const categoryStats = [];
-
-    for (const category of CATEGORIES) {
-      const count = await prisma.post.count({
-        where: {
-          published: true,
-          categories: {
-            some: {
-              name: category,
-            },
-          },
-        },
-      });
-      categoryStats.push({
-        name: category,
-        count,
-      });
-    }
-
+    const categoryStats = await postService.getCategoryStats(CATEGORIES);
     return NextResponse.json({ categoryStats });
   } catch (error) {
     console.error("Error loading category stats:", error);

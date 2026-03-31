@@ -9,8 +9,9 @@ import { useTheme } from "@/theme/theme";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { href: "/events", label: "Events" },
-  { href: "/blog", label: "Blog" },
+  { href: "/activities", label: "Activities" },
+  { href: "/events", label: "This Weekend" },
+  { href: "/blog", label: "Stories" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Partner with us", cta: true },
 ];

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { serialize } from "next-mdx-remote/serialize";
 import { calculateReadingTime } from "@/utils/blogHelpers";
-import { prisma } from "@dud/db";
+import { postService } from "@dud/db";
 
 export async function GET(
   _request: Request,
@@ -10,18 +10,7 @@ export async function GET(
   try {
     const { category } = await params;
 
-    const posts = await prisma.post.findMany({
-      where: {
-        published: true,
-        categories: {
-          some: {
-            name: category,
-          },
-        },
-      },
-      include: { categories: true },
-      orderBy: { publishedAt: "desc" },
-    });
+    const posts = await postService.getPostsByCategory(category);
 
     const serializedPosts = await Promise.all(
       posts.map(async (post: any) => {

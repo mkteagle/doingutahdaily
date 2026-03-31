@@ -7,17 +7,19 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "migrate": "prisma migrate dev",
-    "push": "prisma db push",
-    "seed": "ts-node prisma/seed.ts",
-    "generate": "prisma generate"
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "push": "drizzle-kit push",
+    "studio": "drizzle-kit studio",
+    "seed": "npx tsx scripts/seed-activities.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.8.0"
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.8"
   },
   "devDependencies": {
-    "gray-matter": "^4.0.3",
-    "prisma": "^5.8.0",
-    "ts-node": "^10.9.2"
+    "@types/node": "^20.19.33",
+    "drizzle-kit": "^0.31.10",
+    "gray-matter": "^4.0.3"
   }
 }

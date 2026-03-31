@@ -1,14 +1,11 @@
 import Link from "next/link";
-import { prisma } from "@dud/db";
+import { postService } from "@dud/db";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function PostsPage() {
-  const posts = await prisma.post.findMany({
-    include: { categories: true },
-    orderBy: { updatedAt: "desc" },
-  });
+  const posts = await postService.getAllPosts();
 
   return (
     <div className="p-8">

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@dud/db";
+import { postService } from "@dud/db";
 import { PostEditor } from "@/components/PostEditor";
 
 export const dynamic = "force-dynamic";
@@ -10,10 +10,7 @@ export default async function EditPostPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const post = await prisma.post.findUnique({
-    where: { id },
-    include: { categories: true },
-  });
+  const post = await postService.getPostById(id);
 
   if (!post) notFound();
 

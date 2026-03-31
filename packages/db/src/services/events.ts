@@ -1,16 +1,18 @@
-import { prisma } from "../client";
+import { eq, desc, gte } from "drizzle-orm";
+import { db } from "../client";
+import { events } from "../schema";
 
 export async function getUpcomingEvents(limit?: number) {
-  return prisma.event.findMany({
-    where: { startTime: { gte: new Date() } },
-    orderBy: { startTime: "asc" },
-    take: limit,
+  return db.query.events.findMany({
+    where: gte(events.startTime, new Date()),
+    orderBy: events.startTime,
+    limit,
   });
 }
 
 export async function getAllEvents() {
-  return prisma.event.findMany({
-    orderBy: { startTime: "desc" },
+  return db.query.events.findMany({
+    orderBy: desc(events.startTime),
   });
 }
 
@@ -24,17 +26,29 @@ export async function upsertEvent(data: {
   categories?: string[];
   sourceId?: string;
 }) {
-  return prisma.event.upsert({
-    where: { id: data.id },
-    update: {
-      title: data.title,
-      description: data.description ?? null,
-      startTime: data.startTime,
-      endTime: data.endTime ?? null,
-      location: data.location ?? null,
-      categories: data.categories ?? [],
-    },
-    create: {
+  const existing = await db.query.events.findFirst({
+    where: eq(events.id, data.id),
+  });
+
+  if (existing) {
+    const [updated] = await db
+      .update(events)
+      .set({
+        title: data.title,
+        description: data.description ?? null,
+        startTime: data.startTime,
+        endTime: data.endTime ?? null,
+        location: data.location ?? null,
+        categories: data.categories ?? [],
+      })
+      .where(eq(events.id, data.id))
+      .returning();
+    return updated;
+  }
+
+  const [created] = await db
+    .insert(events)
+    .values({
       id: data.id,
       title: data.title,
       description: data.description ?? null,
@@ -43,10 +57,11 @@ export async function upsertEvent(data: {
       location: data.location ?? null,
       categories: data.categories ?? [],
       sourceId: data.sourceId ?? null,
-    },
-  });
+    })
+    .returning();
+  return created;
 }
 
 export async function deleteEvent(id: string) {
-  return prisma.event.delete({ where: { id } });
+  return db.delete(events).where(eq(events.id, id));
 }

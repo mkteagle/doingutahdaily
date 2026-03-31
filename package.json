@@ -9,12 +9,14 @@
     "build": "pnpm -r build",
     "start": "pnpm --filter web start",
     "lint": "pnpm -r lint",
-    "db:migrate": "pnpm --filter db migrate dev",
+    "db:generate": "pnpm --filter db generate",
+    "db:migrate": "pnpm --filter db migrate",
     "db:push": "pnpm --filter db push",
+    "db:studio": "pnpm --filter db studio",
     "db:seed": "pnpm --filter db seed"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma", "sharp"]
+    "onlyBuiltDependencies": ["sharp"]
   },
   "devDependencies": {
     "next": "^16.0.7"

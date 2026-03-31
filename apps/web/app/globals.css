@@ -6,66 +6,82 @@
 
 @layer base {
   :root {
-    /* Brand: Utah Canyon */
-    --primary:           20 82% 54%;
+    /* Brand: Canyon — #C45C2A */
+    --primary:           19 65% 47%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Mountain Slate */
-    --secondary:           215 25% 27%;
+    /* Secondary: Slate — #2E3A4F */
+    --secondary:           218 26% 25%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Accent: Utah Sky */
-    --accent:           200 72% 48%;
+    /* Accent: Sky — #4B7FA3 */
+    --accent:           205 37% 47%;
     --accent-foreground: 0 0% 100%;
 
-    /* Neutral surfaces */
-    --background:   35 30% 97%;
-    --foreground:   20 15% 13%;
-    --card:         0 0% 100%;
-    --card-foreground: 20 15% 13%;
-    --popover:      0 0% 100%;
-    --popover-foreground: 20 15% 13%;
-    --muted:        30 15% 93%;
-    --muted-foreground: 20 10% 45%;
-    --border:       30 15% 88%;
-    --input:        30 15% 88%;
-    --ring:         20 82% 54%;
+    /* Neutral surfaces — Sand #F2E8D9, Cream #FFF8EE, Ink #1C1410 */
+    --background:   36 49% 90%;
+    --foreground:   20 27% 9%;
+    --card:         35 100% 97%;
+    --card-foreground: 20 27% 9%;
+    --popover:      35 100% 97%;
+    --popover-foreground: 20 27% 9%;
+    --muted:        36 35% 85%;
+    --muted-foreground: 218 20% 40%;
+    --border:       36 30% 82%;
+    --input:        36 30% 82%;
+    --ring:         19 65% 47%;
     --destructive:  0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Extras */
-    --canyon:  20 82% 54%;
-    --sky:     200 72% 48%;
-    --sage:    155 30% 48%;
-    --sand:    38 55% 75%;
-    --snow:    210 40% 96%;
+    /* Brand palette */
+    --canyon:       19 65% 47%;
+    --canyon-deep:  16 68% 39%;
+    --sky:          205 37% 47%;
+    --sage:         127 14% 54%;
+    --amber:        35 79% 58%;
+    --sand:         36 49% 90%;
+    --cream:        35 100% 97%;
+    --ink:          20 27% 9%;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --primary:            20 90% 62%;
-    --primary-foreground: 20 15% 10%;
+    /* Canyon lightened for dark mode */
+    --primary:            19 70% 58%;
+    --primary-foreground: 20 27% 9%;
 
-    --secondary:            215 20% 72%;
-    --secondary-foreground: 215 25% 12%;
+    /* Slate lightened */
+    --secondary:            218 20% 72%;
+    --secondary-foreground: 218 26% 12%;
 
-    --accent:            200 70% 60%;
-    --accent-foreground: 200 30% 10%;
+    /* Sky lightened */
+    --accent:            205 42% 58%;
+    --accent-foreground: 205 30% 10%;
 
-    --background:   215 28% 10%;
-    --foreground:   35 20% 92%;
-    --card:         215 25% 13%;
-    --card-foreground: 35 20% 92%;
-    --popover:      215 25% 13%;
-    --popover-foreground: 35 20% 92%;
-    --muted:        215 20% 18%;
-    --muted-foreground: 215 10% 60%;
-    --border:       215 20% 20%;
-    --input:        215 20% 20%;
-    --ring:         20 90% 62%;
+    --background:   218 28% 10%;
+    --foreground:   36 30% 92%;
+    --card:         218 25% 13%;
+    --card-foreground: 36 30% 92%;
+    --popover:      218 25% 13%;
+    --popover-foreground: 36 30% 92%;
+    --muted:        218 20% 18%;
+    --muted-foreground: 218 10% 60%;
+    --border:       218 20% 20%;
+    --input:        218 20% 20%;
+    --ring:         19 70% 58%;
     --destructive:  0 65% 55%;
     --destructive-foreground: 0 0% 100%;
+
+    /* Brand palette — dark adjusted */
+    --canyon:       19 70% 58%;
+    --canyon-deep:  16 68% 48%;
+    --sky:          205 42% 58%;
+    --sage:         127 18% 48%;
+    --amber:        35 79% 52%;
+    --sand:         36 20% 18%;
+    --cream:        218 25% 13%;
+    --ink:          36 30% 92%;
   }
 }
 

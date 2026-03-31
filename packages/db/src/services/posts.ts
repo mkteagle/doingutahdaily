@@ -1,55 +1,63 @@
-import { prisma } from "../client";
+import { eq, desc, and, sql } from "drizzle-orm";
+import { db } from "../client";
+import { posts, postCategories } from "../schema";
 
 export async function getAllPosts() {
-  return prisma.post.findMany({
-    include: { categories: true },
-    orderBy: { updatedAt: "desc" },
+  return db.query.posts.findMany({
+    with: { categories: true },
+    orderBy: desc(posts.updatedAt),
   });
 }
 
 export async function getPublishedPosts() {
-  return prisma.post.findMany({
-    where: { published: true },
-    include: { categories: true },
-    orderBy: { publishedAt: "desc" },
+  return db.query.posts.findMany({
+    where: eq(posts.published, true),
+    with: { categories: true },
+    orderBy: desc(posts.publishedAt),
   });
 }
 
 export async function getPostBySlug(slug: string) {
-  return prisma.post.findUnique({
-    where: { slug },
-    include: { categories: true },
+  return db.query.posts.findFirst({
+    where: eq(posts.slug, slug),
+    with: { categories: true },
   });
 }
 
 export async function getPostById(id: string) {
-  return prisma.post.findUnique({
-    where: { id },
-    include: { categories: true },
+  return db.query.posts.findFirst({
+    where: eq(posts.id, id),
+    with: { categories: true },
   });
 }
 
 export async function getPostsByCategory(category: string) {
-  return prisma.post.findMany({
-    where: {
-      published: true,
-      categories: { some: { name: category } },
-    },
-    include: { categories: true },
-    orderBy: { publishedAt: "desc" },
+  const matchingPostIds = db
+    .select({ postId: postCategories.postId })
+    .from(postCategories)
+    .where(eq(postCategories.name, category));
+
+  return db.query.posts.findMany({
+    where: and(
+      eq(posts.published, true),
+      sql`${posts.id} IN (${matchingPostIds})`
+    ),
+    with: { categories: true },
+    orderBy: desc(posts.publishedAt),
   });
 }
 
-export async function getCategoryStats(categoryNames: string[]) {
+export async function getCategoryStats(categoryNames: readonly string[]) {
   const stats = await Promise.all(
     categoryNames.map(async (name) => {
-      const count = await prisma.post.count({
-        where: {
-          published: true,
-          categories: { some: { name } },
-        },
-      });
-      return { name, count };
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(postCategories)
+        .innerJoin(posts, eq(postCategories.postId, posts.id))
+        .where(
+          and(eq(postCategories.name, name), eq(posts.published, true))
+        );
+      return { name, count: Number(result[0]?.count ?? 0) };
     })
   );
   return stats;
@@ -65,18 +73,24 @@ export async function createPost(data: {
   published?: boolean;
   categories?: string[];
 }) {
-  const { categories, ...rest } = data;
-  return prisma.post.create({
-    data: {
+  const { categories: cats, ...rest } = data;
+
+  const [post] = await db
+    .insert(posts)
+    .values({
       ...rest,
       excerpt: rest.excerpt ?? "",
       publishedAt: rest.published ? new Date() : null,
-      categories: {
-        create: (categories ?? []).map((name) => ({ name })),
-      },
-    },
-    include: { categories: true },
-  });
+    })
+    .returning();
+
+  if (cats?.length) {
+    await db
+      .insert(postCategories)
+      .values(cats.map((name) => ({ postId: post.id, name })));
+  }
+
+  return getPostById(post.id);
 }
 
 export async function updatePost(
@@ -90,32 +104,27 @@ export async function updatePost(
     categories?: string[];
   }
 ) {
-  const { categories, ...rest } = data;
+  const { categories: cats, ...rest } = data;
 
-  if (categories !== undefined) {
-    await prisma.postCategory.deleteMany({ where: { postId: id } });
+  const updateData: Record<string, unknown> = { ...rest };
+  if (rest.published !== undefined) {
+    updateData.publishedAt = rest.published ? new Date() : null;
   }
 
-  return prisma.post.update({
-    where: { id },
-    data: {
-      ...rest,
-      publishedAt:
-        rest.published !== undefined
-          ? rest.published
-            ? new Date()
-            : null
-          : undefined,
-      ...(categories !== undefined && {
-        categories: {
-          create: categories.map((name) => ({ name })),
-        },
-      }),
-    },
-    include: { categories: true },
-  });
+  await db.update(posts).set(updateData).where(eq(posts.id, id));
+
+  if (cats !== undefined) {
+    await db.delete(postCategories).where(eq(postCategories.postId, id));
+    if (cats.length) {
+      await db
+        .insert(postCategories)
+        .values(cats.map((name) => ({ postId: id, name })));
+    }
+  }
+
+  return getPostById(id);
 }
 
 export async function deletePost(id: string) {
-  return prisma.post.delete({ where: { id } });
+  return db.delete(posts).where(eq(posts.id, id));
 }

@@ -5,8 +5,9 @@ import { Mountain, Instagram, Facebook, Mail, MapPin, ArrowRight } from "lucide-
 
 const LINKS = {
   explore: [
-    { label: "Events", href: "/events" },
-    { label: "Blog", href: "/blog" },
+    { label: "Activities", href: "/activities" },
+    { label: "This Weekend", href: "/events" },
+    { label: "Stories & Guides", href: "/blog" },
     { label: "About", href: "/about" },
     { label: "Partner with us", href: "/contact" },
   ],
@@ -34,8 +35,8 @@ export function SiteFooter() {
             </Link>
 
             <p className="font-serif text-background/75 leading-relaxed mb-8 max-w-sm italic">
-              Your trusted guide to family-friendly events and unforgettable
-              adventures across the Beehive State.
+              Your family&apos;s guide to everything happening in Utah.
+              Actually went there. Honestly tells you what to expect.
             </p>
 
             {/* Social */}
@@ -59,7 +60,7 @@ export function SiteFooter() {
             {/* Newsletter */}
             <div>
               <p className="text-sm font-medium text-background/80 mb-3">
-                Weekly event highlights, straight to your inbox
+                &ldquo;This Weekend in Utah&rdquo; — every Thursday
               </p>
               <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
                 <input

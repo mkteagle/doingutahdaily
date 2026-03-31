@@ -40,7 +40,7 @@ export async function POST() {
         caption: media.caption,
         mediaUrl: media.media_url,
         thumbnailUrl: media.thumbnail_url,
-        mediaType: media.media_type,
+        mediaType: media.media_type === "CAROUSEL_ALBUM" ? "CAROUSEL" : media.media_type,
         permalink: media.permalink,
         timestamp: media.timestamp,
       });
