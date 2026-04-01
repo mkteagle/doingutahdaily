@@ -12,8 +12,10 @@
   "dependencies": {
     "@dud/db": "workspace:*",
     "@mkteagle/mdx-wysiwyg": "*",
+    "jose": "^6.2.2",
     "lucide-react": "^0.453.0",
     "next": "^16.2.1",
+    "next-auth": "5.0.0-beta.30",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },

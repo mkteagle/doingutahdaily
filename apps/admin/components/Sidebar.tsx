@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   FileText,
@@ -14,6 +15,7 @@ import {
   BadgeCheck,
   Sparkles,
 } from "lucide-react";
+import { LogoutButton } from "@/components/AuthButtons";
 
 const navSections = [
   {
@@ -48,6 +50,7 @@ const navSections = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   return (
     <aside className="w-full border-b border-sand bg-cream md:min-h-screen md:w-56 md:border-b-0 md:border-r md:flex md:flex-col">
@@ -94,11 +97,37 @@ export function Sidebar() {
       </nav>
 
       <div className="hidden border-t border-sand px-5 py-4 md:block">
+        {session?.user?.email ? (
+          <div className="space-y-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-ink/35">
+                Signed In
+              </p>
+              <p className="mt-1 truncate text-sm font-medium text-ink">
+                {session.user.email}
+              </p>
+            </div>
+            <LogoutButton />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="text-xs text-ink/40">
+              {status === "loading" ? "Checking session..." : "Not signed in"}
+            </div>
+            <Link
+              href="/sign-in"
+              className="flex w-full items-center justify-center rounded-lg bg-canyon px-3 py-2 text-sm font-medium text-white transition hover:bg-canyon-deep"
+            >
+              Login
+            </Link>
+          </div>
+        )}
+
         <a
           href="https://doingutahdaily.com"
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-1.5 text-xs text-ink/40 hover:text-canyon transition-colors"
+          className="mt-3 flex items-center gap-1.5 text-xs text-ink/40 hover:text-canyon transition-colors"
         >
           <ExternalLink size={12} />
           View Site
