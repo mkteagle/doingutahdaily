@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { postService } from "@dud/db";
-import { slugify } from "@/lib/utils";
+import { createUniquePostSlug } from "@/lib/postDrafts";
 
 export async function GET() {
   try {
@@ -14,14 +14,23 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { title, content, excerpt, coverImage, categories, published } = await req.json();
+    const {
+      title,
+      content,
+      excerpt,
+      coverImage,
+      categories,
+      published,
+      scheduledAt,
+    } = await req.json();
     const post = await postService.createPost({
-      slug: slugify(title),
+      slug: await createUniquePostSlug(title),
       title,
       content: content || "",
       excerpt: excerpt || "",
       coverImage,
       published: published ?? false,
+      scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
       categories: categories ?? [],
     });
     return NextResponse.json({ post }, { status: 201 });

@@ -42,84 +42,88 @@ export const costTierEnum = pgEnum("cost_tier", [
 // ─── Existing Models (migrated from Prisma) ──────────────────────────────
 
 export const posts = pgTable(
-  "posts",
+  "Post",
   {
     id: text("id").$defaultFn(createId).primaryKey(),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
     excerpt: text("excerpt"),
     content: text("content").notNull(),
-    coverImage: text("cover_image"),
+    coverImage: text("coverImage"),
     author: text("author").notNull().default("Doing Utah Daily"),
     published: boolean("published").notNull().default(false),
-    publishedAt: timestamp("published_at"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at")
+    publishedAt: timestamp("publishedAt"),
+    scheduledAt: timestamp("scheduledAt"),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt")
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (t) => [index("posts_published_at_idx").on(t.publishedAt)]
+  (t) => [
+    index("Post_publishedAt_idx").on(t.publishedAt),
+    index("Post_scheduledAt_idx").on(t.scheduledAt),
+  ]
 );
 
 export const postCategories = pgTable(
-  "post_categories",
+  "PostCategory",
   {
     id: text("id").$defaultFn(createId).primaryKey(),
-    postId: text("post_id")
+    postId: text("postId")
       .notNull()
       .references(() => posts.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
   },
   (t) => [
-    unique("post_category_unique").on(t.postId, t.name),
-    index("post_categories_post_id_idx").on(t.postId),
+    unique("PostCategory_postId_name_key").on(t.postId, t.name),
+    index("PostCategory_postId_idx").on(t.postId),
   ]
 );
 
 export const socialPosts = pgTable(
-  "social_posts",
+  "SocialPost",
   {
     id: text("id").primaryKey(),
     platform: platformEnum("platform").notNull(),
-    mediaUrl: text("media_url"),
-    thumbnailUrl: text("thumbnail_url"),
+    mediaUrl: text("mediaUrl"),
+    thumbnailUrl: text("thumbnailUrl"),
     caption: text("caption"),
     permalink: text("permalink").notNull(),
-    mediaType: mediaTypeEnum("media_type"),
+    mediaType: mediaTypeEnum("mediaType"),
     timestamp: timestamp("timestamp").notNull(),
-    cachedAt: timestamp("cached_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at")
+    cachedAt: timestamp("cachedAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt")
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
   (t) => [
-    index("social_posts_platform_idx").on(t.platform),
-    index("social_posts_timestamp_idx").on(t.timestamp),
+    index("SocialPost_platform_idx").on(t.platform),
+    index("SocialPost_timestamp_idx").on(t.timestamp),
   ]
 );
 
 export const events = pgTable(
-  "events",
+  "Event",
   {
     id: text("id").primaryKey(),
     title: text("title").notNull(),
     description: text("description"),
-    startTime: timestamp("start_time").notNull(),
-    endTime: timestamp("end_time"),
+    startTime: timestamp("startTime").notNull(),
+    endTime: timestamp("endTime"),
     location: text("location"),
     categories: text("categories").array().notNull().default([]),
-    sourceId: text("source_id"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at")
+    sourceId: text("sourceId"),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt")
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
   (t) => [
-    index("events_start_time_idx").on(t.startTime),
-    index("events_source_id_idx").on(t.sourceId),
+    index("Event_startTime_idx").on(t.startTime),
+    index("Event_sourceId_idx").on(t.sourceId),
   ]
 );
 

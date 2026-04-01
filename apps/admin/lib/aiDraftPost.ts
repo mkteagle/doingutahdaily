@@ -1,0 +1,152 @@
+import { POST_CATEGORIES } from "@/lib/postCategories";
+
+export interface DraftPostRequest {
+  prompt: string;
+  supportingNotes?: string;
+  categories?: string[];
+}
+
+export interface GeneratedDraftPost {
+  title: string;
+  excerpt: string;
+  content: string;
+  categories: string[];
+}
+
+const OPENAI_API_URL = "https://api.openai.com/v1/responses";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5-mini";
+
+const draftSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["title", "excerpt", "content", "categories"],
+  properties: {
+    title: { type: "string" },
+    excerpt: { type: "string" },
+    content: { type: "string" },
+    categories: {
+      type: "array",
+      items: {
+        type: "string",
+        enum: [...POST_CATEGORIES],
+      },
+    },
+  },
+} as const;
+
+function extractTextResponse(payload: any) {
+  if (typeof payload?.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text;
+  }
+
+  const output = payload?.output;
+  if (!Array.isArray(output)) return null;
+
+  for (const item of output) {
+    if (!Array.isArray(item?.content)) continue;
+    for (const contentItem of item.content) {
+      if (typeof contentItem?.text === "string" && contentItem.text.trim()) {
+        return contentItem.text;
+      }
+    }
+  }
+
+  return null;
+}
+
+function sanitizeCategories(categories: string[], requested: string[] = []) {
+  const allowed = new Set(POST_CATEGORIES);
+  const merged = [...requested, ...categories].filter((category) =>
+    allowed.has(category as (typeof POST_CATEGORIES)[number])
+  );
+
+  return [...new Set(merged)].slice(0, 4);
+}
+
+export async function generateDraftPost({
+  prompt,
+  supportingNotes,
+  categories,
+}: DraftPostRequest): Promise<GeneratedDraftPost> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is missing.");
+  }
+
+  const systemPrompt = [
+    "You write blog drafts for Doing Utah Daily, a warm and practical Utah family activities publication.",
+    "Return valid JSON only.",
+    "Write in approachable, trustworthy language for busy parents.",
+    "Prefer clear structure, short paragraphs, and skimmable headings.",
+    "Output MDX content suitable for a blog editor.",
+    "Do not invent concrete facts like hours, prices, addresses, or availability when they were not provided.",
+    "When factual details are missing, use neutral wording and add a short 'Before you go' section listing what should be verified before publishing.",
+    `Only use these categories: ${POST_CATEGORIES.join(", ")}.`,
+  ].join(" ");
+
+  const userPrompt = [
+    `Draft request:\n${prompt.trim()}`,
+    supportingNotes?.trim()
+      ? `Supporting notes or source material:\n${supportingNotes.trim()}`
+      : "Supporting notes or source material:\nNone provided.",
+    categories?.length
+      ? `Preferred categories:\n${categories.join(", ")}`
+      : "Preferred categories:\nChoose the best fit from the allowed category list.",
+    [
+      "Draft requirements:",
+      "- Create a compelling title.",
+      "- Write an excerpt of 1 to 2 sentences.",
+      "- Write a useful blog draft with an introduction, helpful subheads, and a short wrap-up.",
+      "- Keep the voice warm, local, and practical.",
+      "- If facts are uncertain, explicitly mark them for verification instead of guessing.",
+    ].join("\n"),
+  ].join("\n\n");
+
+  const response = await fetch(OPENAI_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      input: [
+        {
+          role: "system",
+          content: [{ type: "input_text", text: systemPrompt }],
+        },
+        {
+          role: "user",
+          content: [{ type: "input_text", text: userPrompt }],
+        },
+      ],
+      text: {
+        format: {
+          type: "json_schema",
+          name: "doing_utah_daily_post_draft",
+          schema: draftSchema,
+          strict: true,
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`OpenAI request failed: ${response.status} ${message}`);
+  }
+
+  const payload = await response.json();
+  const text = extractTextResponse(payload);
+  if (!text) {
+    throw new Error("The AI response did not include usable text.");
+  }
+
+  const parsed = JSON.parse(text) as GeneratedDraftPost;
+
+  return {
+    title: parsed.title.trim(),
+    excerpt: parsed.excerpt.trim(),
+    content: parsed.content.trim(),
+    categories: sanitizeCategories(parsed.categories || [], categories),
+  };
+}

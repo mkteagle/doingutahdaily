@@ -12,6 +12,7 @@ import {
   Instagram,
   ExternalLink,
   BadgeCheck,
+  Sparkles,
 } from "lucide-react";
 
 const navSections = [
@@ -23,6 +24,7 @@ const navSections = [
   {
     title: "Content",
     items: [
+      { label: "Capture", href: "/capture", icon: Sparkles },
       { label: "Posts", href: "/posts", icon: FileText },
       { label: "Activities", href: "/activities", icon: MapPin },
       { label: "Events", href: "/events", icon: Calendar },
@@ -48,7 +50,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 min-h-screen bg-cream border-r border-sand flex flex-col">
+    <aside className="w-full border-b border-sand bg-cream md:min-h-screen md:w-56 md:border-b-0 md:border-r md:flex md:flex-col">
       <div className="px-5 py-5 border-b border-sand">
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-canyon">
           Doing Utah Daily
@@ -56,15 +58,15 @@ export function Sidebar() {
         <p className="text-sm font-semibold text-ink mt-0.5">Admin</p>
       </div>
 
-      <nav className="flex-1 px-3 py-3 space-y-4 overflow-auto">
+      <nav className="flex-1 overflow-auto px-3 py-3 md:space-y-4">
         {navSections.map((section, i) => (
-          <div key={i}>
+          <div key={i} className="mb-3 md:mb-0">
             {section.title && (
-              <p className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-ink/40">
+              <p className="mb-1.5 hidden px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-ink/40 md:block">
                 {section.title}
               </p>
             )}
-            <div className="space-y-0.5">
+            <div className="flex gap-1 overflow-x-auto pb-1 md:block md:space-y-0.5 md:overflow-visible md:pb-0">
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const active =
@@ -75,7 +77,7 @@ export function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
                       active
                         ? "bg-canyon/10 text-canyon font-medium"
                         : "text-ink/60 hover:bg-sand hover:text-ink"
@@ -91,7 +93,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="px-5 py-4 border-t border-sand">
+      <div className="hidden border-t border-sand px-5 py-4 md:block">
         <a
           href="https://doingutahdaily.com"
           target="_blank"

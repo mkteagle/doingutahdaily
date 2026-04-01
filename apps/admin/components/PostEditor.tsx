@@ -5,13 +5,8 @@ import { useRouter } from "next/navigation";
 import { MdxEditor } from "@mkteagle/mdx-wysiwyg";
 import "@mkteagle/mdx-wysiwyg/styles";
 import { Loader2, Trash2 } from "lucide-react";
-
-const CATEGORIES = [
-  "Family Activities", "Outdoor Adventures", "Indoor Activities",
-  "Seasonal Events", "Free Events", "Holiday Events",
-  "Food & Dining", "Arts & Culture",
-  "Spring", "Summer", "Fall", "Winter",
-];
+import { POST_CATEGORIES } from "@/lib/postCategories";
+import { toDatetimeLocalValue } from "@/lib/utils";
 
 interface PostEditorProps {
   post?: {
@@ -21,6 +16,7 @@ interface PostEditorProps {
     excerpt: string | null;
     coverImage: string | null;
     published: boolean;
+    scheduledAt: Date | string | null;
     categories: { id: string; name: string }[];
   };
 }
@@ -34,6 +30,9 @@ export function PostEditor({ post }: PostEditorProps) {
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
   const [published, setPublished] = useState(post?.published ?? false);
+  const [scheduledAt, setScheduledAt] = useState(
+    toDatetimeLocalValue(post?.scheduledAt)
+  );
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     post?.categories.map((c) => c.name) ?? []
   );
@@ -61,6 +60,7 @@ export function PostEditor({ post }: PostEditorProps) {
       excerpt,
       coverImage,
       published: shouldPublish,
+      scheduledAt: shouldPublish ? null : scheduledAt || null,
       categories: selectedCategories,
     };
 
@@ -107,7 +107,10 @@ export function PostEditor({ post }: PostEditorProps) {
             {saving ? <Loader2 size={14} className="animate-spin" /> : "Save Draft"}
           </button>
           <button
-            onClick={() => handleSave(true)}
+            onClick={() => {
+              setScheduledAt("");
+              void handleSave(true);
+            }}
             disabled={saving}
             className="text-sm px-3 py-1.5 bg-canyon text-white rounded-lg hover:bg-canyon-deep disabled:opacity-50 transition-colors"
           >
@@ -167,6 +170,46 @@ export function PostEditor({ post }: PostEditorProps) {
                 {published ? "Published" : "Draft"}
               </span>
             </div>
+            {!published && (
+              <p className="mt-2 text-xs leading-5 text-ink/45">
+                Save as a draft, or pick a future date below to have it publish
+                automatically.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-ink/40 uppercase tracking-[0.15em]">
+              Schedule Publish
+            </label>
+            <input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => {
+                setPublished(false);
+                setScheduledAt(e.target.value);
+              }}
+              className="mt-2 w-full text-sm border border-ink/10 rounded-lg p-2.5 outline-none focus:border-canyon/40 text-ink bg-sand"
+            />
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => void handleSave(false)}
+                disabled={saving}
+                className="text-xs px-2.5 py-1.5 border border-ink/10 rounded-lg text-ink/65 hover:bg-white transition-colors disabled:opacity-50"
+              >
+                Save Schedule
+              </button>
+              {scheduledAt && (
+                <button
+                  type="button"
+                  onClick={() => setScheduledAt("")}
+                  className="text-xs px-2.5 py-1.5 text-ink/45 hover:text-canyon transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Excerpt */}
@@ -211,7 +254,7 @@ export function PostEditor({ post }: PostEditorProps) {
               Categories
             </label>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {CATEGORIES.map((cat) => (
+              {POST_CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => toggleCategory(cat)}

@@ -1,4 +1,4 @@
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, lte, isNotNull } from "drizzle-orm";
 import { db } from "../client";
 import { posts, postCategories } from "../schema";
 
@@ -71,15 +71,18 @@ export async function createPost(data: {
   coverImage?: string;
   author?: string;
   published?: boolean;
+  scheduledAt?: Date | null;
   categories?: string[];
 }) {
   const { categories: cats, ...rest } = data;
+  const scheduledAt = rest.published ? null : rest.scheduledAt ?? null;
 
   const [post] = await db
     .insert(posts)
     .values({
       ...rest,
       excerpt: rest.excerpt ?? "",
+      scheduledAt,
       publishedAt: rest.published ? new Date() : null,
     })
     .returning();
@@ -101,6 +104,7 @@ export async function updatePost(
     excerpt?: string;
     coverImage?: string | null;
     published?: boolean;
+    scheduledAt?: Date | null;
     categories?: string[];
   }
 ) {
@@ -109,6 +113,17 @@ export async function updatePost(
   const updateData: Record<string, unknown> = { ...rest };
   if (rest.published !== undefined) {
     updateData.publishedAt = rest.published ? new Date() : null;
+    if (rest.published) {
+      updateData.scheduledAt = null;
+    }
+  }
+
+  if (rest.scheduledAt !== undefined) {
+    updateData.scheduledAt = rest.scheduledAt;
+    if (rest.scheduledAt) {
+      updateData.published = false;
+      updateData.publishedAt = null;
+    }
   }
 
   await db.update(posts).set(updateData).where(eq(posts.id, id));
@@ -127,4 +142,39 @@ export async function updatePost(
 
 export async function deletePost(id: string) {
   return db.delete(posts).where(eq(posts.id, id));
+}
+
+export async function publishScheduledPosts(now = new Date()) {
+  const duePosts = await db.query.posts.findMany({
+    where: and(
+      eq(posts.published, false),
+      isNotNull(posts.scheduledAt),
+      lte(posts.scheduledAt, now)
+    ),
+    with: { categories: true },
+    orderBy: desc(posts.scheduledAt),
+  });
+
+  if (!duePosts.length) {
+    return [];
+  }
+
+  const publishedAt = new Date();
+
+  await db
+    .update(posts)
+    .set({
+      published: true,
+      publishedAt,
+      scheduledAt: null,
+    })
+    .where(
+      and(
+        eq(posts.published, false),
+        isNotNull(posts.scheduledAt),
+        lte(posts.scheduledAt, now)
+      )
+    );
+
+  return duePosts;
 }

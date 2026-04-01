@@ -1,4 +1,10 @@
 {
   "buildCommand": "cd ../.. && pnpm --filter=db generate && pnpm --filter=admin build",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/cron/publish-posts",
+      "schedule": "*/15 * * * *"
+    }
+  ]
 }

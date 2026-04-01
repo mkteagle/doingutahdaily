@@ -22,13 +22,22 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const { title, content, excerpt, coverImage, categories, published } = await req.json();
+    const {
+      title,
+      content,
+      excerpt,
+      coverImage,
+      categories,
+      published,
+      scheduledAt,
+    } = await req.json();
     const post = await postService.updatePost(id, {
       title,
       content,
       excerpt,
       coverImage,
       published,
+      scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
       categories,
     });
     return NextResponse.json({ post });

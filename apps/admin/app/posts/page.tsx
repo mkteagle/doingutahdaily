@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { postService } from "@dud/db";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateTime } from "@/lib/utils";
 import { Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -43,11 +43,18 @@ export default async function PostsPage() {
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                     post.published
                       ? "bg-sage/15 text-sage"
+                      : post.scheduledAt
+                        ? "bg-canyon/10 text-canyon"
                       : "bg-ink/5 text-ink/40"
                   }`}>
-                    {post.published ? "Published" : "Draft"}
+                    {post.published ? "Published" : post.scheduledAt ? "Scheduled" : "Draft"}
                   </span>
                   <span className="text-xs text-ink/30">{formatDate(post.updatedAt)}</span>
+                  {post.scheduledAt && !post.published && (
+                    <span className="text-xs text-canyon/80">
+                      {formatDateTime(post.scheduledAt)}
+                    </span>
+                  )}
                   {post.categories.slice(0, 2).map((cat: any) => (
                     <span key={cat.id} className="text-xs text-ink/30">{cat.name}</span>
                   ))}
