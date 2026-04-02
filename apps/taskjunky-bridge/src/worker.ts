@@ -1,5 +1,6 @@
 import { failJob, claimJob, completeJob, type BridgeJob } from "./taskjunkyClient";
 import { requestDraftPost, requestPostRevision } from "./contentWorkerClient";
+import { publishDraftArtifacts } from "./publishDraft";
 
 const pollIntervalMs = Number(process.env.TASKJUNKY_POLL_INTERVAL_MS || "5000");
 
@@ -14,16 +15,23 @@ async function handleJob(job: BridgeJob) {
         prompt?: string;
         supportingNotes?: string;
         categories?: string[];
+        imageUrls?: string[];
       };
 
       if (!payload.prompt?.trim()) {
         throw new Error("draftPost job is missing a prompt.");
       }
 
-      return requestDraftPost({
+      const result = await requestDraftPost({
         prompt: payload.prompt,
         supportingNotes: payload.supportingNotes,
         categories: Array.isArray(payload.categories) ? payload.categories : [],
+      });
+
+      return publishDraftArtifacts({
+        payload,
+        result,
+        jobId: job.id,
       });
     }
 

@@ -8,6 +8,10 @@
     "start": "tsx src/worker.ts",
     "build": "tsc --noEmit -p tsconfig.json"
   },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1021.0",
+    "@dud/db": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^20.19.33",
     "tsx": "^4.20.6",

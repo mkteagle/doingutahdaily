@@ -8,10 +8,18 @@ interface ClaimResponse {
   job: BridgeJob | null;
 }
 
+interface CreateTaskResponse {
+  task: {
+    id: string;
+    title: string;
+  };
+}
+
 const DEFAULT_BASE_URL = "https://taskjunky.app";
 const DEFAULT_CLAIM_PATH = "/api/worker-jobs/claim";
 const DEFAULT_COMPLETE_PATH = "/api/worker-jobs/:jobId/complete";
 const DEFAULT_FAIL_PATH = "/api/worker-jobs/:jobId/fail";
+const DEFAULT_TASKS_PATH = "/api/tasks";
 
 function getBaseUrl() {
   return (process.env.TASKJUNKY_API_BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, "");
@@ -89,5 +97,20 @@ export async function failJob(jobId: string, error: string) {
       workerId: getWorkerId(),
       error,
     }
+  );
+}
+
+export async function createTask(body: {
+  title: string;
+  description?: string;
+  listName?: string;
+  assignee?: string;
+  source?: string;
+  aiNotes?: string;
+  tags?: string[];
+}) {
+  return postJson<CreateTaskResponse>(
+    process.env.TASKJUNKY_TASKS_PATH || DEFAULT_TASKS_PATH,
+    body
   );
 }
