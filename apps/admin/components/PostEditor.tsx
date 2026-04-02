@@ -313,22 +313,18 @@ export function PostEditor({ post }: PostEditorProps) {
         <div className="px-4 py-4 sm:px-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-canyon/80">
-                <span className="inline-flex items-center gap-2">
-                  <Sparkles size={13} />
-                  {postId ? "Editing Draft" : "Fast Draft"}
-                </span>
-                <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] tracking-[0.12em] text-ink/55">
-                  {saveLabel}
-                </span>
-              </div>
               <input
                 type="text"
                 placeholder="Untitled draft"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="mt-3 w-full border-none bg-transparent text-3xl font-bold text-ink outline-none placeholder:text-ink/20 sm:text-4xl"
+                className="w-full border-none bg-transparent text-3xl font-bold text-ink outline-none placeholder:text-ink/20 sm:text-4xl"
               />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/55">
+                  {saveLabel}
+                </span>
+              </div>
               <textarea
                 value={excerpt}
                 onChange={(event) => setExcerpt(event.target.value)}
