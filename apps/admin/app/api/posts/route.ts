@@ -23,9 +23,12 @@ export async function POST(req: Request) {
       published,
       scheduledAt,
     } = await req.json();
+    const normalizedTitle =
+      typeof title === "string" && title.trim() ? title.trim() : "Untitled draft";
+
     const post = await postService.createPost({
-      slug: await createUniquePostSlug(title),
-      title,
+      slug: await createUniquePostSlug(normalizedTitle),
+      title: normalizedTitle,
       content: content || "",
       excerpt: excerpt || "",
       coverImage,
