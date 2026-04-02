@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Sidebar } from "@/components/Sidebar";
 import { AuthProvider } from "@/components/AuthProvider";
+import { AppShell } from "@/components/AppShell";
 import { auth } from "@/auth";
 
 export const metadata: Metadata = {
@@ -20,12 +20,7 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider session={session}>
-          <div className="min-h-screen bg-sand md:flex">
-            <Sidebar />
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
-          </div>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>
