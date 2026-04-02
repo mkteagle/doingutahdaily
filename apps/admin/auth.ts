@@ -20,7 +20,7 @@ async function createAppleClientSecret() {
   const keyId = process.env.APPLE_KEY_ID;
   const privateKey = process.env.APPLE_PRIVATE_KEY;
   const clientId =
-    process.env.AUTH_APPLE_ID || process.env.APPLE_SERVICE_ID;
+    process.env.APPLE_SERVICE_ID || process.env.APPLE_CLIENT_ID;
 
   if (!teamId || !keyId || !privateKey || !clientId) {
     return undefined;
@@ -42,20 +42,7 @@ async function createAppleClientSecret() {
 
 const providers = [];
 
-if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
-  providers.push(
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    })
-  );
-}
-
-if (
-  !providers.length &&
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET
-) {
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   providers.push(
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -65,11 +52,10 @@ if (
 }
 
 const appleClientId =
-  process.env.AUTH_APPLE_ID ||
   process.env.APPLE_SERVICE_ID ||
   process.env.APPLE_CLIENT_ID;
 const appleClientSecret =
-  process.env.AUTH_APPLE_SECRET || (await createAppleClientSecret());
+  process.env.APPLE_CLIENT_SECRET || (await createAppleClientSecret());
 
 if (appleClientId && appleClientSecret) {
   providers.push(
