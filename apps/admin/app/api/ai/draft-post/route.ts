@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { postService } from "@dud/db";
-import { generateDraftPost } from "@/lib/aiDraftPost";
 import { createUniquePostSlug } from "@/lib/postDrafts";
+import { requestDraftPost } from "@/lib/contentWorkerClient";
 
 export const runtime = "nodejs";
 
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const draft = await generateDraftPost({
+    const { draft } = await requestDraftPost({
       prompt,
       supportingNotes,
       categories: Array.isArray(categories) ? categories : [],

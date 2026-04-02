@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dud/content-engine": "workspace:*",
     "@dud/db": "workspace:*",
     "@mkteagle/mdx-wysiwyg": "*",
     "jose": "^6.2.2",

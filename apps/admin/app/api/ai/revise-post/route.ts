@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revisePostDraft } from "@/lib/aiRevisePost";
+import { requestPostRevision } from "@/lib/contentWorkerClient";
 
 export const runtime = "nodejs";
 
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const draft = await revisePostDraft({
+    const { draft } = await requestPostRevision({
       instruction,
       title: typeof title === "string" ? title : "",
       excerpt: typeof excerpt === "string" ? excerpt : "",
