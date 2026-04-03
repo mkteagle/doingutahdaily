@@ -11,7 +11,8 @@
     "migrate": "drizzle-kit migrate",
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio",
-    "seed": "npx tsx scripts/seed-activities.ts"
+    "seed": "npx tsx scripts/seed-activities.ts",
+    "migrate-posts": "tsx --env-file=.env scripts/migrate-posts.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",

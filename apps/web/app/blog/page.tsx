@@ -1,5 +1,8 @@
 import BlogList from "@/components/screens/BlogList";
+import { postService } from "@dud/db";
+import { calculateReadingTime } from "@/utils/blogHelpers";
 import type { Metadata } from "next";
+import type { Blog, Category } from "@/types/blog";
 
 export const metadata: Metadata = {
   title: "Blog - Utah Family Adventures & Event Guides",
@@ -19,11 +22,21 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  // Fetch posts server-side for better SEO
-  const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-  const response = await fetch(`${baseUrl}/api/blog`, { cache: 'no-store' });
-  const data = await response.json();
-  const posts = data.posts || [];
+  const posts = await postService.getPublishedPosts();
 
-  return <BlogList initialPosts={posts} />;
+  const blogPosts: Blog[] = posts.map((post) => ({
+    meta: {
+      slug: post.slug,
+      title: post.title,
+      date: post.publishedAt?.toISOString() ?? post.createdAt.toISOString(),
+      excerpt: post.excerpt ?? "",
+      author: { name: post.author },
+      coverImage: post.coverImage ?? undefined,
+      categories: post.categories.map((c) => c.name) as Category[],
+      readingTime: calculateReadingTime(post.content),
+    },
+    content: null,
+  }));
+
+  return <BlogList initialPosts={blogPosts} />;
 }
