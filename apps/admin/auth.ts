@@ -55,7 +55,11 @@ const appleClientId =
   process.env.APPLE_SERVICE_ID ||
   process.env.APPLE_CLIENT_ID;
 const appleClientSecret =
-  process.env.APPLE_CLIENT_SECRET || (await createAppleClientSecret());
+  process.env.APPLE_CLIENT_SECRET ||
+  (await createAppleClientSecret().catch((err) => {
+    console.error("[auth] Failed to generate Apple client secret:", err.message);
+    return undefined;
+  }));
 
 if (appleClientId && appleClientSecret) {
   providers.push(
