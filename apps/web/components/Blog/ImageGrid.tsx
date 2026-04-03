@@ -10,7 +10,7 @@ interface ImageGridProps {
   columns?: 2 | 3 | 4;
 }
 
-export function ImageGrid({ images, columns = 2 }: ImageGridProps) {
+export function ImageGrid({ images = [], columns = 2 }: ImageGridProps) {
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
