@@ -1,52 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useBlogPost } from "@/hooks/useBlogPosts";
 import { MDXRemote } from "next-mdx-remote";
 import { useMDXComponents } from "@/app/mdxComponents";
 import { format, parseISO } from "date-fns";
 import { ArrowLeft, Clock, Calendar, User } from "lucide-react";
+import type { Blog } from "@/types/blog";
 
-function PostSkeleton() {
-  return (
-    <div className="max-w-3xl mx-auto px-5 sm:px-8 py-16 animate-pulse">
-      <div className="h-4 bg-muted rounded w-24 mb-8" />
-      <div className="h-8 bg-muted rounded w-1/3 mb-4" />
-      <div className="h-12 bg-muted rounded w-4/5 mb-4" />
-      <div className="h-12 bg-muted rounded w-3/5 mb-10" />
-      <div className="aspect-[16/9] bg-muted rounded-2xl mb-10" />
-      <div className="space-y-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="h-4 bg-muted rounded" style={{ width: `${70 + Math.random() * 30}%` }} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function BlogPost({ slug }: { slug: string }) {
+export function BlogPost({ post }: { post: Blog }) {
   const components = useMDXComponents();
-  const { post, loading, error } = useBlogPost(slug);
-
-  if (loading) return <PostSkeleton />;
-
-  if (error || !post) {
-    return (
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-24 text-center">
-        <p className="font-display text-2xl text-foreground mb-3">Post not found</p>
-        <p className="text-muted-foreground mb-8 font-serif">
-          This article doesn&apos;t exist or has been removed.
-        </p>
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
-        >
-          <ArrowLeft size={15} /> Back to Blog
-        </Link>
-      </div>
-    );
-  }
-
   const { meta, content } = post;
 
   return (
