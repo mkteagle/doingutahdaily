@@ -6,6 +6,7 @@ import { SignJWT, importPKCS8 } from "jose";
 const allowedEmails = new Set([
   "mkteagle@gmail.com",
   "jen.a.jarrett@gmail.com",
+  "doingutdaily@gmail.com",
 ]);
 
 function normalizePrivateKey(value: string) {
