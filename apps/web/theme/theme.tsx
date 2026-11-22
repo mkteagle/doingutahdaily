@@ -47,8 +47,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setColorModeState((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  if (!mounted) return null;
-
   return (
     <ThemeContext.Provider value={{ colorMode, setColorMode, toggleColorMode }}>
       {children}
