@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { postService } from "@dud/db";
 import { PostEditor } from "@/components/PostEditor";
@@ -15,14 +16,19 @@ export default async function EditPostPage({
   if (!post) notFound();
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="px-8 py-5 border-b border-gray-200 bg-white">
-        <h1 className="text-lg font-semibold text-gray-900">Edit Post</h1>
-        <p className="text-xs text-gray-400 mt-0.5 font-mono">/blog/{post.slug}</p>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <PostEditor post={post} />
-      </div>
+    <div>
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/10 bg-cream px-5 py-3 text-sm sm:px-6">
+        <div className="flex items-center gap-2">
+          <Link href="/posts" className="font-semibold text-canyon hover:underline">Stories</Link>
+          <span aria-hidden="true">/</span> <span>Edit story</span>
+        </div>
+        {post.published && (
+          <a href={`https://www.doingutahdaily.com/blog/${encodeURIComponent(post.slug)}`} className="text-canyon hover:underline">
+            View live story
+          </a>
+        )}
+      </header>
+      <PostEditor post={post} />
     </div>
   );
 }

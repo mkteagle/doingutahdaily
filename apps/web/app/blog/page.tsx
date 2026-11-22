@@ -1,42 +1,57 @@
-import BlogList from "@/components/screens/BlogList";
+import { notFound } from "next/navigation";
 import { postService } from "@dud/db";
-import { calculateReadingTime } from "@/utils/blogHelpers";
 import type { Metadata } from "next";
-import type { Blog, Category } from "@/types/blog";
+import BlogList from "@/components/screens/BlogList";
+import { blogArchiveUrl, getBlogFilters, STORIES_PER_PAGE } from "@/lib/blogArchive";
 
-export const metadata: Metadata = {
-  title: "Blog - Utah Family Adventures & Event Guides",
-  description: "Discover the best things to do in Utah with our comprehensive guides, seasonal activity ideas, and insider tips for families exploring the Beehive State.",
-  keywords: ["Utah blog", "Utah family blog", "Utah travel blog", "things to do Utah", "Utah activities blog", "Utah family adventures"],
-  openGraph: {
-    title: "Blog - Utah Family Adventures & Event Guides",
-    description: "Discover the best things to do in Utah with our comprehensive guides, seasonal activity ideas, and insider tips for families.",
-    url: "https://doingutahdaily.com/blog",
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Blog - Utah Family Adventures & Event Guides",
-    description: "Discover the best things to do in Utah with our comprehensive guides, seasonal activity ideas, and insider tips for families."
-  }
+type BlogPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function BlogPage() {
-  const posts = await postService.getPublishedPosts();
+const title = "Utah Stories & Family Guides";
+const description = "Discover family outings, seasonal adventures, and first-hand reviews of things to do in Utah.";
 
-  const blogPosts: Blog[] = posts.map((post) => ({
-    meta: {
-      slug: post.slug,
-      title: post.title,
-      date: post.publishedAt?.toISOString() ?? post.createdAt.toISOString(),
-      excerpt: post.excerpt ?? "",
-      author: { name: post.author },
-      coverImage: post.coverImage ?? undefined,
-      categories: post.categories.map((c) => c.name) as Category[],
-      readingTime: calculateReadingTime(post.content),
+export async function generateMetadata({ searchParams }: BlogPageProps): Promise<Metadata> {
+  const { page, search, categories } = getBlogFilters(await searchParams);
+  const parameterized = Boolean(search || categories.length);
+  const canonical = blogArchiveUrl({ page: parameterized ? 1 : page });
+
+  return {
+    title: page > 1 ? `${title} – Page ${page}` : title,
+    description,
+    alternates: { canonical },
+    robots: parameterized ? { index: false, follow: true } : undefined,
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      images: [{ url: "/images/field-guide-hero.webp", alt: "Hikers on a Wasatch Mountains trail" }],
     },
-    content: null,
-  }));
+  };
+}
 
-  return <BlogList initialPosts={blogPosts} />;
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const [posts, search] = await Promise.all([postService.getPublishedPostSummaries(), searchParams]);
+  const filters = getBlogFilters(search);
+  const categories = [...new Set(posts.flatMap((post) => post.categories.map(({ name }) => name)))].sort();
+  const query = filters.search.toLowerCase();
+  const matches = posts.filter((post) =>
+    (!query || [post.title, post.excerpt, ...post.categories.map(({ name }) => name)]
+      .some((text) => text?.toLowerCase().includes(query))) &&
+    (!filters.categories.length || post.categories.some(({ name }) => filters.categories.includes(name)))
+  );
+  const pages = Math.max(1, Math.ceil(matches.length / STORIES_PER_PAGE));
+  if (filters.page > pages) notFound();
+  const start = (filters.page - 1) * STORIES_PER_PAGE;
+
+  return (
+    <BlogList
+      posts={matches.slice(start, start + STORIES_PER_PAGE)}
+      categories={categories}
+      filters={filters}
+      pages={pages}
+      count={matches.length}
+    />
+  );
 }

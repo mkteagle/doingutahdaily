@@ -17,6 +17,32 @@ export async function getPublishedPosts() {
   });
 }
 
+export async function getPublishedPostSummaries(limit?: number) {
+  return db.query.posts.findMany({
+    columns: {
+      slug: true,
+      title: true,
+      excerpt: true,
+      coverImage: true,
+      author: true,
+      publishedAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    where: eq(posts.published, true),
+    with: { categories: { columns: { name: true } } },
+    orderBy: [sql`${posts.publishedAt} DESC NULLS LAST`, desc(posts.createdAt), desc(posts.slug)],
+    limit,
+  });
+}
+
+export async function getPublishedPostBySlug(slug: string) {
+  return db.query.posts.findFirst({
+    where: and(eq(posts.slug, slug), eq(posts.published, true)),
+    with: { categories: true },
+  });
+}
+
 export async function getPostBySlug(slug: string) {
   return db.query.posts.findFirst({
     where: eq(posts.slug, slug),
@@ -77,23 +103,27 @@ export async function createPost(data: {
   const { categories: cats, ...rest } = data;
   const scheduledAt = rest.published ? null : rest.scheduledAt ?? null;
 
-  const [post] = await db
-    .insert(posts)
-    .values({
-      ...rest,
-      excerpt: rest.excerpt ?? "",
-      scheduledAt,
-      publishedAt: rest.published ? new Date() : null,
-    })
-    .returning();
+  return db.transaction(async (transaction) => {
+    const [post] = await transaction
+      .insert(posts)
+      .values({
+        ...rest,
+        excerpt: rest.excerpt ?? "",
+        scheduledAt,
+        publishedAt: rest.published ? new Date() : null,
+      })
+      .returning();
 
-  if (cats?.length) {
-    await db
-      .insert(postCategories)
-      .values(cats.map((name) => ({ postId: post.id, name })));
-  }
+    if (cats?.length) {
+      await transaction.insert(postCategories)
+        .values([...new Set(cats)].map((name) => ({ postId: post.id, name })));
+    }
 
-  return getPostById(post.id);
+    return transaction.query.posts.findFirst({
+      where: eq(posts.id, post.id),
+      with: { categories: true },
+    });
+  });
 }
 
 export async function updatePost(
@@ -112,7 +142,7 @@ export async function updatePost(
 
   const updateData: Record<string, unknown> = { ...rest };
   if (rest.published !== undefined) {
-    updateData.publishedAt = rest.published ? new Date() : null;
+    updateData.publishedAt = rest.published ? sql`coalesce(${posts.publishedAt}, now())` : null;
     if (rest.published) {
       updateData.scheduledAt = null;
     }
@@ -126,18 +156,24 @@ export async function updatePost(
     }
   }
 
-  await db.update(posts).set(updateData).where(eq(posts.id, id));
+  return db.transaction(async (transaction) => {
+    const [updated] = await transaction.update(posts).set(updateData)
+      .where(eq(posts.id, id)).returning({ id: posts.id });
+    if (!updated) return undefined;
 
-  if (cats !== undefined) {
-    await db.delete(postCategories).where(eq(postCategories.postId, id));
-    if (cats.length) {
-      await db
-        .insert(postCategories)
-        .values(cats.map((name) => ({ postId: id, name })));
+    if (cats !== undefined) {
+      await transaction.delete(postCategories).where(eq(postCategories.postId, id));
+      if (cats.length) {
+        await transaction.insert(postCategories)
+          .values([...new Set(cats)].map((name) => ({ postId: id, name })));
+      }
     }
-  }
 
-  return getPostById(id);
+    return transaction.query.posts.findFirst({
+      where: eq(posts.id, id),
+      with: { categories: true },
+    });
+  });
 }
 
 export async function deletePost(id: string) {
@@ -145,36 +181,8 @@ export async function deletePost(id: string) {
 }
 
 export async function publishScheduledPosts(now = new Date()) {
-  const duePosts = await db.query.posts.findMany({
-    where: and(
-      eq(posts.published, false),
-      isNotNull(posts.scheduledAt),
-      lte(posts.scheduledAt, now)
-    ),
-    with: { categories: true },
-    orderBy: desc(posts.scheduledAt),
-  });
-
-  if (!duePosts.length) {
-    return [];
-  }
-
-  const publishedAt = new Date();
-
-  await db
-    .update(posts)
-    .set({
-      published: true,
-      publishedAt,
-      scheduledAt: null,
-    })
-    .where(
-      and(
-        eq(posts.published, false),
-        isNotNull(posts.scheduledAt),
-        lte(posts.scheduledAt, now)
-      )
-    );
-
-  return duePosts;
+  return db.update(posts)
+    .set({ published: true, publishedAt: new Date(), scheduledAt: null })
+    .where(and(eq(posts.published, false), isNotNull(posts.scheduledAt), lte(posts.scheduledAt, now)))
+    .returning({ id: posts.id });
 }

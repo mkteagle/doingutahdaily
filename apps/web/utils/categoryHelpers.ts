@@ -131,7 +131,6 @@ export function getUniqueEventCategories(events: CalendarEvent[]): Category[] {
 
 const CALENDAR_ID = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_ID ?? "";
 
-console.info({ CALENDAR_ID });
 
 // Function to encode the calendar ID for use in URLs
 function getEncodedCalendarId(): string {

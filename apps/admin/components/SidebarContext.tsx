@@ -5,7 +5,7 @@ import { createContext, useContext, useState } from "react";
 export const MIN_WIDTH = 200;
 export const MAX_WIDTH = 360;
 export const COLLAPSED_WIDTH = 56;
-export const DEFAULT_WIDTH = 224;
+export const DEFAULT_WIDTH = 240;
 
 interface SidebarContextValue {
   isCollapsed: boolean;

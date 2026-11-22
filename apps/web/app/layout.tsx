@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 import { ThemeProvider } from "@/theme/theme";
 import { Suspense } from "react";
@@ -8,7 +9,7 @@ import { ImageBrightnessProvider } from "@/context/ImageBrightnessContext";
 import { SiteLayout } from "@/components/Layout/SiteLayout";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://doingutahdaily.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Doing Utah Daily - Discover Utah's Best Family Events & Activities",
     template: "%s | Doing Utah Daily"
@@ -21,15 +22,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://doingutahdaily.com",
+    url: SITE_URL,
     siteName: "Doing Utah Daily",
     title: "Doing Utah Daily - Discover Utah's Best Family Events & Activities",
     description: "Your trusted guide to family-friendly events and unforgettable adventures across Utah.",
     images: [
       {
-        url: "/apple-icon.png",
-        width: 180,
-        height: 180,
+        url: "/images/field-guide-hero.webp",
+        width: 1536,
+        height: 1024,
         alt: "Doing Utah Daily"
       }
     ]
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Doing Utah Daily - Discover Utah's Best Family Events & Activities",
     description: "Your trusted guide to family-friendly events and unforgettable adventures across Utah.",
-    images: ["/apple-icon.png"],
+    images: ["/images/field-guide-hero.webp"],
     creator: "@doingutahdaily"
   },
   robots: {

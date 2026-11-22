@@ -2,159 +2,47 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Menu, X, Sun, Moon } from "lucide-react";
-import ThemedLogo from "@/components/Layout/ThemedLogo";
+import { Moon, Sun } from "lucide-react";
+import { MountainMark } from "@dud/ui/mountain-mark";
 import { useTheme } from "@/theme/theme";
-import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
+const nav = [
   { href: "/activities", label: "Activities" },
   { href: "/events", label: "This Weekend" },
   { href: "/blog", label: "Stories" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Partner with us", cta: true },
+  { href: "/instagram", label: "Instagram" },
 ];
 
 export function SiteHeader() {
   const pathname = usePathname();
   const { colorMode, toggleColorMode } = useTheme();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
+  const colorSchemeButton = (
+    <button type="button" className="field-icon-button" onClick={toggleColorMode} aria-label="Toggle color mode">
+      {colorMode === "dark" ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
+    </button>
+  );
 
   return (
-    <>
-      <header
-        className={cn(
-          "fixed top-0 inset-x-0 z-50 transition-all duration-300",
-          scrolled
-            ? "bg-background/95 backdrop-blur-md border-b border-border shadow-sm"
-            : "bg-background/60 backdrop-blur-sm"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
+    <header className="field-header">
+      <div className="field-container field-header-inner">
+        <Link href="/" className="field-wordmark" aria-current={pathname === "/" ? "page" : undefined}>
+          <MountainMark className="w-[56px] shrink-0 text-canyon sm:w-[4.75rem] lg:w-[5.2rem]" />
+          <span className="min-w-0 break-words">Doing Utah Daily</span>
+        </Link>
+        <div className="field-theme-mobile">{colorSchemeButton}</div>
+        <nav id="site-navigation" aria-label="Main navigation" className="field-nav">
+          {nav.map(({ href, label }) => {
+            const current = pathname === href ? "page" : pathname.startsWith(`${href}/`) ? "location" : undefined;
 
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0 hover:scale-105 transition-transform duration-300">
-              <ThemedLogo className="h-12 md:h-16 w-auto" />
-            </Link>
-
-            {/* Desktop nav + dark mode */}
-            <div className="hidden md:flex items-center gap-0.5">
-              <nav className="flex items-center gap-0.5">
-                {NAV_LINKS.map(({ href, label, cta }) => {
-                  const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={cn(
-                        "relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-                        cta
-                          ? "ml-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                          : active
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      )}
-                    >
-                      {label}
-                    </Link>
-                  );
-                })}
-              </nav>
-              <button
-                onClick={toggleColorMode}
-                aria-label="Toggle color mode"
-                className="ml-2 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                {colorMode === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-              </button>
-            </div>
-
-            {/* Mobile: hamburger only */}
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Toggle menu"
-              className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile drawer */}
-      <div className={cn("fixed inset-0 z-40 md:hidden", menuOpen ? "pointer-events-auto" : "pointer-events-none")}>
-        <div
-          onClick={() => setMenuOpen(false)}
-          className={cn(
-            "absolute inset-0 bg-foreground/20 backdrop-blur-sm transition-opacity duration-300",
-            menuOpen ? "opacity-100" : "opacity-0"
-          )}
-        />
-        <div
-          className={cn(
-            "absolute top-0 right-0 h-full w-72 bg-background border-l border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out",
-            menuOpen ? "translate-x-0" : "translate-x-full"
-          )}
-        >
-          <div className="flex items-center justify-between px-6 h-16 border-b border-border">
-            <span className="font-display text-sm text-foreground">Menu</span>
-            <button onClick={() => setMenuOpen(false)} className="p-2 rounded-lg hover:bg-muted transition-colors">
-              <X size={18} className="text-muted-foreground" />
-            </button>
-          </div>
-          <nav className="flex flex-col gap-1 p-4 flex-1">
-            {NAV_LINKS.map(({ href, label, cta }) => {
-              const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "px-4 py-3 rounded-xl text-base font-medium transition-colors",
-                    cta
-                      ? "mt-2 bg-primary text-primary-foreground text-center hover:bg-primary/90"
-                      : active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="px-6 pb-8 pt-4 border-t border-border">
-            <button
-              onClick={toggleColorMode}
-              className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              {colorMode === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              {colorMode === "dark" ? "Light mode" : "Dark mode"}
-            </button>
-          </div>
-        </div>
+            return (
+              <Link key={href} href={href} aria-current={current}>
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="field-theme-desktop">{colorSchemeButton}</div>
       </div>
-
-      {/* Layout spacer */}
-      <div className="h-16 md:h-20" aria-hidden />
-    </>
+    </header>
   );
 }

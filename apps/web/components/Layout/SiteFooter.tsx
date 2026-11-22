@@ -1,142 +1,50 @@
-"use client";
-
 import Link from "next/link";
-import { Mountain, Instagram, Facebook, Mail, MapPin, ArrowRight } from "lucide-react";
+import { Instagram, Mail } from "lucide-react";
+import { MountainMark } from "@dud/ui/mountain-mark";
+import { INSTAGRAM_URL } from "@/lib/social";
 
-const LINKS = {
-  explore: [
-    { label: "Activities", href: "/activities" },
-    { label: "This Weekend", href: "/events" },
-    { label: "Stories & Guides", href: "/blog" },
-    { label: "About", href: "/about" },
-    { label: "Partner with us", href: "/contact" },
-  ],
-  legal: [
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Use", href: "/terms" },
-  ],
-};
+const explore = [
+  { label: "Activities", href: "/activities" },
+  { label: "This Weekend", href: "/events" },
+  { label: "Stories & Guides", href: "/blog" },
+  { label: "About", href: "/about" },
+  { label: "Share an event", href: "/submit" },
+];
 
 export function SiteFooter() {
   return (
-    <footer className="bg-foreground text-background">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 lg:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
-
-          {/* Brand */}
-          <div className="md:col-span-5">
-            <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
-              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground">
-                <Mountain size={19} strokeWidth={2.5} />
-              </span>
-              <div className="leading-none">
-                <div className="font-display text-base text-background">Doing Utah Daily</div>
-              </div>
+    <footer className="bg-[#23392a] text-[#fbf1e4]">
+      <div className="field-container pt-10 sm:pt-14">
+        <div className="grid gap-8 md:grid-cols-[1.5fr_1fr_1fr]">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-3 text-xl font-bold">
+              <MountainMark className="w-14 text-[#e9a181]" /> Doing Utah Daily
             </Link>
-
-            <p className="font-serif text-background/75 leading-relaxed mb-8 max-w-sm italic">
-              Your family&apos;s guide to everything happening in Utah.
-              Actually went there. Honestly tells you what to expect.
+            <p className="mt-4 max-w-sm text-[#e0dfd3]">
+              Utah outings, local stories, and weekend ideas for families.
             </p>
-
-            {/* Social */}
-            <div className="flex items-center gap-3 mb-8">
-              {[
-                { icon: Instagram, label: "Instagram", href: "#" },
-                { icon: Facebook, label: "Facebook", href: "#" },
-                { icon: Mail, label: "Email", href: "mailto:hello@doingutahdaily.com" },
-              ].map(({ icon: Icon, label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="p-2.5 rounded-lg bg-background/10 hover:bg-background/20 text-background transition-colors"
-                >
-                  <Icon size={17} />
-                </a>
-              ))}
-            </div>
-
-            {/* Newsletter */}
-            <div>
-              <p className="text-sm font-medium text-background/80 mb-3">
-                &ldquo;This Weekend in Utah&rdquo; — every Thursday
-              </p>
-              <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  className="flex-1 min-w-0 px-4 py-2.5 rounded-lg bg-background/10 border border-background/20 text-background placeholder:text-background/40 text-sm focus:outline-none focus:border-background/40 focus:bg-background/15 transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shrink-0"
-                >
-                  <ArrowRight size={16} />
-                </button>
-              </form>
-            </div>
           </div>
-
-          {/* Explore links */}
-          <div className="md:col-span-3 md:col-start-7">
-            <h3 className="text-xs font-semibold tracking-widest uppercase text-background/50 mb-5">
-              Explore
-            </h3>
-            <ul className="space-y-3">
-              {LINKS.explore.map(({ label, href }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className="text-background/70 hover:text-background text-sm font-medium transition-colors"
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div className="md:col-span-3">
-            <h3 className="text-xs font-semibold tracking-widest uppercase text-background/50 mb-5">
-              Contact
-            </h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-2.5">
-                <Mail size={15} className="text-background/50 mt-0.5 shrink-0" />
-                <a
-                  href="mailto:hello@doingutahdaily.com"
-                  className="text-sm text-background/70 hover:text-background transition-colors"
-                >
-                  hello@doingutahdaily.com
-                </a>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <MapPin size={15} className="text-background/50 mt-0.5 shrink-0" />
-                <span className="text-sm text-background/70">
-                  Salt Lake City, Utah
-                </span>
-              </li>
-            </ul>
+          <nav aria-label="Explore" className="grid content-start justify-items-start gap-2">
+            {explore.map(({ label, href }) => (
+              <Link key={href} href={href} className="hover:underline">{label}</Link>
+            ))}
+          </nav>
+          <div className="grid content-start justify-items-start gap-3">
+            <Link href="/contact" className="hover:underline">Partner with us</Link>
+            <Link href="/newsletter" className="hover:underline">Get the newsletter</Link>
+            <a href={INSTAGRAM_URL} className="flex items-center gap-2 hover:underline">
+              <Instagram size={16} aria-hidden /> Instagram
+            </a>
+            <a href="mailto:hello@doingutahdaily.com" className="flex items-center gap-2 break-all hover:underline">
+              <Mail size={16} aria-hidden /> hello@doingutahdaily.com
+            </a>
           </div>
         </div>
-
-        {/* Bottom bar */}
-        <div className="mt-16 pt-8 border-t border-background/15 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-background/40">
-            © {new Date().getFullYear()} Doing Utah Daily. All rights reserved.
-          </p>
-          <div className="flex gap-6">
-            {LINKS.legal.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                className="text-xs text-background/40 hover:text-background/70 transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
+        <div className="mt-9 flex flex-wrap justify-between gap-3 border-t border-white/20 py-5 text-sm text-[#e0dfd3]">
+          <span>© {new Date().getFullYear()} Doing Utah Daily</span>
+          <div className="flex gap-4">
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
           </div>
         </div>
       </div>

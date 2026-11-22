@@ -2,48 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useState, useRef, useCallback, useEffect } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
 import {
-  LayoutDashboard,
-  FileText,
-  MapPin,
-  Inbox,
-  Users,
-  Calendar,
-  Instagram,
-  ExternalLink,
-  BadgeCheck,
-  Sparkles,
-  PanelLeftClose,
-  PanelLeftOpen,
-  LogOut,
+  BadgeCheck, Calendar, ExternalLink, FileText, Inbox, Instagram, LayoutDashboard,
+  LogOut, MapPin, Menu, KeyRound, PanelLeftClose, PanelLeftOpen, Sparkles, Users, X,
 } from "lucide-react";
-import {
-  useSidebar,
-  MIN_WIDTH,
-  MAX_WIDTH,
-  COLLAPSED_WIDTH,
-} from "@/components/SidebarContext";
+import { MountainMark } from "@dud/ui/mountain-mark";
+import { useSidebar, MIN_WIDTH, MAX_WIDTH } from "@/components/SidebarContext";
 
-const navGroups = [
+const groups = [
   {
-    label: "Dashboard",
-    items: [{ label: "Dashboard", href: "/", icon: LayoutDashboard }],
-  },
-  {
-    label: "Content",
+    label: "Publishing",
     items: [
-      { label: "Capture", href: "/capture", icon: Sparkles },
-      { label: "Posts", href: "/posts", icon: FileText },
-      { label: "Activities", href: "/activities", icon: MapPin },
-      { label: "Events", href: "/events", icon: Calendar },
+      { label: "Overview", href: "/", icon: LayoutDashboard },
+      { label: "Stories", href: "/posts", icon: FileText },
+      { label: "Quick capture", href: "/capture", icon: Sparkles },
     ],
   },
   {
-    label: "Pipeline",
+    label: "Utah guide",
     items: [
+      { label: "Activities", href: "/activities", icon: MapPin },
+      { label: "Events", href: "/events", icon: Calendar },
       { label: "Submissions", href: "/submissions", icon: Inbox },
       { label: "Verification", href: "/verification", icon: BadgeCheck },
     ],
@@ -51,239 +32,131 @@ const navGroups = [
   {
     label: "Audience",
     items: [
-      { label: "Subscribers", href: "/subscribers", icon: Users },
-      { label: "Social Feed", href: "/social", icon: Instagram },
+      { label: "Newsletter", href: "/subscribers", icon: Users },
+      { label: "Social feed", href: "/social", icon: Instagram },
     ],
   },
 ];
 
-function DudMark({ size = 28 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 40 40" width={size} height={size} fill="none">
-      <circle cx="20" cy="13" r="5" fill="#C45C2A" opacity="0.9" />
-      <path d="M5 33 L14 18 L20 27 L26 20 L35 33 Z" fill="#C45C2A" opacity="0.7" />
-      <path d="M14 18 L20 27 L26 20 L20 14 Z" fill="#C45C2A" />
-    </svg>
-  );
-}
-
-export function Sidebar() {
+export function Sidebar({ passkeysEnabled }: { passkeysEnabled: boolean }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { isCollapsed, setIsCollapsed, sidebarWidth, setSidebarWidth } = useSidebar();
-  const [isResizing, setIsResizing] = useState(false);
-  const [isHeaderHovered, setIsHeaderHovered] = useState(false);
-  const sidebarRef = useRef<HTMLElement>(null);
+  const [openPath, setOpenPath] = useState<string | null>(null);
+  const mobileToggle = useRef<HTMLButtonElement>(null);
+  const mobileOpen = openPath === pathname;
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  }, []);
+  function resize(width: number) {
+    const next = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width));
+    setSidebarWidth(next);
+    localStorage.setItem("dud-admin-sidebar-width", String(next));
+  }
 
   useEffect(() => {
-    if (!isResizing) return;
-    const handleMouseMove = (e: MouseEvent) => {
-      const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, e.clientX));
-      setSidebarWidth(newWidth);
-      localStorage.setItem("dud-admin-sidebar-width", String(newWidth));
-    };
-    const handleMouseUp = () => setIsResizing(false);
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-  }, [isResizing, setSidebarWidth]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("dud-admin-sidebar-width");
-    if (saved) setSidebarWidth(Number(saved));
+    const stored = localStorage.getItem("dud-admin-sidebar-width");
+    const width = stored ? Number(stored) : NaN;
+    if (Number.isFinite(width)) setSidebarWidth(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width)));
   }, [setSidebarWidth]);
 
-  const currentWidth = isCollapsed ? COLLAPSED_WIDTH : sidebarWidth;
+  function closeMenu() {
+    setOpenPath(null);
+    mobileToggle.current?.focus();
+  }
 
   return (
-    <aside
-      ref={sidebarRef}
-      className="fixed top-0 left-0 h-full z-40 hidden md:flex flex-col bg-cream border-r border-sand select-none"
-      style={{
-        width: currentWidth,
-        transition: isResizing ? "none" : "width 200ms cubic-bezier(0.22, 1, 0.36, 1)",
-      }}
-    >
-      {/* Brand header */}
-      <div
-        className={`flex items-center border-b border-sand ${
-          isCollapsed ? "px-0 py-4 justify-center" : "px-4 py-4 gap-2.5"
-        }`}
-      >
-        {isCollapsed ? (
-          <button
-            onClick={() => setIsCollapsed(false)}
-            className="relative flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors hover:bg-sand group"
-            aria-label="Expand sidebar"
-            onMouseEnter={() => setIsHeaderHovered(true)}
-            onMouseLeave={() => setIsHeaderHovered(false)}
-          >
-            <div
-              className={`transition-all duration-200 ${
-                isHeaderHovered ? "opacity-0 scale-75" : "opacity-100 scale-100"
-              }`}
-            >
-              <DudMark size={24} />
-            </div>
-            <div
-              className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${
-                isHeaderHovered ? "opacity-100 scale-100" : "opacity-0 scale-75"
-              }`}
-            >
-              <PanelLeftOpen className="h-4 w-4 text-ink/50" />
-            </div>
-          </button>
-        ) : (
-          <>
-            <div className="flex items-center justify-center w-9 h-9 shrink-0">
-              <DudMark size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-canyon leading-tight truncate">
-                Doing Utah Daily
-              </p>
-              <p className="text-[11px] font-medium text-ink/40 leading-tight">Admin</p>
-            </div>
-            <button
-              onClick={() => setIsCollapsed(true)}
-              className="flex items-center justify-center w-7 h-7 rounded-md text-ink/30 hover:text-ink hover:bg-sand transition-colors"
-              aria-label="Collapse sidebar"
-            >
-              <PanelLeftClose className="h-3.5 w-3.5" />
-            </button>
-          </>
-        )}
+    <header className="bg-[#263d2f] text-[#f9f3e8] md:sticky md:top-0 md:h-dvh">
+      <div className="flex min-h-16 items-center justify-between gap-3 border-b border-white/15 px-5 md:hidden">
+        <Link href="/" onClick={() => setOpenPath(null)} className="flex items-center gap-2 font-semibold">
+          <MountainMark className="w-11 text-[#eda484]" /> Doing Utah Daily
+        </Link>
+        <button ref={mobileToggle} type="button" className="grid size-10 place-items-center rounded-lg hover:bg-white/10"
+          aria-label={mobileOpen ? "Close admin navigation" : "Open admin navigation"} aria-expanded={mobileOpen}
+          aria-controls="admin-navigation" onClick={() => setOpenPath(mobileOpen ? null : pathname)}>
+          {mobileOpen ? <X size={20} aria-hidden /> : <Menu size={20} aria-hidden />}
+        </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-2 px-1.5 overflow-y-auto overflow-x-hidden">
-        {navGroups.map((group, gi) => (
-          <div key={group.label} className={gi > 0 ? "mt-4" : ""}>
-            {!isCollapsed && (
-              <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/35">
-                {group.label}
-              </p>
-            )}
-            {isCollapsed && gi > 0 && (
-              <div className="h-px bg-sand mx-2 my-2" />
-            )}
-            <div className="space-y-px">
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
-                return (
-                  <div key={item.href} className="relative group/item">
-                    <Link
-                      href={item.href}
-                      title={isCollapsed ? item.label : undefined}
-                      className={`flex items-center gap-2.5 rounded-lg text-[13px] transition-all duration-100 relative ${
-                        active
-                          ? "text-canyon font-medium bg-canyon/10"
-                          : "text-ink/55 hover:text-ink hover:bg-sand"
-                      } ${isCollapsed ? "justify-center px-2 py-2" : "px-2.5 py-[7px]"}`}
-                    >
-                      {active && !isCollapsed && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-canyon" />
-                      )}
-                      {active && isCollapsed && (
-                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[3px] rounded-t-full bg-canyon" />
-                      )}
-                      <Icon
-                        className={`shrink-0 h-4 w-4 ${active ? "text-canyon" : "text-ink/40"}`}
-                        strokeWidth={active ? 2 : 1.5}
-                      />
-                      {!isCollapsed && <span className="truncate">{item.label}</span>}
-                    </Link>
-                    {isCollapsed && (
-                      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-ink text-cream text-[11px] font-medium rounded-lg opacity-0 group-hover/item:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
-                        {item.label}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      {/* Footer */}
-      <div className={`border-t border-sand ${isCollapsed ? "px-2 py-3" : "px-4 py-4"}`}>
-        {!isCollapsed ? (
-          <div className="space-y-3">
-            {session?.user?.email && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/30 mb-0.5">
-                  Signed in
-                </p>
-                <p className="text-xs font-medium text-ink truncate">
-                  {session.user.email}
-                </p>
-              </div>
-            )}
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => signOut({ callbackUrl: "/sign-in" })}
-                className="flex items-center gap-1.5 text-xs text-ink/40 hover:text-canyon transition-colors"
-              >
-                <LogOut size={12} />
-                Sign out
+      <aside id="admin-navigation" className={`${mobileOpen ? "flex" : "hidden"} min-h-0 flex-col md:flex md:h-full`}
+        onKeyDown={(event) => { if (event.key === "Escape" && mobileOpen) closeMenu(); }}>
+        <div className={`hidden min-h-[4.75rem] items-center gap-2 border-b border-white/15 md:flex ${isCollapsed ? "justify-center" : "px-4"}`}>
+          {isCollapsed ? (
+            <button type="button" onClick={() => setIsCollapsed(false)} className="grid size-10 place-items-center rounded-lg hover:bg-white/10" aria-label="Expand sidebar">
+              <PanelLeftOpen size={19} aria-hidden />
+            </button>
+          ) : (
+            <>
+              <Link href="/" className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold">
+                <MountainMark className="w-9 shrink-0 text-[#eda484]" />
+                <span className="truncate">Doing Utah Daily</span>
+              </Link>
+              <button type="button" onClick={() => setIsCollapsed(true)} className="grid size-8 shrink-0 place-items-center rounded-lg hover:bg-white/10" aria-label="Collapse sidebar">
+                <PanelLeftClose size={16} aria-hidden />
               </button>
-              <a
-                href="https://doingutahdaily.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1 text-xs text-ink/30 hover:text-canyon transition-colors"
-              >
-                <ExternalLink size={11} />
-                View site
-              </a>
+            </>
+          )}
+        </div>
+
+        <nav aria-label="Admin" className="flex-1 overflow-auto px-3 py-4">
+          {groups.map((group) => (
+            <div key={group.label} className="mb-5 last:mb-0">
+              <p className={`px-2 pb-1 text-xs font-semibold text-white/65 ${isCollapsed ? "md:sr-only" : ""}`}>{group.label}</p>
+              <ul className="space-y-0.5">
+                {group.items.map(({ label, href, icon: Icon }) => {
+                  const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
+                  return (
+                    <li key={href}>
+                      <Link href={href} title={label} onClick={() => setOpenPath(null)}
+                        aria-current={active ? "page" : undefined}
+                        className={`flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 text-sm hover:bg-white/10 aria-[current=page]:bg-white/15 aria-[current=page]:font-semibold ${isCollapsed ? "md:justify-center md:px-0" : ""}`}>
+                        <Icon size={17} className="shrink-0 text-[#e9b59e]" aria-hidden />
+                        <span className={isCollapsed ? "md:sr-only" : ""}>{label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2">
-            <button
-              onClick={() => signOut({ callbackUrl: "/sign-in" })}
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-ink/35 hover:text-canyon hover:bg-sand transition-colors"
-              aria-label="Sign out"
-              title="Sign out"
-            >
-              <LogOut size={14} />
+          ))}
+        </nav>
+
+        <div className="border-t border-white/15 px-3 py-3">
+          {session?.user?.email && <p className={`truncate px-2 pb-2 text-xs text-white/65 ${isCollapsed ? "md:sr-only" : ""}`}>{session.user.email}</p>}
+          {passkeysEnabled && (
+            <Link href="/account" onClick={() => setOpenPath(null)} title="Account security"
+              className="mb-2 flex min-h-9 items-center gap-2 rounded-md px-2 text-xs hover:bg-white/10">
+              <KeyRound size={14} aria-hidden /> <span className={isCollapsed ? "md:sr-only" : ""}>Account security</span>
+            </Link>
+          )}
+          <div className={`flex gap-1 ${isCollapsed ? "md:flex-col" : "flex-wrap"}`}>
+            <a className="flex min-h-9 items-center gap-2 rounded-md px-2 text-xs hover:bg-white/10" href="https://www.doingutahdaily.com/" title="View live site">
+              <ExternalLink size={14} aria-hidden /> <span className={isCollapsed ? "md:sr-only" : ""}>View live site</span>
+            </a>
+            <button type="button" className="flex min-h-9 items-center gap-2 rounded-md px-2 text-xs hover:bg-white/10"
+              title="Sign out" onClick={() => void signOut({ redirectTo: "/sign-in" })}>
+              <LogOut size={14} aria-hidden /> <span className={isCollapsed ? "md:sr-only" : ""}>Sign out</span>
             </button>
           </div>
-        )}
-      </div>
-
-      {/* Resize handle */}
+        </div>
+      </aside>
       {!isCollapsed && (
         <div
-          className="absolute top-0 right-0 w-[5px] h-full cursor-col-resize group/resize z-50"
-          onMouseDown={handleMouseDown}
-        >
-          <div
-            className={`absolute right-0 top-0 w-[1px] h-full transition-all duration-150 ${
-              isResizing
-                ? "bg-canyon w-[2px]"
-                : "bg-transparent group-hover/resize:bg-canyon/40"
-            }`}
-          />
-        </div>
+          role="separator" tabIndex={0} aria-label="Resize sidebar" aria-orientation="vertical"
+          aria-valuemin={MIN_WIDTH} aria-valuemax={MAX_WIDTH} aria-valuenow={sidebarWidth}
+          className="absolute inset-y-0 right-0 hidden w-1.5 cursor-col-resize hover:bg-white/25 focus-visible:bg-white/25 md:block"
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+            event.preventDefault();
+            resize(sidebarWidth + (event.key === "ArrowRight" ? 10 : -10));
+          }}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) resize(event.clientX);
+          }}
+        />
       )}
-    </aside>
+    </header>
   );
 }

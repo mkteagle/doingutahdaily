@@ -3,27 +3,16 @@
 import { signIn, signOut } from "next-auth/react";
 import { LogIn, LogOut } from "lucide-react";
 
-export function LoginButtons({
-  callbackUrl = "/",
-}: {
-  callbackUrl?: string;
-}) {
+export function LoginButtons({ providers }: { providers: ("google" | "apple")[] }) {
   return (
     <div className="space-y-3">
-      <button
-        onClick={() => void signIn("google", { callbackUrl })}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-medium text-ink transition hover:border-canyon/30 hover:bg-canyon/5"
-      >
-        <LogIn size={16} />
-        Continue with Google
-      </button>
-      <button
-        onClick={() => void signIn("apple", { callbackUrl })}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-medium text-white transition hover:bg-ink/90"
-      >
-        <LogIn size={16} />
-        Continue with Apple
-      </button>
+      {providers.map((provider) => (
+        <button key={provider} type="button" className="admin-secondary w-full"
+          onClick={() => void signIn(provider, { redirectTo: "/" })}>
+          <LogIn size={16} aria-hidden />
+          Continue with {provider === "google" ? "Google" : "Apple"}
+        </button>
+      ))}
     </div>
   );
 }

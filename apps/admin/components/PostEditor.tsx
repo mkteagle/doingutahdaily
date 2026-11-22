@@ -67,7 +67,7 @@ export function PostEditor({ post }: PostEditorProps) {
   );
   const [editorMode, setEditorMode] = useState<"visual" | "source">("visual");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [manualSaving, setManualSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [autosaveState, setAutosaveState] = useState<
     "idle" | "dirty" | "saving" | "saved" | "error"
   >("idle");
@@ -102,7 +102,14 @@ export function PostEditor({ post }: PostEditorProps) {
 
   const payloadKey = useMemo(() => serializePayload(payload), [payload]);
   const lastSavedPayloadRef = useRef(payloadKey);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAttemptedPayloadRef = useRef<string | null>(null);
+  const saveInFlightRef = useRef(false);
+  const savedPostIdRef = useRef(post?.id ?? null);
+  const latestPayloadRef = useRef(payloadKey);
+
+  useEffect(() => {
+    latestPayloadRef.current = payloadKey;
+  }, [payloadKey]);
 
   function toggleCategory(name: string) {
     setSelectedCategories((current) =>
@@ -113,6 +120,7 @@ export function PostEditor({ post }: PostEditorProps) {
   }
 
   async function savePost(options?: { publish?: boolean; autosave?: boolean }) {
+    if (saveInFlightRef.current) return null;
     const autosave = options?.autosave ?? false;
     const shouldPublish = options?.publish ?? published;
     const normalizedPayload = {
@@ -122,26 +130,33 @@ export function PostEditor({ post }: PostEditorProps) {
       scheduledAt: shouldPublish ? "" : scheduledAt,
     };
 
-    if (!normalizedPayload.title.trim()) {
-      setError("Title is required.");
+    if ((shouldPublish || normalizedPayload.scheduledAt) && (!title.trim() || !content.trim())) {
+      setError("Add a title and story content before publishing.");
       return null;
     }
 
-    if (!autosave) {
-      setManualSaving(true);
+    const schedule = normalizedPayload.scheduledAt ? new Date(normalizedPayload.scheduledAt) : null;
+    if (schedule && Number.isNaN(schedule.getTime())) {
+      setError("Enter a valid publishing date and time.");
+      return null;
     }
+
+    const currentId = savedPostIdRef.current;
+    lastAttemptedPayloadRef.current = payloadKey;
+    saveInFlightRef.current = true;
+    setSaving(true);
     setError(null);
     setAutosaveState("saving");
 
     try {
       const response = await fetch(
-        postId ? `/api/posts/${postId}` : "/api/posts",
+        currentId ? `/api/posts/${currentId}` : "/api/posts",
         {
-          method: postId ? "PATCH" : "POST",
+          method: currentId ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...normalizedPayload,
-            scheduledAt: normalizedPayload.scheduledAt || null,
+            scheduledAt: schedule?.toISOString() ?? null,
           }),
         }
       );
@@ -152,13 +167,13 @@ export function PostEditor({ post }: PostEditorProps) {
       }
 
       const savedPostId = data.post.id as string;
+      savedPostIdRef.current = savedPostId;
       setPostId(savedPostId);
-      if (!title.trim() && data.post.title) {
+      if (latestPayloadRef.current === payloadKey && !title.trim() && data.post.title) {
         setTitle(data.post.title);
       }
-      if (options?.publish !== undefined) {
-        setPublished(shouldPublish);
-      }
+      if (options?.publish !== undefined) setPublished(shouldPublish);
+      if (shouldPublish) setScheduledAt("");
 
       const savedPayloadKey = serializePayload({
         title: title.trim() || data.post.title || "Untitled draft",
@@ -173,7 +188,7 @@ export function PostEditor({ post }: PostEditorProps) {
       setLastSavedAt(new Date());
       setAutosaveState("saved");
 
-      if (!postId) {
+      if (!post && latestPayloadRef.current === payloadKey) {
         router.replace(`/posts/${savedPostId}`);
       } else if (!autosave) {
         router.refresh();
@@ -187,7 +202,8 @@ export function PostEditor({ post }: PostEditorProps) {
       );
       return null;
     } finally {
-      setManualSaving(false);
+      saveInFlightRef.current = false;
+      setSaving(false);
     }
   }
 
@@ -195,7 +211,11 @@ export function PostEditor({ post }: PostEditorProps) {
     if (!postId) return;
     if (!confirm("Delete this post? This cannot be undone.")) return;
 
-    await fetch(`/api/posts/${postId}`, { method: "DELETE" });
+    const response = await fetch(`/api/posts/${postId}`, { method: "DELETE" }).catch(() => null);
+    if (!response?.ok) {
+      setError("The story couldn’t be deleted. Try again.");
+      return;
+    }
     router.push("/posts");
   }
 
@@ -250,48 +270,16 @@ export function PostEditor({ post }: PostEditorProps) {
   }
 
   useEffect(() => {
-    const hasDraftContent = Boolean(
-      title.trim() ||
-        content.trim() ||
-        excerpt.trim() ||
-        coverImage.trim() ||
-        scheduledAt ||
-        selectedCategories.length
-    );
-
-    if (!hasDraftContent) {
-      setAutosaveState("idle");
-      return;
-    }
-
-    if (payloadKey === lastSavedPayloadRef.current) {
-      return;
-    }
+    if (saving || payloadKey === lastSavedPayloadRef.current || payloadKey === lastAttemptedPayloadRef.current) return;
+    if (!postId && !title.trim() && !content.trim() && !excerpt.trim() && !coverImage.trim() && !scheduledAt && !selectedCategories.length) return;
 
     setAutosaveState("dirty");
+    // Changes to a live story require the explicit Update action.
+    if (published) return;
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(() => {
-      void savePost({ autosave: true });
-    }, 1200);
-
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, [
-    payloadKey,
-    title,
-    content,
-    excerpt,
-    coverImage,
-    scheduledAt,
-    selectedCategories.length,
-  ]);
+    const saveTimer = setTimeout(() => void savePost({ autosave: true }), 1200);
+    return () => clearTimeout(saveTimer);
+  }, [payloadKey, saving, published, postId, title, content, excerpt, coverImage, scheduledAt, selectedCategories.length]);
 
   const saveLabel =
     autosaveState === "saving"
@@ -305,32 +293,36 @@ export function PostEditor({ post }: PostEditorProps) {
           ? "Save failed"
           : autosaveState === "dirty"
             ? "Unsaved changes"
-            : "Autosave on";
+            : published ? "Published" : "Autosave on";
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex min-w-0 flex-col">
       <div className="border-b border-sand bg-cream/95 backdrop-blur">
         <div className="px-4 py-4 sm:px-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 flex-1">
+              <label className="sr-only" htmlFor="story-title">Story title</label>
               <input
+                id="story-title"
                 type="text"
                 placeholder="Untitled draft"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="w-full border-none bg-transparent text-3xl font-bold text-ink outline-none placeholder:text-ink/20 sm:text-4xl"
+                className="w-full border-none bg-transparent font-display text-4xl text-ink outline-none placeholder:text-ink/20 sm:text-4xl"
               />
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/55">
+                <span role="status" className="rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold text-ink/75">
                   {saveLabel}
                 </span>
               </div>
+              <label className="mb-1 mt-3 block text-sm font-semibold" htmlFor="story-excerpt">Summary</label>
               <textarea
+                id="story-excerpt"
                 value={excerpt}
                 onChange={(event) => setExcerpt(event.target.value)}
                 rows={2}
-                placeholder="Optional deck or excerpt. Leave it rough and keep moving."
-                className="mt-3 w-full resize-none rounded-2xl border border-ink/10 bg-white/60 px-4 py-3 text-sm leading-6 text-ink outline-none placeholder:text-ink/30 focus:border-canyon/30"
+                placeholder="A short summary for the blog list and shared links"
+                className="w-full resize-none rounded-2xl border border-ink/10 bg-white/60 px-4 py-3 text-sm leading-6 text-ink outline-none placeholder:text-ink/30 focus:border-canyon/30"
               />
             </div>
 
@@ -338,26 +330,25 @@ export function PostEditor({ post }: PostEditorProps) {
               <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                 <button
                   type="button"
-                  onClick={() => void savePost({ publish: false })}
-                  disabled={manualSaving}
+                  onClick={() => {
+                    if (!published || confirm("Move this live story back to drafts?")) void savePost({ publish: false });
+                  }}
+                  disabled={saving}
                   className="rounded-lg border border-ink/15 px-3 py-2 text-sm text-ink/70 transition-colors hover:bg-sand disabled:opacity-50"
                 >
-                  {manualSaving ? (
+                  {saving ? (
                     <span className="inline-flex items-center gap-2">
                       <Loader2 size={14} className="animate-spin" />
                       Saving
                     </span>
                   ) : (
-                    "Save Draft"
+                    published ? "Unpublish" : "Save draft"
                   )}
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setScheduledAt("");
-                    void savePost({ publish: true });
-                  }}
-                  disabled={manualSaving || aiLoading}
+                  onClick={() => void savePost({ publish: true })}
+                  disabled={saving || aiLoading}
                   className="rounded-lg bg-canyon px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-canyon-deep disabled:opacity-50"
                 >
                   {published ? "Update" : "Publish Now"}
@@ -366,6 +357,7 @@ export function PostEditor({ post }: PostEditorProps) {
                   <button
                     type="button"
                     onClick={handleDelete}
+                    disabled={saving}
                     className="rounded-lg px-3 py-2 text-sm text-ink/35 transition-colors hover:bg-red-50 hover:text-red-600"
                   >
                     <span className="inline-flex items-center gap-2">
@@ -403,20 +395,18 @@ export function PostEditor({ post }: PostEditorProps) {
                   </span>
                 </div>
 
-                <div className="mt-4">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-ink/40">
-                    Schedule Publish
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={(event) => {
-                      setPublished(false);
-                      setScheduledAt(event.target.value);
-                    }}
-                    className="mt-2 w-full rounded-lg border border-ink/10 bg-sand px-3 py-2.5 text-sm text-ink outline-none focus:border-canyon/40"
-                  />
-                </div>
+                {!published && (
+                  <div className="mt-4">
+                    <label htmlFor="publish-time" className="text-xs font-semibold text-ink/75">Schedule publication</label>
+                    <input
+                      id="publish-time"
+                      type="datetime-local"
+                      value={scheduledAt}
+                      onChange={(event) => setScheduledAt(event.target.value)}
+                      className="mt-2 w-full rounded-lg border border-ink/15 bg-sand px-3 py-2.5 text-sm text-ink"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -424,13 +414,13 @@ export function PostEditor({ post }: PostEditorProps) {
       </div>
 
       {error && (
-        <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto px-4 py-5 sm:px-6">
+      <div className="flex min-w-0 flex-1 flex-col xl:flex-row">
+        <div className="min-w-0 flex-1 px-4 py-5 sm:px-6">
           <div className="mx-auto max-w-5xl">
             <div className="mb-4 rounded-[26px] border border-white/80 bg-white/85 p-4 shadow-[0_18px_50px_rgba(83,54,24,0.07)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -576,7 +566,7 @@ export function PostEditor({ post }: PostEditorProps) {
         <aside
           className={`${
             settingsOpen ? "flex" : "hidden"
-          } w-[320px] shrink-0 border-l border-sand bg-cream/90 px-5 py-6 xl:flex`}
+          } w-full shrink-0 border-t border-ink/10 bg-cream/90 px-5 py-6 xl:flex xl:w-[300px] xl:border-l xl:border-t-0`}
         >
           <div className="w-full space-y-6 overflow-auto">
             <div>
@@ -599,10 +589,11 @@ export function PostEditor({ post }: PostEditorProps) {
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-ink/40">
-                Cover Image URL
+              <label htmlFor="cover-image-url" className="text-xs font-semibold text-ink/75">
+                Cover image URL
               </label>
               <input
+                id="cover-image-url"
                 type="text"
                 value={coverImage}
                 onChange={(event) => setCoverImage(event.target.value)}

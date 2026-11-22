@@ -1,48 +1,35 @@
-import { auth } from "@/auth";
+import { auth, isApprovedAdmin, passkeysEnabled, signInMethods } from "@/auth";
 import { LoginButtons } from "@/components/AuthButtons";
+import { PasskeyButton } from "@/components/PasskeyButton";
+import { MountainMark } from "@dud/ui/mountain-mark";
 import { redirect } from "next/navigation";
 
-export default async function SignInPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const session = await auth();
-  if (session?.user?.email) {
-    redirect("/");
-  }
+  if (isApprovedAdmin(session?.user?.email)) redirect("/");
 
   const { error } = await searchParams;
-  const message =
-    error === "AccessDenied"
-      ? "That email address is not allowed to access this admin."
-      : null;
+  const message = error === "AccessDenied"
+    ? "That account isn’t approved for this workspace."
+    : error ? "Sign-in couldn’t be completed. Please try again." : null;
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-cream via-sand to-[#F8F3EA] px-4 py-8">
-      <div className="mx-auto max-w-md rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(83,54,24,0.08)] backdrop-blur sm:p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-canyon/80">
-          Doing Utah Daily
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-ink">Admin login</h1>
-        <p className="mt-3 text-sm leading-6 text-ink/65">
-          Sign in with an approved Google or Apple account to access the
-          editor and scheduling tools.
-        </p>
-
-        {message && (
-          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {message}
+    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)]">
+      <div className="flex flex-col justify-center gap-4 bg-[#263d2f] px-6 py-9 text-[#f9f3e8] sm:px-12 lg:px-[13%]">
+        <MountainMark className="w-24 text-[#eda484] sm:w-36" />
+        <p className="font-display text-5xl leading-none sm:text-7xl">Doing Utah Daily</p>
+        <a href="https://www.doingutahdaily.com/" className="mt-2 w-fit text-sm underline underline-offset-4">Visit the public site</a>
+      </div>
+      <div className="grid content-center justify-items-center px-6 py-12">
+        <div className="w-full max-w-sm">
+          <h1 className="admin-heading">Sign in</h1>
+          <p className="mb-6 mt-3 text-ink/75">Use an approved account to open the editorial workspace.</p>
+          {message && <p role="alert" className="mb-5 rounded-lg bg-red-100 p-3 text-sm text-red-800">{message}</p>}
+          <div className="space-y-3">
+            {passkeysEnabled && <PasskeyButton action="authenticate" />}
+            <LoginButtons providers={signInMethods} />
           </div>
-        )}
-
-        <div className="mt-6">
-          <LoginButtons />
         </div>
-
-        <p className="mt-5 text-xs leading-5 text-ink/40">
-          Access is limited to approved accounts only.
-        </p>
       </div>
     </div>
   );

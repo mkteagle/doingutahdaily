@@ -1,272 +1,128 @@
-"use client";
-
-import { useState, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import type { Blog } from "@/types/blog";
-import type { Category } from "@/types/blog";
-import { format, parseISO } from "date-fns";
-import { Search, X, BookOpen, Clock, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ArrowRight, Search } from "lucide-react";
+import type { postService } from "@dud/db";
+import { blogArchiveUrl, type BlogFilters } from "@/lib/blogArchive";
+import { BlogAdvertisement, BlogSupport } from "@/components/Blog/BlogRevenue";
 
-interface BlogListProps {
-  initialPosts: Blog[];
-}
+type Story = Awaited<ReturnType<typeof postService.getPublishedPostSummaries>>[number];
 
-const CATEGORIES: Category[] = [
-  "Family Activities",
-  "Outdoor Adventures",
-  "Indoor Activities",
-  "Seasonal Events",
-  "Holiday Events",
-  "Food & Dining",
-  "Arts & Culture",
-];
+function StoryCard({ post, featured = false }: { post: Story; featured?: boolean }) {
+  const date = post.publishedAt ?? post.createdAt;
 
-// ─── Blog Card ────────────────────────────────────────────────────────────────
-
-function BlogCard({ post, featured = false }: { post: Blog; featured?: boolean }) {
-  const { meta } = post;
-
-  if (featured) {
-    return (
-      <Link
-        href={`/blog/${meta.slug}`}
-        className="group col-span-full grid grid-cols-1 md:grid-cols-2 gap-0 bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-card transition-all duration-200"
-      >
-        {meta.coverImage && (
-          <div className="aspect-[4/3] md:aspect-auto overflow-hidden bg-muted">
+  return (
+    <article className={featured ? "overflow-hidden rounded-2xl border border-border bg-card md:grid md:grid-cols-2" : "border-b border-border pb-6"}>
+      <Link href={`/blog/${post.slug}`} className={featured ? "group grid md:col-span-2 md:grid-cols-2" : "group block"}>
+        {post.coverImage && (
+          <div className={featured ? "aspect-[3/2] overflow-hidden bg-muted md:h-full md:aspect-auto" : "mb-4 aspect-[3/2] overflow-hidden rounded-xl bg-muted"}>
+            {/* Archive images include external URLs from the original blog. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={meta.coverImage}
-              alt={meta.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              src={post.coverImage}
+              alt=""
+              width={720}
+              height={480}
+              loading={featured ? "eager" : "lazy"}
+              className="h-full w-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
             />
           </div>
         )}
-        <div className="p-8 flex flex-col justify-center">
-          <span className="inline-flex items-center gap-1.5 mb-4 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary w-fit">
-            Featured
-          </span>
-          {meta.categories && meta.categories.length > 0 && (
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              {meta.categories[0]}
-            </span>
-          )}
-          <h2 className="font-display text-2xl sm:text-3xl text-foreground leading-snug mb-3 group-hover:text-primary transition-colors">
-            {meta.title}
+        <div className={featured ? "flex flex-col justify-center p-6 sm:p-10" : ""}>
+          {post.categories[0] && <p className="mb-2 text-sm font-semibold text-primary">{post.categories[0].name}</p>}
+          <h2 className={`font-display leading-tight group-hover:text-primary ${featured ? "text-3xl sm:text-5xl" : "text-2xl"}`}>
+            {post.title}
           </h2>
-          <p className="font-serif text-base text-muted-foreground line-clamp-3 mb-6 leading-relaxed">
-            {meta.excerpt}
-          </p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              {meta.author?.name && <span>{meta.author.name}</span>}
-              <span>·</span>
-              <time>{format(parseISO(meta.date), "MMM d, yyyy")}</time>
-              {meta.readingTime && (
-                <>
-                  <span>·</span>
-                  <span className="flex items-center gap-1">
-                    <Clock size={11} /> {meta.readingTime}
-                  </span>
-                </>
-              )}
-            </div>
-            <span className="flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-              Read <ChevronRight size={14} />
-            </span>
-          </div>
+          <p className="mt-3 line-clamp-3 leading-relaxed text-muted-foreground">{post.excerpt}</p>
+          <time dateTime={date.toISOString()} className="mt-4 block text-sm text-muted-foreground">
+            {format(date, "MMM d, yyyy")}
+          </time>
         </div>
       </Link>
-    );
-  }
-
-  return (
-    <Link
-      href={`/blog/${meta.slug}`}
-      className="group flex flex-col bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-card transition-all duration-200"
-    >
-      {meta.coverImage && (
-        <div className="aspect-[16/9] overflow-hidden bg-muted">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={meta.coverImage}
-            alt={meta.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        </div>
-      )}
-      <div className="p-5 flex flex-col flex-1">
-        {meta.categories && meta.categories.length > 0 && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            {meta.categories[0]}
-          </span>
-        )}
-        <h3 className="font-display text-base leading-snug text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors flex-1">
-          {meta.title}
-        </h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 font-serif mb-4">
-          {meta.excerpt}
-        </p>
-        <div className="flex items-center justify-between pt-4 border-t border-border">
-          <time className="text-xs text-muted-foreground">
-            {format(parseISO(meta.date), "MMM d, yyyy")}
-          </time>
-          <span className="flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-1.5 transition-all">
-            Read <ChevronRight size={12} />
-          </span>
-        </div>
-      </div>
-    </Link>
+    </article>
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
-
-export default function BlogList({ initialPosts }: BlogListProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const [search, setSearch] = useState(searchParams?.get("search") || "");
-  const [activeCategories, setActiveCategories] = useState<Category[]>(
-    (searchParams?.get("categories")?.split(",").filter(Boolean) as Category[]) || []
-  );
-
-  const updateUrl = (s: string, cats: Category[]) => {
-    const params = new URLSearchParams();
-    if (s) params.set("search", s);
-    if (cats.length) params.set("categories", cats.join(","));
-    router.push(params.toString() ? `?${params.toString()}` : "/blog", { scroll: false });
-  };
-
-  const handleSearch = (v: string) => {
-    setSearch(v);
-    updateUrl(v, activeCategories);
-  };
-
-  const toggleCategory = (cat: Category) => {
-    const next = activeCategories.includes(cat)
-      ? activeCategories.filter((c) => c !== cat)
-      : [...activeCategories, cat];
-    setActiveCategories(next);
-    updateUrl(search, next);
-  };
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return initialPosts.filter(({ meta }) => {
-      const matchesSearch =
-        !q ||
-        meta.title.toLowerCase().includes(q) ||
-        meta.excerpt?.toLowerCase().includes(q) ||
-        meta.categories?.some((c) => c.toLowerCase().includes(q));
-      const matchesCat =
-        activeCategories.length === 0 ||
-        activeCategories.some((c) => meta.categories?.includes(c));
-      return matchesSearch && matchesCat;
-    });
-  }, [initialPosts, search, activeCategories]);
-
-  const [featured, ...rest] = filtered;
+export default function BlogList({
+  posts, categories, filters, pages, count,
+}: {
+  posts: Story[];
+  categories: string[];
+  filters: BlogFilters;
+  pages: number;
+  count: number;
+}) {
+  const isArchiveStart = filters.page === 1 && !filters.search && filters.categories.length === 0;
+  const featured = isArchiveStart ? posts[0] : undefined;
 
   return (
-    <>
-      {/* Hero */}
-      <section className="relative py-16 sm:py-20 bg-background border-b border-border overflow-hidden">
-        <div className="absolute inset-0 dot-pattern opacity-30" />
-        <div className="absolute top-0 right-0 w-80 h-80 bg-primary/8 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="flex items-start justify-between gap-6">
-            <div>
-              <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">
-                Stories &amp; guides
-              </p>
-              <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl text-foreground mb-4">
-                The Blog
-              </h1>
-              <p className="font-serif text-lg text-muted-foreground max-w-lg">
-                Reviews, guides, and adventures from across the Beehive State.
-              </p>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 mt-auto shrink-0">
-              <BookOpen size={14} className="text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {initialPosts.length} articles
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="field-container pb-14">
+      <nav aria-label="Breadcrumb" className="py-5 text-sm text-muted-foreground">
+        <Link href="/" className="hover:underline">Home</Link> <span aria-hidden="true">/</span> <span aria-current="page">Stories</span>
+      </nav>
+      <header className="pb-8 pt-3 sm:pt-8">
+        <h1 className="font-display text-4xl leading-tight sm:text-6xl">Utah stories &amp; guides</h1>
+        <p className="mt-3 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+          First-hand ideas for days out, local favorites, and adventures across Utah.
+        </p>
+      </header>
 
-      {/* Filters */}
-      <div className="sticky top-16 md:top-20 z-30 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4">
-          <div className="relative mb-3">
-            <Search
-              size={15}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search articles..."
-              className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 focus:bg-background transition-colors"
-            />
-            {search && (
-              <button
-                onClick={() => handleSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => toggleCategory(cat)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150",
-                  activeCategories.includes(cat)
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-            {activeCategories.length > 0 && (
-              <button
-                onClick={() => { setActiveCategories([]); updateUrl(search, []); }}
-                className="px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-              >
-                <X size={11} /> Clear
-              </button>
-            )}
-          </div>
-        </div>
+      <div className="mb-8 border-y border-border py-5">
+        <form action="/blog" role="search" className="flex items-stretch gap-2 sm:max-w-lg">
+          {filters.categories.length > 0 && <input type="hidden" name="categories" value={filters.categories.join(",")} />}
+          <label className="sr-only" htmlFor="story-search">Search stories</label>
+          <input id="story-search" type="search" name="search" defaultValue={filters.search} maxLength={120}
+            placeholder="Search stories" className="min-w-0 flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-base" />
+          <button type="submit" className="flex items-center gap-2 rounded-lg bg-[#273e2b] px-4 text-white hover:bg-[#39523b]">
+            <Search size={16} aria-hidden /> Search
+          </button>
+        </form>
+        <nav aria-label="Story topics" className="mt-4 flex flex-wrap gap-2">
+          <Link href={blogArchiveUrl({ search: filters.search })} aria-current={!filters.categories.length ? "page" : undefined}
+            className="rounded-full border border-border px-3 py-1.5 text-sm hover:border-primary aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
+            All topics
+          </Link>
+          {categories.map((category) => {
+            const selected = filters.categories.includes(category);
+            const nextCategories = selected ? filters.categories.filter((item) => item !== category) : [...filters.categories, category];
+            return (
+              <Link key={category} href={blogArchiveUrl({ search: filters.search, categories: nextCategories })}
+                aria-label={selected ? `Remove ${category} filter` : `Filter by ${category}`}
+                aria-current={selected ? "true" : undefined}
+                className="rounded-full border border-border px-3 py-1.5 text-sm hover:border-primary aria-current:bg-primary aria-current:text-primary-foreground">
+                {category}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
-      {/* Grid */}
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
-        {filtered.length === 0 ? (
-          <div className="py-24 text-center">
-            <BookOpen size={40} className="mx-auto mb-4 text-muted-foreground/40" />
-            <p className="font-display text-xl text-foreground mb-2">No articles found</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+      {featured && <StoryCard post={featured} featured />}
+      {count > 0 ? (
+        <section className="mt-8" aria-label="Stories">
+          <div className="mb-6"><BlogAdvertisement /></div>
+          <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            {(featured ? posts.slice(1) : posts).map((post) => <StoryCard key={post.slug} post={post} />)}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured && <BlogCard post={featured} featured />}
-            {rest.map((post) => (
-              <BlogCard key={post.meta.slug} post={post} />
-            ))}
-          </div>
-        )}
-      </div>
-    </>
+        </section>
+      ) : (
+        <div className="py-12">
+          <h2 className="font-display text-3xl">No matching stories</h2>
+          <Link className="field-action-link mt-3" href="/blog">See all stories <ArrowRight size={17} aria-hidden /></Link>
+        </div>
+      )}
+      {pages > 1 && (
+        <nav aria-label="Story pages" className="my-9 flex flex-wrap items-center gap-2">
+          {Array.from({ length: pages }, (_, index) => index + 1).map((page) => (
+            <Link key={page} href={blogArchiveUrl({ ...filters, page })}
+              aria-label={`Page ${page}`} aria-current={filters.page === page ? "page" : undefined}
+              className="grid size-10 place-items-center rounded-lg border border-border hover:border-primary aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
+              {page}
+            </Link>
+          ))}
+          {filters.page < pages && <Link className="field-action-link ml-2" href={blogArchiveUrl({ ...filters, page: filters.page + 1 })}>Next <ArrowRight size={16} aria-hidden /></Link>}
+        </nav>
+      )}
+      <div className="mt-10"><BlogSupport /></div>
+    </div>
   );
 }

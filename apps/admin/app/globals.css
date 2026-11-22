@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400..800&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -16,7 +16,38 @@ html {
 }
 
 body {
-  background: #F2E8D9; /* Sand */
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #1C1410; /* Ink */
+  background: #f4eee4; /* Sand */
+  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #203429; /* Ink */
+}
+
+@layer components {
+  .admin-shell {
+    @apply min-h-dvh md:grid md:grid-cols-[var(--sidebar-width)_minmax(0,1fr)];
+  }
+
+  .admin-page {
+    @apply mx-auto w-full max-w-7xl px-5 py-7 sm:px-8 sm:py-10 xl:px-12;
+  }
+
+  .admin-heading {
+    @apply font-display text-4xl font-semibold leading-tight sm:text-5xl;
+  }
+
+  .admin-panel {
+    @apply min-w-0 rounded-2xl border border-ink/15 bg-cream;
+  }
+
+  .admin-button {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#294331] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#365641];
+  }
+
+  .admin-secondary {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-ink/20 bg-cream px-4 py-2.5 text-sm font-semibold hover:bg-sand;
+  }
+}
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid #9e4726;
+  outline-offset: 3px;
 }

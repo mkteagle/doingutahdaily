@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400..800&family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,7 +7,7 @@
 @layer base {
   :root {
     /* Brand: Canyon — #C45C2A */
-    --primary:           19 65% 47%;
+    --primary:           18 65% 35%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Slate — #2E3A4F */
@@ -19,29 +19,29 @@
     --accent-foreground: 0 0% 100%;
 
     /* Neutral surfaces — Sand #F2E8D9, Cream #FFF8EE, Ink #1C1410 */
-    --background:   36 49% 90%;
-    --foreground:   20 27% 9%;
-    --card:         35 100% 97%;
-    --card-foreground: 20 27% 9%;
-    --popover:      35 100% 97%;
-    --popover-foreground: 20 27% 9%;
-    --muted:        36 35% 85%;
-    --muted-foreground: 218 20% 40%;
-    --border:       36 30% 82%;
-    --input:        36 30% 82%;
-    --ring:         19 65% 47%;
+    --background:   37 63% 94%;
+    --foreground:   140 30% 14%;
+    --card:         37 75% 97%;
+    --card-foreground: 140 30% 14%;
+    --popover:      37 75% 97%;
+    --popover-foreground: 140 30% 14%;
+    --muted:        38 35% 88%;
+    --muted-foreground: 135 12% 33%;
+    --border:       42 23% 81%;
+    --input:        42 23% 81%;
+    --ring:         18 65% 35%;
     --destructive:  0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     /* Brand palette */
-    --canyon:       19 65% 47%;
-    --canyon-deep:  16 68% 39%;
+    --canyon:       18 65% 35%;
+    --canyon-deep:  16 68% 29%;
     --sky:          205 37% 47%;
     --sage:         127 14% 54%;
     --amber:        35 79% 58%;
-    --sand:         36 49% 90%;
-    --cream:        35 100% 97%;
-    --ink:          20 27% 9%;
+    --sand:         37 63% 94%;
+    --cream:        37 75% 97%;
+    --ink:          140 30% 14%;
 
     --radius: 0.75rem;
   }
@@ -96,28 +96,25 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     font-feature-settings: "liga" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Dela Gothic One', system-ui, sans-serif;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-  }
-
-  .font-display {
-    font-family: 'Dela Gothic One', system-ui, sans-serif;
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.14;
   }
 
   .font-serif {
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Instrument Serif', Georgia, serif;
   }
 
   .font-body {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 
@@ -283,4 +280,177 @@
 ::selection {
   background: hsl(var(--primary) / 0.25);
   color: hsl(var(--foreground));
+}
+
+@layer components {
+  .field-container {
+    @apply mx-auto w-full max-w-[1440px] px-5 sm:px-9 lg:px-12;
+  }
+
+  .field-header {
+    @apply relative z-40 border-b border-border/50 bg-background;
+    container: site-header / inline-size;
+  }
+
+  .field-header-inner {
+    @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 px-4 pb-1 pt-2 sm:px-9 lg:px-12;
+  }
+
+  .field-wordmark {
+    @apply inline-flex min-w-0 items-center justify-self-start gap-2 rounded-md text-lg font-bold tracking-tight text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary sm:gap-3 sm:text-[1.85rem];
+  }
+
+  .field-nav {
+    @apply col-span-2 -mx-2 flex min-w-0 flex-wrap items-stretch gap-x-1;
+  }
+
+  .field-nav a {
+    @apply flex min-h-[44px] min-w-[44px] max-w-full flex-auto items-center justify-center break-words rounded-md px-0.5 py-1 text-center text-sm font-medium hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary;
+  }
+
+  .field-nav [aria-current] {
+    @apply text-primary underline decoration-2 underline-offset-4;
+  }
+
+  .field-icon-button {
+    @apply flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary;
+  }
+
+  .field-theme-desktop {
+    @apply hidden;
+  }
+
+  @container site-header (min-width: 53rem) {
+    .field-header-inner {
+      @apply flex min-h-[86px] gap-5 py-0 lg:gap-7;
+    }
+
+    .field-nav {
+      @apply mx-0 ml-auto justify-end gap-x-5 lg:gap-x-7;
+    }
+
+    .field-nav a {
+      @apply flex-none px-0 text-base hover:bg-transparent hover:text-primary lg:text-lg;
+    }
+
+    .field-theme-mobile {
+      @apply hidden;
+    }
+
+    .field-theme-desktop {
+      @apply block;
+    }
+  }
+
+  .field-hero {
+    @apply relative isolate grid bg-background md:min-h-[clamp(31rem,54vw,47rem)] md:items-center;
+  }
+
+  .field-hero-photo {
+    @apply relative min-h-[16rem] overflow-hidden max-md:order-2 md:absolute md:inset-y-0 md:right-0 md:w-[72%];
+  }
+
+  .field-hero-photo img {
+    object-position: 69% 54%;
+  }
+
+  @media (min-width: 768px) {
+    .field-hero-photo::after {
+      position: absolute;
+      inset: 0;
+      content: "";
+      background: linear-gradient(90deg, hsl(var(--background)) 2%, hsl(var(--background) / .93) 13%, hsl(var(--background) / .45) 34%, transparent 57%);
+    }
+  }
+
+  .field-hero-ridge {
+    @apply pointer-events-none absolute bottom-0 left-0 hidden h-[clamp(5rem,10vw,8rem)] w-[44%] max-w-[36rem] md:block;
+    background: url("/images/field-guide-ridge.webp") left bottom / 100% 100% no-repeat;
+    mask-image: linear-gradient(90deg, black 75%, transparent);
+  }
+
+  .field-hero-content {
+    @apply relative max-md:py-10 md:-translate-y-4 md:py-14;
+  }
+
+  .field-hero h1 {
+    @apply font-display text-[clamp(2.55rem,7.1vw,7.1rem)] font-[650] leading-[1.08];
+  }
+
+  .field-hero p {
+    @apply mb-5 mt-5 max-w-[26ch] text-[clamp(1.1rem,2.35vw,2rem)] leading-tight md:mb-8 md:mt-8;
+  }
+
+  .field-button {
+    @apply inline-flex w-fit items-center gap-3 rounded-xl bg-[#273e2b] px-5 py-3 text-base font-semibold text-white hover:bg-[#39523b] sm:px-7 sm:py-4 md:text-[1.35rem];
+  }
+
+  .field-section {
+    @apply py-7 sm:py-10;
+  }
+
+  .field-section-heading {
+    @apply mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6;
+  }
+
+  .field-section-heading::after {
+    content: "";
+    @apply order-2 hidden h-px flex-1 bg-foreground/50 md:block;
+  }
+
+  .field-section-heading h2 {
+    @apply font-display text-3xl leading-tight sm:text-4xl lg:text-5xl;
+  }
+
+  .field-section-heading > :is(a, button) {
+    @apply order-3 ml-auto inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline sm:text-base;
+  }
+
+  .field-topic {
+    @apply inline-flex rounded-full bg-primary px-3.5 py-1 font-body text-base font-semibold leading-tight text-primary-foreground sm:text-lg;
+  }
+
+  .field-action-link {
+    @apply inline-flex items-center gap-2 font-semibold text-primary hover:underline;
+  }
+
+  .field-article-body {
+    @apply text-[1.0625rem] leading-[1.8] sm:text-lg;
+  }
+
+  .field-article-body :is(h2, h3, h4) {
+    @apply mt-10 font-display leading-tight;
+  }
+
+  .field-article-body h2 {
+    @apply text-4xl;
+  }
+
+  .field-article-body h3 {
+    @apply text-3xl;
+  }
+
+  .field-article-body :is(p, ul, ol, figure) {
+    @apply my-5;
+  }
+
+  .field-article-body a {
+    @apply text-primary underline underline-offset-2;
+  }
+
+  .field-article-body :is(ul, ol) {
+    @apply pl-7;
+  }
+
+  .field-article-body ul {
+    @apply list-disc;
+  }
+
+  .field-article-body ol {
+    @apply list-decimal;
+  }
+
+  .field-article-body img {
+    @apply h-auto max-w-full rounded-xl;
+  }
 }

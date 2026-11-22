@@ -1,19 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Search,
-  SlidersHorizontal,
-  MapPin,
-  Clock,
-  CheckCircle2,
-  Baby,
-  TreePine,
-  GraduationCap,
-  DollarSign,
-  ChevronRight,
-  X,
-} from "lucide-react";
+import { MapPin, Search } from "lucide-react";
+import Link from "next/link";
 
 const AGE_BANDS = [
   { value: "0-2", label: "0–2", short: "Baby" },
@@ -43,11 +32,26 @@ const CATEGORIES = [
   "Holiday Events",
 ];
 
-export function ActivitiesPage() {
+interface Listing {
+  id: string;
+  title: string;
+  city: string;
+  description: string | null;
+  cost: string;
+  ageBands: string[];
+  categories: string[];
+  website: string | null;
+}
+
+export function ActivitiesPage({ listings, initialCategory, initialCost }: {
+  listings: Listing[];
+  initialCategory?: string;
+  initialCost?: string;
+}) {
   const [search, setSearch] = useState("");
   const [selectedAges, setSelectedAges] = useState<string[]>([]);
-  const [selectedCost, setSelectedCost] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCost, setSelectedCost] = useState<string[]>(initialCost && COST_TIERS.some(({ value }) => value === initialCost) ? [initialCost] : []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory && CATEGORIES.includes(initialCategory) ? [initialCategory] : []);
 
   const toggleFilter = (
     value: string,
@@ -64,6 +68,14 @@ export function ActivitiesPage() {
   const activeFilterCount =
     selectedAges.length + selectedCost.length + selectedCategories.length;
 
+  const query = search.trim().toLowerCase();
+  const results = listings.filter((activity) =>
+    (!query || [activity.title, activity.city, activity.description].some((field) => field?.toLowerCase().includes(query))) &&
+    (!selectedAges.length || activity.ageBands.includes("all_ages") || selectedAges.some((age) => activity.ageBands.includes(age))) &&
+    (!selectedCost.length || selectedCost.includes(activity.cost)) &&
+    (!selectedCategories.length || selectedCategories.some((category) => activity.categories.includes(category)))
+  );
+
   return (
     <div className="min-h-screen bg-sand">
       {/* Header */}
@@ -76,8 +88,7 @@ export function ActivitiesPage() {
             Find your next adventure
           </h1>
           <p className="font-serif italic text-muted-foreground text-lg max-w-xl">
-            Everything&apos;s verified by someone who actually went there. Filter
-            by your kids&apos; ages and find exactly what fits.
+            Browse Utah outings by age, cost, and the kind of day you have in mind.
           </p>
         </div>
       </div>
@@ -91,7 +102,8 @@ export function ActivitiesPage() {
               className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
-              type="text"
+              type="search"
+              aria-label="Search activities"
               placeholder="Search activities, trails, parks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -109,6 +121,7 @@ export function ActivitiesPage() {
             {AGE_BANDS.map(({ value, label }) => (
               <button
                 key={value}
+                aria-pressed={selectedAges.includes(value)}
                 onClick={() =>
                   toggleFilter(value, selectedAges, setSelectedAges)
                 }
@@ -133,6 +146,7 @@ export function ActivitiesPage() {
             {COST_TIERS.map(({ value, label }) => (
               <button
                 key={value}
+                aria-pressed={selectedCost.includes(value)}
                 onClick={() =>
                   toggleFilter(value, selectedCost, setSelectedCost)
                 }
@@ -157,6 +171,7 @@ export function ActivitiesPage() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
+                aria-pressed={selectedCategories.includes(cat)}
                 onClick={() =>
                   toggleFilter(cat, selectedCategories, setSelectedCategories)
                 }
@@ -192,26 +207,24 @@ export function ActivitiesPage() {
           </div>
         )}
 
-        {/* Empty state — activities will be populated from the database */}
-        <div className="text-center py-20">
-          <div className="w-20 h-20 rounded-2xl bg-canyon/10 flex items-center justify-center mx-auto mb-6">
-            <MapPin size={32} className="text-canyon" />
+        {results.length > 0 ? (
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map((activity) => (
+              <li key={activity.id} className="rounded-xl border border-border bg-card p-5">
+                <p className="flex items-center gap-1.5 text-sm text-muted-foreground"><MapPin size={14} aria-hidden />{activity.city}</p>
+                <h2 className="mt-2 font-display text-3xl">{activity.title}</h2>
+                {activity.description && <p className="mt-2 leading-relaxed">{activity.description}</p>}
+                {activity.website && <a className="field-action-link mt-4" href={activity.website}>Visit activity website</a>}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="py-14 text-center">
+            <h2 className="font-display text-4xl">{listings.length ? "No activities match those filters" : "Activities are coming soon"}</h2>
+            <p className="mx-auto mt-3 max-w-md text-muted-foreground">In the meantime, find ideas in our family guides.</p>
+            <Link href="/blog" className="field-action-link mt-4">Browse stories &amp; guides</Link>
           </div>
-          <h2 className="font-display text-2xl text-ink mb-2">
-            Activities coming soon
-          </h2>
-          <p className="font-serif italic text-muted-foreground max-w-md mx-auto mb-6">
-            We&apos;re building the most honest, verified database of
-            family-friendly things to do in Utah. Every listing visited by a
-            real person.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Want to be first to know?{" "}
-            <a href="#newsletter" className="text-canyon font-semibold hover:underline">
-              Join the newsletter
-            </a>
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );

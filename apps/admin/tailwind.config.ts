@@ -7,15 +7,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: { display: ["Bricolage Grotesque", "Instrument Sans", "sans-serif"] },
       colors: {
-        canyon: { DEFAULT: "#C45C2A", deep: "#A84420" },
+        canyon: { DEFAULT: "#9E4726", deep: "#81391e" },
         slate: "#2E3A4F",
         sage: "#7A9B7E",
         amber: "#E8A240",
         sky: "#4B7FA3",
-        sand: "#F2E8D9",
-        cream: "#FFF8EE",
-        ink: "#1C1410",
+        sand: "#f4eee4",
+        cream: "#fffaf1",
+        ink: "#203429",
       },
     },
   },

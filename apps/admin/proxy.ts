@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-
-const PUBLIC_PATHS = ["/sign-in"];
+import { auth, isApprovedAdmin } from "@/auth";
 
 export default auth((req) => {
   const { nextUrl } = req;
-  const isApiAuth = nextUrl.pathname.startsWith("/api/auth");
-  const isPublicPage = PUBLIC_PATHS.some((path) =>
-    nextUrl.pathname.startsWith(path)
-  );
-  const isAuthenticated = !!req.auth?.user;
+  const isPublicPage = nextUrl.pathname === "/sign-in";
+  const isAuthenticated = isApprovedAdmin(req.auth?.user?.email);
 
-  if (isApiAuth) {
+  const isCron = nextUrl.pathname === "/api/cron/publish-posts" ||
+    nextUrl.pathname === "/api/cron/sync-instagram";
+  if (nextUrl.pathname.startsWith("/api/auth/") || isCron) {
     return NextResponse.next();
   }
 

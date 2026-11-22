@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const { slug } = await params;
   try {
-    const post = await postService.getPostBySlug(slug);
+    const post = await postService.getPublishedPostBySlug(slug);
     if (!post) return NextResponse.json({ error: "Post not found" }, { status: 404 });
 
     return NextResponse.json({
@@ -17,7 +17,7 @@ export async function GET(
         meta: {
           slug: post.slug,
           title: post.title,
-          date: post.publishedAt?.toISOString() ?? new Date().toISOString(),
+          date: post.publishedAt?.toISOString() ?? post.createdAt.toISOString(),
           excerpt: post.excerpt,
           author: { name: post.author },
           coverImage: post.coverImage,

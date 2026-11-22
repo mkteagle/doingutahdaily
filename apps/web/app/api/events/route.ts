@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getEventsForYear } from "@/lib/googleCalendar";
+import { getEventsForYear, type CalendarEvent } from "@/lib/googleCalendar";
+import { eventService } from "@dud/db";
+import { processEventsWithCategories } from "@/utils/categoryHelpers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,20 +19,30 @@ export async function GET(request: NextRequest) {
 
     // Get year range (default to current year if not provided)
     const currentYear = new Date().getFullYear();
-    const yearRange = yearRangeParam
-      ? yearRangeParam.split(",").map((year) => parseInt(year))
-      : [currentYear];
+    const requestedYears = yearRangeParam?.split(",").map(Number) ?? [currentYear];
+    const yearRange = [...new Set(requestedYears)]
+      .filter((year) => Number.isInteger(year) && Math.abs(year - currentYear) <= 3)
+      .slice(0, 3);
+    if (!yearRange.length) return NextResponse.json({ events: [] });
 
-    // Fetch events for the entire range of years
-    const eventsPromises = yearRange.map((year) => getEventsForYear(year));
-    const eventsArrays = await Promise.all(eventsPromises);
+    let events: CalendarEvent[];
+    try {
+      events = (await Promise.all(yearRange.map(getEventsForYear))).flat();
+    } catch {
+      const saved = await eventService.getAllEvents();
+      events = processEventsWithCategories(saved.filter((event) =>
+        yearRange.includes(Number(event.startTime.toISOString().slice(0, 4)))).map((event) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description ?? undefined,
+        location: event.location ?? undefined,
+        start: event.startTime.toISOString(),
+        end: (event.endTime ?? event.startTime).toISOString(),
+        isAllDay: false,
+      })));
+    }
 
-    // Combine and sort events
-    let events = eventsArrays
-      .flat()
-      .sort(
-        (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
-      );
+    events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
     // Filter upcoming events if requested
     if (onlyUpcoming) {

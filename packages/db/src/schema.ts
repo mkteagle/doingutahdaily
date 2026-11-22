@@ -440,3 +440,5 @@ export const communityConfirmationsRelations = relations(
     }),
   })
 );
+
+export { adminAuthUsers, adminAuthAccounts, adminAuthenticators } from "./adminAuthSchema";
