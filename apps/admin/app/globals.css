@@ -45,28 +45,10 @@ body {
   .admin-secondary {
     @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-ink/20 bg-cream px-4 py-2.5 text-sm font-semibold hover:bg-sand;
   }
+}
 
-  .story-preview {
-    @apply break-words text-sm leading-relaxed;
-  }
-
-  .story-preview > * + * { @apply mt-4; }
-  .story-preview :is(h1, h2, h3, h4) { @apply font-display font-semibold leading-tight; }
-  .story-preview :is(h1, h2) { @apply text-xl; }
-  .story-preview :is(h3, h4) { @apply text-base; }
-  .story-preview ul { @apply list-disc pl-5; }
-  .story-preview ol { @apply list-decimal pl-5; }
-  .story-preview a { @apply text-canyon underline; }
-  .story-preview blockquote { @apply border-l-2 border-canyon/40 pl-3 text-ink/75; }
-  .story-preview pre { @apply overflow-x-auto rounded-md bg-sand p-3; }
-  .story-preview :is(th, td) { @apply border border-ink/20 px-2 py-1 text-left; }
-
-  .visual-story-editor { @apply rounded-xl border border-ink/15 bg-cream; }
-  .visual-story-toolbar, .visual-story-link { @apply flex flex-wrap items-center gap-2 border-b border-ink/15 p-2; }
-  .visual-story-toolbar button, .visual-story-link button { @apply admin-secondary min-h-8 px-2 py-1 text-xs; }
-  .visual-story-link input { @apply ml-2 rounded border border-ink/20 bg-white px-2 py-1; }
-  .visual-story-content { @apply story-preview min-h-[24rem] p-4; }
-  .visual-story-content:empty::before { content: attr(data-placeholder); @apply pointer-events-none text-ink/45; }
+.story-editor-layout {
+  --story-display: "Bricolage Grotesque", "Instrument Sans", sans-serif;
 }
 
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {

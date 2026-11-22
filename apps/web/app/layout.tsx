@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
+import { pageMetadata } from "@/lib/pageMetadata";
 import "./globals.css";
 import { ThemeProvider } from "@/theme/theme";
 import { Suspense } from "react";
@@ -8,40 +9,23 @@ import MDXWrapper from "./MdxWrapper";
 import { ImageBrightnessProvider } from "@/context/ImageBrightnessContext";
 import { SiteLayout } from "@/components/Layout/SiteLayout";
 
+const siteTitle = "Doing Utah Daily | Utah Family Activities & Weekend Plans";
+const siteDescription = "Find family-friendly outings, local tips, and things to do this weekend in Utah.";
+const { openGraph, twitter } = pageMetadata({ path: "/", title: siteTitle, description: siteDescription });
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Doing Utah Daily - Discover Utah's Best Family Events & Activities",
+    default: siteTitle,
     template: "%s | Doing Utah Daily"
   },
-  description: "Your trusted guide to family-friendly events and unforgettable adventures across Utah. Discover seasonal activities, local attractions, and weekend plans updated daily.",
+  description: siteDescription,
   keywords: ["Utah events", "Utah activities", "family events Utah", "things to do in Utah", "Salt Lake City events", "Utah family fun", "Utah adventures", "weekend plans Utah"],
   authors: [{ name: "Doing Utah Daily" }],
   creator: "Doing Utah Daily",
   publisher: "Doing Utah Daily",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: SITE_URL,
-    siteName: "Doing Utah Daily",
-    title: "Doing Utah Daily - Discover Utah's Best Family Events & Activities",
-    description: "Your trusted guide to family-friendly events and unforgettable adventures across Utah.",
-    images: [
-      {
-        url: "/images/field-guide-hero.webp",
-        width: 1536,
-        height: 1024,
-        alt: "Doing Utah Daily"
-      }
-    ]
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Doing Utah Daily - Discover Utah's Best Family Events & Activities",
-    description: "Your trusted guide to family-friendly events and unforgettable adventures across Utah.",
-    images: ["/images/field-guide-hero.webp"],
-    creator: "@doingutahdaily"
-  },
+  openGraph,
+  twitter,
   robots: {
     index: true,
     follow: true,

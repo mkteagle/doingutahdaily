@@ -4,6 +4,7 @@ import { ImageGrid } from "@/components/Blog/ImageGrid";
 import { PricingTable } from "@/components/Blog/PricingTable";
 import { CalloutBox } from "@/components/Blog/CalloutBox";
 import { Paragraph } from "@/components/ui/typography";
+import { storyMarkdownOptions } from "@/lib/storyMarkdown";
 
 interface MdxNode {
   type: string;
@@ -100,9 +101,15 @@ function ArticlePricing({ items }: { items?: string }) {
 
 export async function compileStoryMdx(source: string) {
   const headings: HeadingLink[] = [];
+  const markdownOptions = storyMarkdownOptions(source);
   const { content } = await compileMDX({
     source,
-    options: { mdxOptions: { remarkPlugins: [preserveStoryMarkup(headings)] } },
+    options: {
+      mdxOptions: {
+        ...markdownOptions,
+        remarkPlugins: [...markdownOptions.remarkPlugins, preserveStoryMarkup(headings)],
+      },
+    },
     components: {
       h1: "h2",
       H1: "h2",

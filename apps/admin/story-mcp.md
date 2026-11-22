@@ -6,8 +6,10 @@ Write and format stories in Doing Utah Daily admin or co-write them with ChatGPT
 
 1. Sign in to Doing Utah Daily admin. Open **Stories**, then choose **New story** or open an existing draft from **Drafts**. [Open Stories](https://admin.doingutahdaily.com/posts)
 2. Add a title and a short summary. Start typing in **Visual** mode. Highlight text and click **Bold** or **Italic**, or use **Heading**, **Bullet list**, **Numbered list**, or **Quote** to format a paragraph. To add a link, highlight its text, click **Link**, paste the address, and click **Add link**.
-3. Choose **Markdown + preview** if you want to see the source and rendered story side by side. Choose **Visual** to return to the toolbar.
+3. **Preview** updates as you type. It appears beside the editor on wide screens and below it on smaller screens. Choose **Markdown** to see the source, then choose **Visual** to return to the toolbar.
 4. Drafts autosave in admin. Use **Save draft** to save immediately. Review the title, summary, cover photo, and categories before clicking **Publish Now**.
+
+The visual editor saves GitHub Flavored Markdown, which supports ordinary headings, links, and lists as well as tables, checklists, and strikethrough. Older stories that use custom components have an **MDX** source view.
 
 ## Co-write a story in ChatGPT
 

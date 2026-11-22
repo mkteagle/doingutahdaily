@@ -1,6 +1,7 @@
-import { App } from "@modelcontextprotocol/ext-apps";
+import { App, applyDocumentTheme } from "@modelcontextprotocol/ext-apps";
 import { createRoot } from "react-dom/client";
-import { storyHtml, VisualStoryEditor } from "../components/VisualStoryEditor";
+import { VisualStoryEditor } from "../components/VisualStoryEditor";
+import { storyHtml } from "../lib/storyMarkdown";
 
 type Draft = {
   id: string;
@@ -36,18 +37,27 @@ const gallery = document.querySelector<HTMLElement>("#gallery")!;
 const photoGrid = document.querySelector<HTMLElement>("#photos")!;
 let draft: Draft | undefined;
 
+app.addEventListener("hostcontextchanged", ({ theme }) => {
+  if (theme) applyDocumentTheme(theme);
+});
+
 function renderPreview() {
   preview.innerHTML = storyHtml(markdown.value);
+}
+
+function renderVisual() {
+  visualEditor.render(<VisualStoryEditor value={markdown.value} onChange={(value) => {
+    markdown.value = value;
+    renderPreview();
+    renderVisual();
+  }} />);
 }
 
 function showVisual() {
   markdownPanel.hidden = true;
   visualPanel.hidden = false;
   mode.textContent = "Edit Markdown";
-  visualEditor.render(<VisualStoryEditor value={markdown.value} onChange={(value) => {
-    markdown.value = value;
-    renderPreview();
-  }} />);
+  renderVisual();
 }
 
 function showDraft(next: Draft) {
@@ -160,6 +170,11 @@ app.ontoolresult = (result) => {
   }
 };
 
-void app.connect().catch(() => {
-  status.textContent = "This view couldn’t connect. You can keep writing in the chat.";
-});
+void app.connect()
+  .then(() => {
+    const theme = app.getHostContext()?.theme;
+    if (theme) applyDocumentTheme(theme);
+  })
+  .catch(() => {
+    status.textContent = "This view couldn’t connect. You can keep writing in the chat.";
+  });

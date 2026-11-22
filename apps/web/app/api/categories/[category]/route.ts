@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { serialize } from "next-mdx-remote/serialize";
 import { calculateReadingTime } from "@/utils/blogHelpers";
+import { storyMarkdownOptions } from "@/lib/storyMarkdown";
 import { postService } from "@dud/db";
 
 export async function GET(
@@ -27,6 +28,7 @@ export async function GET(
 
         const content = await serialize(post.content, {
           parseFrontmatter: true,
+          mdxOptions: storyMarkdownOptions(post.content),
         });
 
         return {

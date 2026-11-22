@@ -450,6 +450,26 @@
     @apply list-decimal;
   }
 
+  .field-article-body li.task-list-item {
+    @apply list-none;
+  }
+
+  .field-article-body input[type="checkbox"] {
+    @apply mr-1 accent-primary;
+  }
+
+  .field-article-body blockquote {
+    @apply my-5 border-l-2 border-primary/40 pl-4 text-muted-foreground;
+  }
+
+  .field-article-body table {
+    @apply my-5 block max-w-full overflow-x-auto border-collapse;
+  }
+
+  .field-article-body :is(th, td) {
+    @apply border border-border px-3 py-1.5;
+  }
+
   .field-article-body img {
     @apply h-auto max-w-full rounded-xl;
   }

@@ -6,6 +6,7 @@ import { BlogPost } from "@/components/screens/BlogPost";
 import { calculateReadingTime } from "@/utils/blogHelpers";
 import { compileStoryMdx } from "@/lib/storyMdx";
 import { SITE_URL } from "@/lib/site";
+import { pageMetadata } from "@/lib/pageMetadata";
 import type { BlogMeta, Category } from "@/types/blog";
 
 interface BlogPostPageProps {
@@ -23,32 +24,22 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const post = await getPost(slug);
   if (!post) return { title: "Story unavailable", robots: { index: false, follow: true } };
 
-  const url = articleUrl(post.slug);
-  const image = post.coverImage || "/images/field-guide-hero.webp";
-  const description = post.excerpt || "Find family outings and first-hand local stories from Doing Utah Daily.";
+  const description = post.excerpt?.trim() || `Read ${post.title} on Doing Utah Daily for local tips and family outings in Utah.`;
 
   return {
-    title: post.title,
-    description,
-    alternates: { canonical: url },
+    ...pageMetadata({
+      path: `/blog/${encodeURIComponent(post.slug)}`,
+      title: post.title,
+      description,
+      coverImage: post.coverImage,
+      article: {
+        publishedTime: (post.publishedAt ?? post.createdAt).toISOString(),
+        modifiedTime: post.updatedAt.toISOString(),
+        authors: post.author === "Doing Utah Daily" ? [new URL("/about", SITE_URL).href] : undefined,
+        tags: post.categories.map(({ name }) => name),
+      },
+    }),
     authors: [{ name: post.author }],
-    openGraph: {
-      type: "article",
-      url,
-      title: post.title,
-      description,
-      publishedTime: (post.publishedAt ?? post.createdAt).toISOString(),
-      modifiedTime: post.updatedAt.toISOString(),
-      authors: [post.author],
-      tags: post.categories.map(({ name }) => name),
-      images: [{ url: image, alt: post.title }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description,
-      images: [{ url: image, alt: post.title }],
-    },
   };
 }
 

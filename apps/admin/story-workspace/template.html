@@ -5,40 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Doing Utah Daily story workspace</title>
   <style>
-    :root{color-scheme:light dark;--paper:#fbf5ea;--panel:#fffdf8;--ink:#20392b;--line:#dcd5c7;--accent:#9b4427}
-    @media(prefers-color-scheme:dark){:root{--paper:#202b24;--panel:#152019;--ink:#fbf5ea;--line:#405147;--accent:#f1a182}}
+    :root{
+      color-scheme:light dark;
+      --paper:light-dark(#fbf5ea,#202b24);--panel:light-dark(#fffdf8,#152019);
+      --ink:light-dark(#20392b,#fbf5ea);--line:light-dark(#dcd5c7,#405147);--accent:light-dark(#9b4427,#f1a182);
+      --story-paper:var(--panel);--story-ink:var(--ink);--story-border:var(--line);--story-accent:var(--accent);
+      --story-toolbar:var(--paper);--story-writing-height:16rem;
+      --story-active-bg:light-dark(#e4eadd,#334e3f);--story-active-ink:light-dark(#244332,#e4efdf);
+      --story-active-border:light-dark(#9eae98,#789384);--story-muted:light-dark(#5b6359,#bdc9bd)
+    }
     *{box-sizing:border-box} [hidden]{display:none!important}
     body{margin:0;padding:16px;font:14px/1.5 system-ui,sans-serif;color:var(--ink);background:var(--paper)}
-    h1,h2,p{margin:0 0 10px} h1{font-size:19px} h2{font-size:15px} p{overflow-wrap:anywhere}
+    :where(h1,h2,h3,h4,h5,h6,p,blockquote,ul,ol,pre){margin:0} h1{font-size:19px}
     label{display:block;font-weight:650;margin:0 0 5px}
     input,textarea,button{font:inherit;color:inherit;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
     input,textarea{padding:10px;width:100%;resize:vertical} input{font-weight:650} input:user-invalid{border-color:var(--accent)}
-    #summary{min-height:56px} #markdown{min-height:255px;font:13px/1.65 ui-monospace,monospace}
+    #summary{min-height:56px}
     :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-    .columns,.photo-grid{display:grid;gap:12px}
-    .columns{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px}
-    .photo-grid{grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr))}
-    @media(max-width:560px){.columns{grid-template-columns:1fr}}
+    .story-editor-layout{margin-top:12px}
+    .photo-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr))}
     .fields{display:grid;gap:10px}
-    .preview{min-height:255px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:auto;overflow-wrap:anywhere}
-    .preview :is(h1,h2,h3,h4){line-height:1.2;margin:12px 0 7px}.preview :is(ul,ol){padding-inline-start:23px}
-    .preview table{border-collapse:collapse}.preview :is(td,th){border:1px solid var(--line);padding:4px 6px}
-    .preview a{color:var(--accent)}
     img{display:block;max-width:100%;border-radius:6px} .photo-grid img{width:100%;height:122px;object-fit:cover}
     #cover{max-height:170px;width:100%;object-fit:cover;margin-bottom:12px}
     .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
     button{padding:7px 10px;cursor:pointer;font-weight:600} button:disabled{opacity:.55;cursor:default}
     .primary{background:var(--ink);color:var(--paper)}
-    .visual-story-editor{border:1px solid var(--line);border-radius:8px;background:var(--panel)}
-    .visual-story-toolbar,.visual-story-link{display:flex;flex-wrap:wrap;gap:5px;padding:7px;border-bottom:1px solid var(--line)}
-    .visual-story-toolbar button,.visual-story-link button{padding:4px 7px;font-size:12px}
-    .visual-story-content{min-height:255px;padding:12px;overflow-wrap:anywhere}
-    .visual-story-content:empty::before{content:attr(data-placeholder);opacity:.6;pointer-events:none}
-    .visual-story-content blockquote{margin-inline:0;padding-inline-start:10px;border-inline-start:2px solid var(--accent)}
     article{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
     article p{font-weight:650;margin:8px 0 5px} article button{margin:2px 4px 2px 0;font-size:12px}
+    #gallery > p{margin:5px 0 10px}
     #status:not(:empty){margin-top:10px}
   </style>
+  <!-- story-editor-styles -->
 </head>
 <body>
   <form id="draft" hidden>
@@ -46,10 +43,12 @@
       <div><label for="title">Story title</label><input id="title" required maxlength="180"></div>
       <div><label for="summary">Summary</label><textarea id="summary" rows="2" maxlength="300"></textarea></div>
     </div>
-    <div class="columns">
-      <section id="visual-panel" aria-labelledby="editor-label"><h2 id="editor-label">Write</h2><div id="visual"></div></section>
-      <div id="markdown-panel" hidden><label for="markdown">Markdown</label><textarea id="markdown" maxlength="50000"></textarea></div>
-      <section aria-labelledby="preview-label"><h2 id="preview-label">Preview</h2><div class="preview"><img id="cover" alt="" hidden><div id="preview"></div></div></section>
+    <div class="story-editor-layout">
+      <div class="story-editor-columns">
+        <section id="visual-panel" aria-labelledby="editor-label" class="story-editor-pane"><h2 id="editor-label" class="story-editor-label">Write</h2><div id="visual" class="story-editor-pane"></div></section>
+        <div id="markdown-panel" class="story-editor-pane" hidden><label for="markdown" class="story-editor-label">Markdown source</label><textarea id="markdown" class="story-editor-source" maxlength="50000"></textarea></div>
+        <section aria-labelledby="preview-label" class="story-editor-pane"><h2 id="preview-label" class="story-editor-label">Preview</h2><div class="story-editor-preview"><img id="cover" alt="" hidden><div id="preview" class="story-prose" data-placeholder="Your story will appear here as you write."></div></div></section>
+      </div>
     </div>
     <div class="actions"><button id="save" class="primary">Save draft</button><button id="revise" type="button">Revise with AI</button><button id="mode" type="button">Edit Markdown</button></div>
   </form>

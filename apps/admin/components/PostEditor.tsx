@@ -4,17 +4,17 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EditorProvider, WysiwygEditor } from "crucible-ui/mdx";
 import "crucible-ui/mdx/styles";
+import "./story-editor.css";
 import { VisualStoryEditor } from "./VisualStoryEditor";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { storyHtml } from "@/lib/storyMarkdown";
 import {
   Bot,
   ChevronDown,
   ChevronUp,
   CircleCheck,
   Code2,
-  Eye,
   Loader2,
+  PenLine,
   Sparkles,
   Trash2,
 } from "lucide-react";
@@ -70,7 +70,9 @@ export function PostEditor({ post }: PostEditorProps) {
   );
   const legacyVisualEditor = !!post && !post.id.startsWith("mcp-") && /<[A-Z][A-Za-z0-9]*[\s\/>]/.test(post.content);
   const [editorMode, setEditorMode] = useState<"visual" | "source">("visual");
+  const showPreview = editorMode === "source" || !legacyVisualEditor;
   const previewContent = useDeferredValue(content);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [autosaveState, setAutosaveState] = useState<
@@ -115,6 +117,12 @@ export function PostEditor({ post }: PostEditorProps) {
   useEffect(() => {
     latestPayloadRef.current = payloadKey;
   }, [payloadKey]);
+
+  useEffect(() => {
+    if (showPreview && previewRef.current) {
+      previewRef.current.innerHTML = storyHtml(previewContent);
+    }
+  }, [previewContent, showPreview]);
 
   function toggleCategory(name: string) {
     setSelectedCategories((current) =>
@@ -427,47 +435,8 @@ export function PostEditor({ post }: PostEditorProps) {
       <div className="flex min-w-0 flex-1 flex-col xl:flex-row">
         <div className="min-w-0 flex-1 px-4 py-5 sm:px-6">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-4 rounded-[26px] border border-white/80 bg-white/85 p-4 shadow-[0_18px_50px_rgba(83,54,24,0.07)]">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="max-w-2xl">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-canyon/80">
-                    AI Quick Rewrites
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-ink/60">
-                    Keep momentum. Tap a quick rewrite or type an instruction and
-                    the draft updates in place.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 self-start rounded-lg border border-ink/10 bg-white/75 p-1">
-                  <button
-                    type="button"
-                    onClick={() => setEditorMode("visual")}
-                    aria-pressed={editorMode === "visual"}
-                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                      editorMode === "visual"
-                        ? "bg-cream text-ink shadow-sm"
-                        : "text-ink/50 hover:text-ink"
-                    }`}
-                  >
-                    <Eye size={14} />
-                    Visual
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditorMode("source")}
-                    aria-pressed={editorMode === "source"}
-                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                      editorMode === "source"
-                        ? "bg-cream text-ink shadow-sm"
-                        : "text-ink/50 hover:text-ink"
-                    }`}
-                  >
-                    <Code2 size={14} />
-                    Markdown + preview
-                  </button>
-                </div>
-              </div>
+            <details className="mb-4 rounded-2xl border border-ink/10 bg-cream p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-ink">AI quick rewrites</summary>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {QUICK_AI_ACTIONS.map((action) => (
@@ -522,7 +491,7 @@ export function PostEditor({ post }: PostEditorProps) {
                   )}
                 </button>
               </div>
-            </div>
+            </details>
 
             <div className="mb-4 flex items-center justify-between">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/75 px-3 py-1.5 text-xs text-ink/55">
@@ -539,50 +508,59 @@ export function PostEditor({ post }: PostEditorProps) {
               </button>
             </div>
 
-            <div className="overflow-hidden rounded-[28px] border border-white/80 bg-white/90 shadow-[0_18px_50px_rgba(83,54,24,0.07)]">
-              <div className="border-b border-sand px-5 py-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-ink/35">
-                  Body
-                </p>
+            <section aria-labelledby="story-body-title" className="rounded-2xl border border-ink/15 bg-[#fffdf9]">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-sand px-4 py-3">
+                <h2 id="story-body-title" className="font-display text-lg font-semibold">Story body</h2>
+                <div role="group" aria-label="Editor mode" className="flex gap-1 rounded-lg border border-ink/15 bg-sand p-1">
+                  <button type="button" onClick={() => setEditorMode("visual")} aria-pressed={editorMode === "visual"}
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold text-ink/75 hover:text-ink aria-pressed:bg-cream aria-pressed:text-ink aria-pressed:shadow-sm">
+                    <PenLine size={14} aria-hidden /> Visual
+                  </button>
+                  <button type="button" onClick={() => setEditorMode("source")} aria-pressed={editorMode === "source"}
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold text-ink/75 hover:text-ink aria-pressed:bg-cream aria-pressed:text-ink aria-pressed:shadow-sm">
+                    <Code2 size={14} aria-hidden /> {legacyVisualEditor ? "MDX" : "Markdown"}
+                  </button>
+                </div>
               </div>
 
-              <div className="p-5">
-                {editorMode === "visual" && legacyVisualEditor ? (
-                  <EditorProvider config={editorConfig}>
-                    <WysiwygEditor
-                      value={content}
-                      onChange={setContent}
-                      placeholder="Start writing your post..."
-                      className="relative"
-                    />
-                  </EditorProvider>
-                ) : editorMode === "visual" ? (
-                  <VisualStoryEditor value={content} onChange={setContent} />
-                ) : (
-                  <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-                    <div className="flex min-w-0 flex-col gap-2">
-                      <label htmlFor="story-markdown" className="text-sm font-semibold">Markdown</label>
-                      <textarea
-                        id="story-markdown"
-                        value={content}
-                        onChange={(event) => setContent(event.target.value)}
-                        placeholder="Write or paste your Markdown here…"
-                        spellCheck={false}
-                        className="min-h-[28rem] w-full flex-1 resize-y rounded-xl border border-ink/15 bg-[#FFFDF9] p-4 font-mono text-sm leading-6"
-                      />
-                    </div>
-                    <section aria-labelledby="story-preview" className="flex min-w-0 flex-col gap-2">
-                      <h2 id="story-preview" className="text-sm font-semibold">Preview</h2>
-                      <div className="story-preview min-h-48 flex-1 overflow-x-auto rounded-xl border border-ink/15 bg-cream p-4">
-                        {previewContent.trim() ? (
-                          <Markdown remarkPlugins={[remarkGfm]} skipHtml>{previewContent}</Markdown>
-                        ) : <p className="text-ink/60">Your story will appear here as you write.</p>}
-                      </div>
-                    </section>
+              <div className="story-editor-layout p-3 sm:p-4">
+                <div className={showPreview ? "story-editor-columns" : undefined}>
+                  <div className="story-editor-pane">
+                    {editorMode === "source" ? (
+                      <>
+                        <label htmlFor="story-markdown" className="story-editor-label">{legacyVisualEditor ? "MDX source" : "Markdown source"}</label>
+                        <textarea
+                          id="story-markdown"
+                          value={content}
+                          onChange={(event) => setContent(event.target.value)}
+                          placeholder="Write or paste your Markdown here…"
+                          spellCheck={false}
+                          className="story-editor-source"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="story-editor-label">Write</p>
+                        {legacyVisualEditor ? (
+                          <div className="story-editor-legacy">
+                            <EditorProvider config={editorConfig}>
+                              <WysiwygEditor value={content} onChange={setContent} placeholder="Start writing your story…" className="relative" />
+                            </EditorProvider>
+                          </div>
+                        ) : <VisualStoryEditor value={content} onChange={setContent} />}
+                      </>
+                    )}
                   </div>
-                )}
+                  {showPreview && (
+                    <section aria-labelledby="story-preview" className="story-editor-pane">
+                      <h3 id="story-preview" className="story-editor-label">Preview</h3>
+                      {legacyVisualEditor && <p className="text-xs text-ink/70">Custom embeds appear on the published story.</p>}
+                      <div ref={previewRef} className="story-editor-preview story-prose" data-placeholder="Your story will appear here as you write." />
+                    </section>
+                  )}
+                </div>
               </div>
-            </div>
+            </section>
           </div>
         </div>
 

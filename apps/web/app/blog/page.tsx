@@ -3,6 +3,7 @@ import { postService } from "@dud/db";
 import type { Metadata } from "next";
 import BlogList from "@/components/screens/BlogList";
 import { blogArchiveUrl, getBlogFilters, STORIES_PER_PAGE } from "@/lib/blogArchive";
+import { pageMetadata } from "@/lib/pageMetadata";
 
 type BlogPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -17,17 +18,8 @@ export async function generateMetadata({ searchParams }: BlogPageProps): Promise
   const canonical = blogArchiveUrl({ page: parameterized ? 1 : page });
 
   return {
-    title: page > 1 ? `${title} – Page ${page}` : title,
-    description,
-    alternates: { canonical },
+    ...pageMetadata({ path: canonical, title: page > 1 ? `${title} – Page ${page}` : title, description }),
     robots: parameterized ? { index: false, follow: true } : undefined,
-    openGraph: {
-      title,
-      description,
-      url: canonical,
-      type: "website",
-      images: [{ url: "/images/field-guide-hero.webp", alt: "Hikers on a Wasatch Mountains trail" }],
-    },
   };
 }
 

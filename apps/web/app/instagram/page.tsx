@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InstagramPostCard } from "@/components/Home/InstagramPostCard";
 import { INSTAGRAM_URL } from "@/lib/social";
+import { pageMetadata } from "@/lib/pageMetadata";
 
 const PAGE_SIZE = 12;
 const filters = [
@@ -32,9 +33,11 @@ function pageUrl(type: string, page = 1) {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { filter, page } = readParams(await searchParams);
   return {
-    title: page === 1 ? "From Instagram" : `From Instagram – Page ${page}`,
-    description: "Photos, videos, and family outings from Doing Utah Daily’s Instagram archive.",
-    alternates: { canonical: pageUrl("", filter.value ? 1 : page) },
+    ...pageMetadata({
+      path: pageUrl("", filter.value ? 1 : page),
+      title: page === 1 ? "From Instagram" : `From Instagram – Page ${page}`,
+      description: "Photos, videos, and family outings from Doing Utah Daily’s Instagram archive.",
+    }),
     robots: filter.value ? { index: false, follow: true } : undefined,
   };
 }

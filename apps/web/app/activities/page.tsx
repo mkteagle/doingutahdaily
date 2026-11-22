@@ -1,11 +1,13 @@
 import { ActivitiesPage } from "@/components/screens/ActivitiesPage";
 import { activityService } from "@dud/db";
+import { pageMetadata } from "@/lib/pageMetadata";
 
-export const metadata = {
+export const metadata = pageMetadata({
+  path: "/activities",
   title: "Activities — Find Things to Do by Age, Cost & Region",
   description:
     "Browse family-friendly activities across Utah filtered by age, cost, and location. Every listing verified by someone who actually went there.",
-};
+});
 
 export default async function Page({ searchParams }: {
   searchParams: Promise<{ category?: string; cost?: string }>;
