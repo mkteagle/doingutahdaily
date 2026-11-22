@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
-import { auth, isApprovedAdmin } from "@/auth";
+import { type NextRequest, NextResponse } from "next/server";
+import { getAdminSession } from "@/auth";
 
-export default auth((req) => {
+export default async function proxy(req: NextRequest) {
   const { nextUrl } = req;
   const isPublicPage = nextUrl.pathname === "/sign-in";
-  const isAuthenticated = isApprovedAdmin(req.auth?.user?.email);
 
   const isCron = nextUrl.pathname === "/api/cron/publish-posts" ||
     nextUrl.pathname === "/api/cron/sync-instagram";
-  if (nextUrl.pathname.startsWith("/api/auth/") || isCron) {
+  if (nextUrl.pathname.startsWith("/api/auth/") || nextUrl.pathname === "/api/mcp" || isCron) {
     return NextResponse.next();
   }
 
-  if (!isAuthenticated) {
+  const session = await getAdminSession(req.headers);
+  if (!session) {
     if (nextUrl.pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,12 +23,12 @@ export default auth((req) => {
     }
   }
 
-  if (isAuthenticated && isPublicPage) {
+  if (session && isPublicPage) {
     return NextResponse.redirect(new URL("/", nextUrl));
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [

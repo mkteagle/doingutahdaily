@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { authClient } from "@/lib/authClient";
 import { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck, Calendar, ExternalLink, FileText, Inbox, Instagram, LayoutDashboard,
@@ -38,9 +38,8 @@ const groups = [
   },
 ];
 
-export function Sidebar({ passkeysEnabled }: { passkeysEnabled: boolean }) {
+export function Sidebar({ passkeysEnabled, adminEmail }: { passkeysEnabled: boolean; adminEmail?: string }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
   const { isCollapsed, setIsCollapsed, sidebarWidth, setSidebarWidth } = useSidebar();
   const [openPath, setOpenPath] = useState<string | null>(null);
   const mobileToggle = useRef<HTMLButtonElement>(null);
@@ -120,7 +119,7 @@ export function Sidebar({ passkeysEnabled }: { passkeysEnabled: boolean }) {
         </nav>
 
         <div className="border-t border-white/15 px-3 py-3">
-          {session?.user?.email && <p className={`truncate px-2 pb-2 text-xs text-white/65 ${isCollapsed ? "md:sr-only" : ""}`}>{session.user.email}</p>}
+          {adminEmail && <p className={`truncate px-2 pb-2 text-xs text-white/65 ${isCollapsed ? "md:sr-only" : ""}`}>{adminEmail}</p>}
           {passkeysEnabled && (
             <Link href="/account" onClick={() => setOpenPath(null)} title="Account security"
               className="mb-2 flex min-h-9 items-center gap-2 rounded-md px-2 text-xs hover:bg-white/10">
@@ -132,7 +131,7 @@ export function Sidebar({ passkeysEnabled }: { passkeysEnabled: boolean }) {
               <ExternalLink size={14} aria-hidden /> <span className={isCollapsed ? "md:sr-only" : ""}>View live site</span>
             </a>
             <button type="button" className="flex min-h-9 items-center gap-2 rounded-md px-2 text-xs hover:bg-white/10"
-              title="Sign out" onClick={() => void signOut({ redirectTo: "/sign-in" })}>
+              title="Sign out" onClick={() => void authClient.signOut({ fetchOptions: { onSuccess: () => window.location.assign("/sign-in") } })}>
               <LogOut size={14} aria-hidden /> <span className={isCollapsed ? "md:sr-only" : ""}>Sign out</span>
             </button>
           </div>

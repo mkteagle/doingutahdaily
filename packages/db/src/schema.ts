@@ -442,3 +442,4 @@ export const communityConfirmationsRelations = relations(
 );
 
 export { adminAuthUsers, adminAuthAccounts, adminAuthenticators } from "./adminAuthSchema";
+export { adminUsers, adminSessions, adminAccounts, adminVerifications, adminPasskeys } from "./betterAuthSchema";

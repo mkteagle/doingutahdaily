@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/components/AuthProvider";
 import { AppShell } from "@/components/AppShell";
-import { auth, passkeysEnabled } from "@/auth";
+import { getAdminSession, passkeysEnabled } from "@/auth";
 
 export const metadata: Metadata = {
   title: "Doing Utah Daily Admin",
@@ -15,14 +14,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const session = await getAdminSession();
 
   return (
     <html lang="en">
       <body>
-        <AuthProvider session={session}>
-          <AppShell passkeysEnabled={passkeysEnabled}>{children}</AppShell>
-        </AuthProvider>
+        <AppShell passkeysEnabled={passkeysEnabled} adminEmail={session?.user.email}>{children}</AppShell>
       </body>
     </html>
   );

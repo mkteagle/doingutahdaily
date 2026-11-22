@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd ../.. && pnpm --filter=db generate && pnpm --filter=admin build",
-  "outputDirectory": ".next",
+  "framework": null,
+  "buildCommand": "pnpm run build:vercel",
   "crons": [
     {
       "path": "/api/cron/publish-posts",

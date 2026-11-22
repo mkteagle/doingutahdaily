@@ -1,4 +1,4 @@
-import { eq, desc, and, sql, lte, isNotNull } from "drizzle-orm";
+import { eq, desc, and, sql, lte, isNotNull, isNull } from "drizzle-orm";
 import { db } from "../client";
 import { posts, postCategories } from "../schema";
 
@@ -57,6 +57,23 @@ export async function getPostById(id: string) {
   });
 }
 
+function isChatDraft() {
+  return and(sql`left(${posts.id}, 4) = 'mcp-'`, eq(posts.published, false), isNull(posts.scheduledAt));
+}
+
+export async function listChatDrafts() {
+  return db.query.posts.findMany({
+    where: isChatDraft(),
+    columns: { id: true, title: true, updatedAt: true, coverImage: true },
+    orderBy: [desc(posts.updatedAt), desc(posts.id)],
+    limit: 12,
+  });
+}
+
+export async function getChatDraft(id: string) {
+  return db.query.posts.findFirst({ where: and(eq(posts.id, id), isChatDraft()), with: { categories: true } });
+}
+
 export async function getPostsByCategory(category: string) {
   const matchingPostIds = db
     .select({ postId: postCategories.postId })
@@ -90,6 +107,7 @@ export async function getCategoryStats(categoryNames: readonly string[]) {
 }
 
 export async function createPost(data: {
+  id?: string;
   slug: string;
   title: string;
   content: string;
@@ -136,11 +154,18 @@ export async function updatePost(
     published?: boolean;
     scheduledAt?: Date | null;
     categories?: string[];
-  }
+  },
+  chatDraftRevision?: Date
 ) {
   const { categories: cats, ...rest } = data;
 
   const updateData: Record<string, unknown> = { ...rest };
+  const where = chatDraftRevision
+    ? and(eq(posts.id, id), isChatDraft(), sql`date_trunc('milliseconds', ${posts.updatedAt}) = ${chatDraftRevision.toISOString()}::timestamp`)
+    : eq(posts.id, id);
+  if (chatDraftRevision) {
+    updateData.updatedAt = sql`greatest(timezone('utc', clock_timestamp()), date_trunc('milliseconds', ${posts.updatedAt}) + interval '1 millisecond')`;
+  }
   if (rest.published !== undefined) {
     updateData.publishedAt = rest.published ? sql`coalesce(${posts.publishedAt}, now())` : null;
     if (rest.published) {
@@ -158,7 +183,7 @@ export async function updatePost(
 
   return db.transaction(async (transaction) => {
     const [updated] = await transaction.update(posts).set(updateData)
-      .where(eq(posts.id, id)).returning({ id: posts.id });
+      .where(where).returning({ id: posts.id });
     if (!updated) return undefined;
 
     if (cats !== undefined) {

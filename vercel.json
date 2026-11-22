@@ -1,4 +1,0 @@
-{
-  "buildCommand": "pnpm --filter=db generate && pnpm --filter=web build",
-  "outputDirectory": ".next"
-}

@@ -1,15 +1,14 @@
-import { auth, isApprovedAdmin, passkeysEnabled, signInMethods } from "@/auth";
+import { getAdminSession, passkeysEnabled, signInMethods } from "@/auth";
 import { LoginButtons } from "@/components/AuthButtons";
 import { PasskeyButton } from "@/components/PasskeyButton";
 import { MountainMark } from "@dud/ui/mountain-mark";
 import { redirect } from "next/navigation";
 
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const session = await auth();
-  if (isApprovedAdmin(session?.user?.email)) redirect("/");
+  if (await getAdminSession()) redirect("/");
 
   const { error } = await searchParams;
-  const message = error === "AccessDenied"
+  const message = error === "access_denied"
     ? "That account isn’t approved for this workspace."
     : error ? "Sign-in couldn’t be completed. Please try again." : null;
 

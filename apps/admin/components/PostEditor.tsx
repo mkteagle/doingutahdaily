@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { EditorProvider, WysiwygEditor } from "@mkteagle/mdx-wysiwyg";
-import "@mkteagle/mdx-wysiwyg/styles";
+import { EditorProvider, WysiwygEditor } from "crucible-ui/mdx";
+import "crucible-ui/mdx/styles";
+import { VisualStoryEditor } from "./VisualStoryEditor";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Bot,
   ChevronDown,
@@ -65,7 +68,9 @@ export function PostEditor({ post }: PostEditorProps) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     post?.categories.map((category) => category.name) ?? []
   );
+  const legacyVisualEditor = !!post && !post.id.startsWith("mcp-") && /<[A-Z][A-Za-z0-9]*[\s\/>]/.test(post.content);
   const [editorMode, setEditorMode] = useState<"visual" | "source">("visual");
+  const previewContent = useDeferredValue(content);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [autosaveState, setAutosaveState] = useState<
@@ -438,6 +443,7 @@ export function PostEditor({ post }: PostEditorProps) {
                   <button
                     type="button"
                     onClick={() => setEditorMode("visual")}
+                    aria-pressed={editorMode === "visual"}
                     className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                       editorMode === "visual"
                         ? "bg-cream text-ink shadow-sm"
@@ -450,6 +456,7 @@ export function PostEditor({ post }: PostEditorProps) {
                   <button
                     type="button"
                     onClick={() => setEditorMode("source")}
+                    aria-pressed={editorMode === "source"}
                     className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                       editorMode === "source"
                         ? "bg-cream text-ink shadow-sm"
@@ -457,7 +464,7 @@ export function PostEditor({ post }: PostEditorProps) {
                     }`}
                   >
                     <Code2 size={14} />
-                    Source
+                    Markdown + preview
                   </button>
                 </div>
               </div>
@@ -540,7 +547,7 @@ export function PostEditor({ post }: PostEditorProps) {
               </div>
 
               <div className="p-5">
-                {editorMode === "visual" ? (
+                {editorMode === "visual" && legacyVisualEditor ? (
                   <EditorProvider config={editorConfig}>
                     <WysiwygEditor
                       value={content}
@@ -549,14 +556,30 @@ export function PostEditor({ post }: PostEditorProps) {
                       className="relative"
                     />
                   </EditorProvider>
+                ) : editorMode === "visual" ? (
+                  <VisualStoryEditor value={content} onChange={setContent} />
                 ) : (
-                  <textarea
-                    value={content}
-                    onChange={(event) => setContent(event.target.value)}
-                    placeholder="Write raw MDX here..."
-                    spellCheck={false}
-                    className="min-h-[520px] w-full resize-y rounded-2xl border border-ink/10 bg-[#171717] p-4 font-mono text-sm leading-7 text-zinc-100 outline-none placeholder:text-zinc-500"
-                  />
+                  <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <label htmlFor="story-markdown" className="text-sm font-semibold">Markdown</label>
+                      <textarea
+                        id="story-markdown"
+                        value={content}
+                        onChange={(event) => setContent(event.target.value)}
+                        placeholder="Write or paste your Markdown here…"
+                        spellCheck={false}
+                        className="min-h-[28rem] w-full flex-1 resize-y rounded-xl border border-ink/15 bg-[#FFFDF9] p-4 font-mono text-sm leading-6"
+                      />
+                    </div>
+                    <section aria-labelledby="story-preview" className="flex min-w-0 flex-col gap-2">
+                      <h2 id="story-preview" className="text-sm font-semibold">Preview</h2>
+                      <div className="story-preview min-h-48 flex-1 overflow-x-auto rounded-xl border border-ink/15 bg-cream p-4">
+                        {previewContent.trim() ? (
+                          <Markdown remarkPlugins={[remarkGfm]} skipHtml>{previewContent}</Markdown>
+                        ) : <p className="text-ink/60">Your story will appear here as you write.</p>}
+                      </div>
+                    </section>
+                  </div>
                 )}
               </div>
             </div>

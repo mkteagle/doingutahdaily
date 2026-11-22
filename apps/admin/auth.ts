@@ -1,10 +1,9 @@
-import NextAuth, { type NextAuthConfig } from "next-auth";
-import Passkey from "next-auth/providers/passkey";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { adminAuthAccounts, adminAuthenticators, adminAuthUsers, db } from "@dud/db";
-import Apple from "next-auth/providers/apple";
-import Google from "next-auth/providers/google";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { passkey } from "@better-auth/passkey";
+import { adminAccounts, adminPasskeys, adminSessions, adminUsers, adminVerifications, db } from "@dud/db";
+import { betterAuth } from "better-auth";
 import { SignJWT, importPKCS8 } from "jose";
+import { headers } from "next/headers";
 
 const allowedEmails = new Set([
   "mkteagle@gmail.com",
@@ -44,19 +43,6 @@ async function createAppleClientSecret() {
     .sign(key);
 }
 
-const providers: NextAuthConfig["providers"] = [];
-const signInMethods: ("google" | "apple")[] = [];
-
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  signInMethods.push("google");
-  providers.push(
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    })
-  );
-}
-
 const appleClientId =
   process.env.APPLE_SERVICE_ID ||
   process.env.APPLE_CLIENT_ID;
@@ -67,87 +53,74 @@ const appleClientSecret =
     return undefined;
   }));
 
-if (appleClientId && appleClientSecret) {
-  signInMethods.push("apple");
-  providers.push(
-    Apple({
-      clientId: appleClientId,
-      clientSecret: appleClientSecret,
-    })
-  );
-}
+const { GOOGLE_CLIENT_ID: googleClientId, GOOGLE_CLIENT_SECRET: googleClientSecret } = process.env;
+const socialProviders = {
+  ...(googleClientId && googleClientSecret && {
+    google: { clientId: googleClientId, clientSecret: googleClientSecret, disableIdTokenSignIn: true },
+  }),
+  ...(appleClientId && appleClientSecret && {
+    apple: { clientId: appleClientId, clientSecret: appleClientSecret, disableIdTokenSignIn: true },
+  }),
+};
 
-export { signInMethods };
+export const signInMethods = (["google", "apple"] as const).filter((id) => socialProviders[id]);
 
-export function isApprovedAdmin(email?: string | null) {
-  return !!email && allowedEmails.has(email.toLowerCase());
-}
-
-const passkeyOrigin = process.env.AUTH_PASSKEYS_ENABLED === "true" && process.env.AUTH_URL
-  ? new URL(process.env.AUTH_URL)
-  : null;
-export const passkeysEnabled = Boolean(passkeyOrigin && (
-  passkeyOrigin.protocol === "https:" ||
-  (passkeyOrigin.protocol === "http:" && passkeyOrigin.hostname === "localhost")
+const origin = new URL(process.env.BETTER_AUTH_URL || process.env.AUTH_URL || (
+  process.env.VERCEL_ENV === "production" ? "https://admin.doingutahdaily.com" :
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3001"
 ));
+export const adminOrigin = origin.origin;
 
-const adapter = passkeysEnabled ? DrizzleAdapter(db, {
-  usersTable: adminAuthUsers,
-  accountsTable: adminAuthAccounts,
-  authenticatorsTable: adminAuthenticators,
-}) : undefined;
+export const passkeysEnabled = process.env.AUTH_PASSKEYS_ENABLED === "true" && (
+  origin.protocol === "https:" || (origin.protocol === "http:" && origin.hostname === "localhost")
+);
 
-if (adapter?.linkAccount) {
-  const linkAccount = adapter.linkAccount;
-  adapter.linkAccount = ({ userId, type, provider, providerAccountId }) =>
-    linkAccount({ userId, type, provider, providerAccountId });
+function isApprovedAdmin(user?: { email?: string; emailVerified?: boolean }) {
+  return user?.emailVerified === true && !!user.email && allowedEmails.has(user.email.toLowerCase());
 }
 
-if (passkeysEnabled && passkeyOrigin) {
-  providers.unshift(Passkey({
-    enableConditionalUI: false,
-    relayingParty: { id: passkeyOrigin.hostname, origin: passkeyOrigin.origin, name: "Doing Utah Daily Admin" },
-    // Only a signed-in user may request enrollment. Email input cannot create an account.
-    getUserInfo: async () => null,
-  }));
-}
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter,
-  experimental: { enableWebAuthn: passkeysEnabled },
-  session: {
-    strategy: "jwt",
-  },
-  providers,
-  pages: {
-    signIn: "/sign-in",
-  },
-  callbacks: {
-    async signIn({ user, profile, account }) {
-      const email =
-        user.email?.toLowerCase() ||
-        (typeof profile?.email === "string"
-          ? profile.email.toLowerCase()
-          : null);
-
-      if (!isApprovedAdmin(email)) return false;
-      if (passkeysEnabled && account?.type !== "webauthn") {
-        const verifiedEmail: unknown = profile?.email_verified;
-        return verifiedEmail === true || verifiedEmail === "true";
-      }
-      return true;
+export const auth = betterAuth({
+  appName: "Doing Utah Daily Admin",
+  baseURL: origin.origin,
+  secret: process.env.BETTER_AUTH_SECRET || process.env.AUTH_SECRET,
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      user: adminUsers,
+      session: adminSessions,
+      account: adminAccounts,
+      verification: adminVerifications,
+      passkey: adminPasskeys,
     },
-    async jwt({ token, user }) {
-      if (user?.email) {
-        token.email = user.email.toLowerCase();
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user && typeof token.email === "string") {
-        session.user.email = token.email;
-      }
-      return session;
+  }),
+  socialProviders,
+  trustedOrigins: socialProviders.apple ? ["https://appleid.apple.com"] : [],
+  onAPIError: { errorURL: `${origin.origin}/sign-in` },
+  account: { encryptOAuthTokens: true },
+  user: {
+    validateUserInfo({ user }) {
+      return isApprovedAdmin(user) ? undefined : { error: "access_denied" };
     },
   },
+  databaseHooks: {
+    session: {
+      create: {
+        async before(session, context) {
+          const user = await context?.context.internalAdapter.findUserById(session.userId);
+          return isApprovedAdmin(user ?? undefined) ? undefined : false;
+        },
+      },
+    },
+  },
+  plugins: passkeysEnabled ? [passkey({
+    rpID: origin.hostname,
+    rpName: "Doing Utah Daily Admin",
+    origin: origin.origin,
+    registration: { requireSession: true },
+  })] : [],
 });
+
+export async function getAdminSession(requestHeaders?: Headers) {
+  const session = await auth.api.getSession({ headers: requestHeaders ?? await headers() });
+  return isApprovedAdmin(session?.user) ? session : null;
+}

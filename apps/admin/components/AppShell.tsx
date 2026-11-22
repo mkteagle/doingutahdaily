@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { SidebarProvider, useSidebar, COLLAPSED_WIDTH } from "@/components/SidebarContext";
 
-function ShellInner({ children, passkeysEnabled }: { children: ReactNode; passkeysEnabled: boolean }) {
+type AppShellProps = { children: ReactNode; passkeysEnabled: boolean; adminEmail?: string };
+
+function ShellInner({ children, passkeysEnabled, adminEmail }: AppShellProps) {
   const pathname = usePathname();
   const { isCollapsed, sidebarWidth } = useSidebar();
 
@@ -16,12 +18,12 @@ function ShellInner({ children, passkeysEnabled }: { children: ReactNode; passke
   const width = isCollapsed ? COLLAPSED_WIDTH : sidebarWidth;
   return (
     <div className="admin-shell" style={{ "--sidebar-width": `${width}px` } as CSSProperties}>
-      <Sidebar passkeysEnabled={passkeysEnabled} />
+      <Sidebar passkeysEnabled={passkeysEnabled} adminEmail={adminEmail} />
       <main id="admin-content" className="min-w-0">{children}</main>
     </div>
   );
 }
 
-export function AppShell({ children, passkeysEnabled }: { children: ReactNode; passkeysEnabled: boolean }) {
-  return <SidebarProvider><ShellInner passkeysEnabled={passkeysEnabled}>{children}</ShellInner></SidebarProvider>;
+export function AppShell(props: AppShellProps) {
+  return <SidebarProvider><ShellInner {...props} /></SidebarProvider>;
 }

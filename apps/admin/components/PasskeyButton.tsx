@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { Fingerprint } from "lucide-react";
-import { signIn } from "next-auth/webauthn";
+import { passkeyClient } from "@better-auth/passkey/client";
+import { createAuthClient } from "better-auth/client";
+
+const authClient = createAuthClient({ plugins: [passkeyClient()] });
 
 export function PasskeyButton({ action }: { action: "authenticate" | "register" }) {
   const [working, setWorking] = useState(false);
@@ -20,8 +23,8 @@ export function PasskeyButton({ action }: { action: "authenticate" | "register" 
     setMessage("");
     setSuccess(false);
     try {
-      const result = await signIn("passkey", { action, redirect: false, redirectTo: registering ? "/account" : "/" });
-      if (!result?.ok || result.error) throw new Error("Passkey request failed");
+      const result = registering ? await authClient.passkey.addPasskey() : await authClient.signIn.passkey();
+      if (result?.error) throw new Error("Passkey request failed");
       if (registering) {
         setSuccess(true);
         setMessage("Passkey added. You can use it the next time you sign in.");
