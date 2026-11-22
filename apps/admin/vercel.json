@@ -1,14 +1,4 @@
 {
   "framework": null,
-  "buildCommand": "pnpm run build:vercel",
-  "crons": [
-    {
-      "path": "/api/cron/publish-posts",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/sync-instagram",
-      "schedule": "0 14 * * *"
-    }
-  ]
+  "buildCommand": "pnpm run build:vercel"
 }

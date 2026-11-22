@@ -2,7 +2,6 @@ import { redact } from "@tanstack/redact/vinext";
 import { nitro } from "nitro/vite";
 import vinext from "vinext";
 import { defineConfig } from "vite";
-import vercelConfig from "./vercel.json" with { type: "json" };
 import { storyWorkspace } from "./story-workspace/vitePlugin.ts";
 
 export default defineConfig({
@@ -13,7 +12,14 @@ export default defineConfig({
       // Vinext copies responses as ResponseInit; keep the native status and headers.
       features: { fastResponse: false },
       vercel: {
-        config: { version: 3, crons: vercelConfig.crons },
+        config: {
+          version: 3,
+          // Vercel combines project and Build Output cron definitions.
+          crons: [
+            { path: "/api/cron/publish-posts", schedule: "*/15 * * * *" },
+            { path: "/api/cron/sync-instagram", schedule: "0 14 * * *" },
+          ],
+        },
         functionRules: {
           "/api/social/sync": { maxDuration: 120 },
           "/api/cron/sync-instagram": { maxDuration: 120 },
