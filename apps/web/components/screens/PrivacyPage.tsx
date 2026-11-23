@@ -70,6 +70,20 @@ export function PrivacyPage() {
           ))}
         </div>
 
+        <section id="data-deletion" className="mt-8 scroll-mt-24 rounded-2xl border border-border bg-card p-6" aria-labelledby="data-deletion-heading">
+          <h2 id="data-deletion-heading" className="mb-3 font-display text-base text-foreground">Instagram data and deletion requests</h2>
+          <p className="font-serif text-sm leading-relaxed text-muted-foreground">
+            We use the Instagram API to display Doing Utah Daily’s public posts on our site. We store post captions, dates, links, and image or thumbnail URLs so we can show them in our archive.
+          </p>
+          <p className="mt-3 font-serif text-sm leading-relaxed text-muted-foreground">
+            To ask us to delete Instagram data we hold about you, email{" "}
+            <a href="mailto:mike@doingutahdaily.com?subject=Instagram%20data%20deletion%20request" className="text-primary hover:underline">
+              mike@doingutahdaily.com
+            </a>{" "}
+            with your Instagram username and links to any posts you want us to review. We may ask you to confirm your connection to the account before we delete data.
+          </p>
+        </section>
+
         <div className="mt-10 p-6 rounded-2xl bg-primary/5 border border-primary/15">
           <div className="flex items-center gap-2 mb-2">
             <Mail size={14} className="text-primary" />
@@ -77,8 +91,8 @@ export function PrivacyPage() {
           </div>
           <p className="text-sm text-muted-foreground font-serif">
             If you have any questions about this Privacy Policy, please contact us at{" "}
-            <a href="mailto:hello@doingutahdaily.com" className="text-primary hover:underline">
-              hello@doingutahdaily.com
+            <a href="mailto:mike@doingutahdaily.com" className="text-primary hover:underline">
+              mike@doingutahdaily.com
             </a>
           </p>
         </div>
