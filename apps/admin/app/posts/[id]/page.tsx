@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { postService } from "@dud/db";
-import { postAssetStorageConfigured } from "@dud/content-engine/post-assets";
 import { PostEditor } from "@/components/PostEditor";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +28,7 @@ export default async function EditPostPage({
           </a>
         )}
       </header>
-      <PostEditor post={post} canUploadImages={postAssetStorageConfigured()} />
+      <PostEditor post={post} />
     </div>
   );
 }

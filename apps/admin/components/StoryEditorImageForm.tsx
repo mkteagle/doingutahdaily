@@ -29,7 +29,7 @@ async function prepareImage(file: File) {
 }
 
 type Props = {
-  uploadImage?: (image: Blob) => Promise<string>;
+  uploadImage: (image: Blob) => Promise<string>;
   initialImage?: { url: string; alt: string };
   initialFile?: File;
   onApply: (photo: { url: string; alt: string } | null) => void;
@@ -103,7 +103,6 @@ export function StoryEditorImageForm({ uploadImage, initialImage, initialFile, o
       finish({ url: source, alt: alt.trim() });
       return;
     }
-    if (!uploadImage) return;
     setUploading(true);
     setError("");
     try {
@@ -133,16 +132,14 @@ export function StoryEditorImageForm({ uploadImage, initialImage, initialFile, o
               alt={alt || "Selected image"} onError={() => setPreviewFailed(true)} />
           ) : <p className="story-image-hint">{previewFailed ? "Image preview unavailable." : "Image preview"}</p>}
         </div>
-        {uploadImage ? (
-          <label>
-            {initialImage ? "Replace with a file" : "Image file"}
-            <input ref={fileInput} type="file" accept={STORY_IMAGE_TYPES} disabled={uploading}
-              onChange={(event) => { setFile(event.target.files?.[0] ?? null); setPreviewFailed(false); setError(""); }} />
-            {file && <span className="story-image-hint">{file.name}</span>}
-          </label>
-        ) : <p className="story-image-hint">File uploads need the story image bucket connected.</p>}
         <label>
-          Image URL
+          {initialImage ? "Replace with a file" : "Upload an image file"}
+          <input ref={fileInput} type="file" accept={STORY_IMAGE_TYPES} disabled={uploading}
+            onChange={(event) => { setFile(event.target.files?.[0] ?? null); setPreviewFailed(false); setError(""); }} />
+          {file && <span className="story-image-hint">{file.name}</span>}
+        </label>
+        <label>
+          Or use an image URL
           <input type="text" inputMode="url" value={url} disabled={uploading} placeholder="https://…"
             onChange={(event) => {
               setUrl(event.target.value);

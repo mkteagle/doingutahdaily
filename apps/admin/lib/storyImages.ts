@@ -5,7 +5,7 @@ import { STORY_IMAGE_BYTES } from "./storyImageLimits";
 
 export async function uploadStoryImage(bytes: Uint8Array) {
   if (!postAssetStorageConfigured()) {
-    return { error: "File uploads need the story image bucket configured. You can use an image URL.", status: 503 } as const;
+    return { error: "R2 image storage isn’t connected for this site. The file is still selected.", status: 503 } as const;
   }
   if (!bytes.byteLength || bytes.byteLength > STORY_IMAGE_BYTES) {
     return { error: "Choose an image up to 3 MB.", status: 413 } as const;

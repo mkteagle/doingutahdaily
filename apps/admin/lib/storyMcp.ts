@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { postAssetsPublicUrl, postAssetStorageConfigured, storePostImage } from "@dud/content-engine/post-assets";
+import { postAssetsPublicUrl, storePostImage } from "@dud/content-engine/post-assets";
 import { postService } from "@dud/db";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
@@ -41,7 +41,6 @@ function draftResponse(post: NonNullable<Awaited<ReturnType<typeof postService.g
         markdown: post.content,
         summary: post.excerpt ?? "",
         coverImage: post.coverImage,
-        canUploadImages: postAssetStorageConfigured(),
         revision: post.updatedAt.toISOString(),
         editorUrl: new URL(`/posts/${post.id}`, adminOrigin).href,
       },

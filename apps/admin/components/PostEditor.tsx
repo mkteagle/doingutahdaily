@@ -22,7 +22,6 @@ import { POST_CATEGORIES } from "@/lib/postCategories";
 import { toDatetimeLocalValue } from "@/lib/utils";
 
 interface PostEditorProps {
-  canUploadImages: boolean;
   post?: {
     id: string;
     title: string;
@@ -61,7 +60,7 @@ async function uploadInlineImage(image: Blob) {
   throw new Error(result?.error || "The image couldn’t be uploaded. Try again.");
 }
 
-export function PostEditor({ post, canUploadImages }: PostEditorProps) {
+export function PostEditor({ post }: PostEditorProps) {
   const router = useRouter();
 
   const [postId, setPostId] = useState(post?.id ?? null);
@@ -555,7 +554,7 @@ export function PostEditor({ post, canUploadImages }: PostEditorProps) {
                               <WysiwygEditor value={content} onChange={setContent} placeholder="Start writing your story…" className="relative" />
                             </EditorProvider>
                           </div>
-                        ) : <VisualStoryEditor value={content} onChange={setContent} uploadImage={canUploadImages ? uploadInlineImage : undefined} />}
+                        ) : <VisualStoryEditor value={content} onChange={setContent} uploadImage={uploadInlineImage} />}
                       </>
                     )}
                   </div>

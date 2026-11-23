@@ -10,7 +10,6 @@ type Draft = {
   markdown: string;
   revision: string;
   coverImage: string | null;
-  canUploadImages: boolean;
 };
 
 type WorkspaceResult = {
@@ -64,7 +63,7 @@ async function uploadInlineImage(image: Blob) {
 
 function renderVisual() {
   visualEditor.render(<VisualStoryEditor key={draft?.id} value={markdown.value}
-    uploadImage={draft?.canUploadImages ? uploadInlineImage : undefined} onChange={(value) => {
+    uploadImage={uploadInlineImage} onChange={(value) => {
     markdown.value = value;
     renderVisual();
   }} />);

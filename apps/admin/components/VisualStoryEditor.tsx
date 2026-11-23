@@ -53,7 +53,7 @@ function readSlashTrigger(root: HTMLElement) {
 type Props = {
   value: string;
   onChange: (value: string) => void;
-  uploadImage?: (image: Blob) => Promise<string>;
+  uploadImage: (image: Blob) => Promise<string>;
 };
 
 type ImageEdit = { range: Range; file?: File } | { image: HTMLImageElement };
@@ -382,7 +382,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
             const text = event.clipboardData.getData("text/plain");
             const file = Array.from(event.clipboardData.files).find((entry) => entry.type.startsWith("image/"));
             if (file && !text.trim()) {
-              startImage(uploadImage ? file : undefined);
+              startImage(file);
               return;
             }
             if (html) {
