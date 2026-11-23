@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/authClient";
 import { useEffect, useRef, useState } from "react";
 import {
-  BadgeCheck, Calendar, ExternalLink, FileText, Inbox, Instagram, LayoutDashboard,
+  BadgeCheck, BookOpen, Calendar, ExternalLink, FileText, Inbox, Instagram, LayoutDashboard,
   LogOut, MapPin, Menu, KeyRound, PanelLeftClose, PanelLeftOpen, Sparkles, Users, X,
 } from "lucide-react";
 import { MountainMark } from "@dud/ui/mountain-mark";
@@ -18,6 +18,7 @@ const groups = [
       { label: "Overview", href: "/", icon: LayoutDashboard },
       { label: "Stories", href: "/posts", icon: FileText },
       { label: "Quick capture", href: "/capture", icon: Sparkles },
+      { label: "ChatGPT guide", href: "/help/chatgpt", icon: BookOpen },
     ],
   },
   {
