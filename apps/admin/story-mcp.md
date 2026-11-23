@@ -31,7 +31,7 @@ When file uploads are configured, you can also paste an image from your clipboar
 
 The site stores uploaded files as web-size copies in Cloudflare R2 and strips camera metadata. The public URL works once the upload finishes. Save the draft to keep the photo in its body.
 
-Configure the admin server’s `POST_ASSETS_R2_*` variables with a bucket-scoped write credential and an HTTPS public URL for the story image library. See the [environment template](../../.env.example) for the setting names.
+Production uses the private `doing-utah-daily-story-images` R2 bucket. The [story image Worker](../../infra/story-images-worker/wrangler.jsonc) serves individual image URLs publicly and accepts uploads from the admin server using a shared secret. Use the Worker’s HTTPS URL for `POST_ASSETS_R2_WORKER_URL` and set `POST_ASSETS_R2_WORKER_TOKEN` to the same value as its `STORY_IMAGES_WRITE_TOKEN` secret. Direct S3 settings are available in the [environment template](../../.env.example) for other deployments.
 
 ## Choose photos from Kindred
 
@@ -63,5 +63,5 @@ If the connection is missing, check `codex mcp list` on that computer. If it app
 
 1. Make a dedicated album in Kindred with photos you are comfortable sharing with ChatGPT and potentially publishing on the site. Create an album share. You can protect it with a password, set an expiration, or revoke it later.
 2. Set `KINDRED_EDITORIAL_ALBUM_URL` in the admin server environment to the HTTPS album share link. If the share uses a password, set `KINDRED_EDITORIAL_ALBUM_PASSWORD` too. Use server configuration for both secrets. The admin server needs to be able to reach the Kindred web host.
-3. Give the admin project write access to the site’s existing story image bucket using the `POST_ASSETS_R2_*` settings. See the [environment template](../../.env.example) for the variable names. Deploy admin with these settings and reopen the MCP connection to refresh its tools.
+3. Configure the admin project’s story image storage using the `POST_ASSETS_R2_*` settings above. Deploy admin with these settings and reopen the MCP connection to refresh its tools.
 4. Ask ChatGPT to show photos from the album. If it cannot open the album, check that the share points to an album and is still active. If previews work but a selected photo fails to attach, check the admin project’s image storage settings.

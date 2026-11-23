@@ -1,0 +1,13 @@
+{
+  "name": "doing-utah-daily-story-images",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-22",
+  "workers_dev": true,
+  "preview_urls": false,
+  "upload_source_maps": true,
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 },
+  "secrets": { "required": ["STORY_IMAGES_WRITE_TOKEN"] },
+  "r2_buckets": [
+    { "binding": "STORY_IMAGES", "bucket_name": "doing-utah-daily-story-images" }
+  ]
+}
