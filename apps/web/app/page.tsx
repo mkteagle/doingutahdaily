@@ -1,7 +1,7 @@
 import { postService, socialService } from "@dud/db";
 import { Home } from "@/components/screens/Home";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 export const metadata = { alternates: { canonical: "/" } };
 
 export default async function Page() {
