@@ -7,6 +7,8 @@ import { z } from "zod";
 import { adminOrigin } from "@/auth";
 import { getKindredAlbum, kindredAlbumConfigured, readKindredPhoto } from "@/lib/kindredPhotos";
 import { createUniquePostSlug } from "@/lib/postDrafts";
+import { STORY_IMAGE_BYTES } from "@/lib/storyImageLimits";
+import { uploadStoryImage } from "@/lib/storyImages";
 import workspaceHtml from "virtual:story-workspace";
 
 const workspaceUri = "ui://doing-utah-daily/story-workspace.html";
@@ -138,6 +140,20 @@ export function registerStoryTools(server: McpServer) {
     if (title === undefined && markdown === undefined && summary === undefined) return fail("Provide a title, Markdown, or summary to save.");
     const post = await postService.updatePost(id, { title, content: markdown, excerpt: summary }, new Date(revision));
     return post ? draftResponse(post, "Revisions saved.") : fail(reopenMessage);
+  });
+
+  server.registerTool("upload_story_image", {
+    title: "Upload an image selected in the story editor",
+    description: "Store an author-selected image in the story image library and return its URL for inline insertion.",
+    inputSchema: { id: chatDraftId, image: z.base64().max(4 * Math.ceil(STORY_IMAGE_BYTES / 3)) },
+    annotations: { ...draftWrite, openWorldHint: true },
+    _meta: { ui: { resourceUri: workspaceUri, visibility: ["app"] }, "openai/visibility": "private", "openai/widgetAccessible": true },
+  }, async ({ id, image }) => {
+    if (!await postService.getChatDraft(id)) return fail("This story draft is unavailable.");
+    const result = await uploadStoryImage(Buffer.from(image, "base64"));
+    return result.error
+      ? fail(result.error)
+      : { content: [{ type: "text", text: "Image uploaded." }], structuredContent: { url: result.url } };
   });
 
   if (!kindredAlbumConfigured()) return;

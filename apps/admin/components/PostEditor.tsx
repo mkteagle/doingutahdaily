@@ -53,6 +53,13 @@ function serializePayload(payload: {
   return JSON.stringify(payload);
 }
 
+async function uploadInlineImage(image: Blob) {
+  const response = await fetch("/api/story-images", { method: "POST", body: image });
+  const result: { url?: string; error?: string } | null = await response.json().catch(() => null);
+  if (response.ok && typeof result?.url === "string") return result.url;
+  throw new Error(result?.error || "The image couldn’t be uploaded. Try again.");
+}
+
 export function PostEditor({ post }: PostEditorProps) {
   const router = useRouter();
 
@@ -70,7 +77,7 @@ export function PostEditor({ post }: PostEditorProps) {
   );
   const legacyVisualEditor = !!post && !post.id.startsWith("mcp-") && /<[A-Z][A-Za-z0-9]*[\s\/>]/.test(post.content);
   const [editorMode, setEditorMode] = useState<"visual" | "source">("visual");
-  const showPreview = editorMode === "source" || !legacyVisualEditor;
+  const showPreview = editorMode === "source";
   const previewContent = useDeferredValue(content);
   const previewRef = useRef<HTMLDivElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -547,7 +554,7 @@ export function PostEditor({ post }: PostEditorProps) {
                               <WysiwygEditor value={content} onChange={setContent} placeholder="Start writing your story…" className="relative" />
                             </EditorProvider>
                           </div>
-                        ) : <VisualStoryEditor value={content} onChange={setContent} />}
+                        ) : <VisualStoryEditor value={content} onChange={setContent} uploadImage={uploadInlineImage} />}
                       </>
                     )}
                   </div>

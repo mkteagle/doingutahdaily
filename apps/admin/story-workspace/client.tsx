@@ -24,8 +24,8 @@ const editor = document.querySelector<HTMLFormElement>("#draft")!;
 const title = document.querySelector<HTMLInputElement>("#title")!;
 const summary = document.querySelector<HTMLTextAreaElement>("#summary")!;
 const markdown = document.querySelector<HTMLTextAreaElement>("#markdown")!;
-const markdownPanel = document.querySelector<HTMLElement>("#markdown-panel")!;
 const visualPanel = document.querySelector<HTMLElement>("#visual-panel")!;
+const sourceWorkspace = document.querySelector<HTMLElement>("#source-workspace")!;
 const mode = document.querySelector<HTMLButtonElement>("#mode")!;
 const visualEditor = createRoot(document.querySelector("#visual")!);
 const preview = document.querySelector<HTMLElement>("#preview")!;
@@ -45,16 +45,31 @@ function renderPreview() {
   preview.innerHTML = storyHtml(markdown.value);
 }
 
+async function uploadInlineImage(image: Blob) {
+  if (!draft) throw new Error("Open a draft to upload an image.");
+  const id = draft.id;
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1]);
+    reader.onerror = () => reject(new Error("The image couldn’t be read."));
+    reader.readAsDataURL(image);
+  });
+  const result = await app.callServerTool({ name: "upload_story_image", arguments: { id, image: base64 } });
+  const data = result.structuredContent;
+  if (!result.isError && data && typeof data === "object" && "url" in data && typeof data.url === "string") return data.url;
+  const error = result.content.find((item) => item.type === "text");
+  throw new Error(error?.text || "The image couldn’t be uploaded. Try again.");
+}
+
 function renderVisual() {
-  visualEditor.render(<VisualStoryEditor value={markdown.value} onChange={(value) => {
+  visualEditor.render(<VisualStoryEditor key={draft?.id} value={markdown.value} uploadImage={uploadInlineImage} onChange={(value) => {
     markdown.value = value;
-    renderPreview();
     renderVisual();
   }} />);
 }
 
 function showVisual() {
-  markdownPanel.hidden = true;
+  sourceWorkspace.hidden = true;
   visualPanel.hidden = false;
   mode.textContent = "Edit Markdown";
   renderVisual();
@@ -71,7 +86,6 @@ function showDraft(next: Draft) {
   cover.hidden = !next.coverImage;
   if (next.coverImage) cover.src = next.coverImage;
   else cover.removeAttribute("src");
-  renderPreview();
 }
 
 function askChat(text: string) {
@@ -87,8 +101,9 @@ mode.addEventListener("click", () => {
   if (visualPanel.hidden) showVisual();
   else {
     visualPanel.hidden = true;
-    markdownPanel.hidden = false;
+    sourceWorkspace.hidden = false;
     mode.textContent = "Visual editor";
+    renderPreview();
     markdown.focus();
   }
 });

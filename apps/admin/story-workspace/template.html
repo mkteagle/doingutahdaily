@@ -26,7 +26,7 @@
     .photo-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr))}
     .fields{display:grid;gap:10px}
     img{display:block;max-width:100%;border-radius:6px} .photo-grid img{width:100%;height:122px;object-fit:cover}
-    #cover{max-height:170px;width:100%;object-fit:cover;margin-bottom:12px}
+    #cover{max-height:170px;width:100%;object-fit:cover;margin-top:12px}
     .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
     button{padding:7px 10px;cursor:pointer;font-weight:600} button:disabled{opacity:.55;cursor:default}
     .primary{background:var(--ink);color:var(--paper)}
@@ -43,11 +43,12 @@
       <div><label for="title">Story title</label><input id="title" required maxlength="180"></div>
       <div><label for="summary">Summary</label><textarea id="summary" rows="2" maxlength="300"></textarea></div>
     </div>
+    <img id="cover" alt="Story cover" hidden>
     <div class="story-editor-layout">
-      <div class="story-editor-columns">
-        <section id="visual-panel" aria-labelledby="editor-label" class="story-editor-pane"><h2 id="editor-label" class="story-editor-label">Write</h2><div id="visual" class="story-editor-pane"></div></section>
-        <div id="markdown-panel" class="story-editor-pane" hidden><label for="markdown" class="story-editor-label">Markdown source</label><textarea id="markdown" class="story-editor-source" maxlength="50000"></textarea></div>
-        <section aria-labelledby="preview-label" class="story-editor-pane"><h2 id="preview-label" class="story-editor-label">Preview</h2><div class="story-editor-preview"><img id="cover" alt="" hidden><div id="preview" class="story-prose" data-placeholder="Your story will appear here as you write."></div></div></section>
+      <section id="visual-panel" aria-labelledby="editor-label" class="story-editor-pane"><h2 id="editor-label" class="story-editor-label">Write</h2><div id="visual" class="story-editor-pane"></div></section>
+      <div id="source-workspace" class="story-editor-columns" hidden>
+        <div class="story-editor-pane"><label for="markdown" class="story-editor-label">Markdown source</label><textarea id="markdown" class="story-editor-source" maxlength="50000"></textarea></div>
+        <section aria-labelledby="preview-label" class="story-editor-pane"><h2 id="preview-label" class="story-editor-label">Preview</h2><div class="story-editor-preview"><div id="preview" class="story-prose" data-placeholder="Your story will appear here as you write."></div></div></section>
       </div>
     </div>
     <div class="actions"><button id="save" class="primary">Save draft</button><button id="revise" type="button">Revise with AI</button><button id="mode" type="button">Edit Markdown</button></div>

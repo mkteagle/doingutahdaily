@@ -5,8 +5,8 @@ Write and format stories in Doing Utah Daily admin or co-write them with ChatGPT
 ## Write and format a story in admin
 
 1. Sign in to Doing Utah Daily admin. Open **Stories**, then choose **New story** or open an existing draft from **Drafts**. [Open Stories](https://admin.doingutahdaily.com/posts)
-2. Add a title and a short summary. Start typing in **Visual** mode. Highlight text and click **Bold** or **Italic**, or use **Heading**, **Bullet list**, **Numbered list**, or **Quote** to format a paragraph. To add a link, highlight its text, click **Link**, paste the address, and click **Add link**.
-3. **Preview** updates as you type. It appears beside the editor on wide screens and below it on smaller screens. Choose **Markdown** to see the source, then choose **Visual** to return to the toolbar.
+2. Add a title and a short summary. In **Visual** mode, the formatting appears as you write. Use the **Block style** dropdown to choose **Paragraph** or **Heading 2**, **Heading 3**, or **Heading 4**. Highlight text to make it bold, italic, or a link.
+3. At the start of a new paragraph, type **/** to open the command menu. Type to find a command, then use the arrow keys and Enter to apply it. Choose **Markdown** to see the source with a live preview.
 4. Drafts autosave in admin. Use **Save draft** to save immediately. Review the title, summary, cover photo, and categories before clicking **Publish Now**.
 
 The visual editor saves GitHub Flavored Markdown, which supports ordinary headings, links, and lists as well as tables, checklists, and strikethrough. Older stories that use custom components have an **MDX** source view.
@@ -18,10 +18,18 @@ Once the [draft connection](#connect-chatgpt-on-the-editors-computer) is set up,
 > Help me write a Doing Utah Daily story about our outing. Ask me one question at a time and start with the opening. Keep my voice, flag details I need to verify, and show me suggested edits before saving them. Open a draft so we can keep working on it here.
 
 1. Work through the story together, one section at a time. Tell ChatGPT which proposed changes to save.
-2. When the inline workspace opens, use the toolbar in **Write** and see your changes in **Preview** as you type. Click **Save draft** to save your own edits. To work on a passage with ChatGPT, highlight it and click **Revise with AI**.
+2. When the inline workspace opens, use the visual toolbar in **Write**. **Edit Markdown** opens the source and preview. Click **Save draft** to save your own edits. To work on a passage with ChatGPT, highlight it and click **Revise with AI**.
 3. To pick up later, ask ChatGPT to find your Doing Utah Daily draft by title. If the inline workspace is unavailable, keep writing and saving through the conversation. Ask ChatGPT for the admin link if you want to open the draft there.
 
 The connection can reopen drafts started through ChatGPT while they are unpublished and unscheduled. If a draft has newer edits, reopen the latest version and reapply any unsaved changes you want to keep. Publish the finished story from admin.
+
+## Upload a photo into the story
+
+Place the cursor where the photo should appear. Click **Image** in the visual toolbar or type **/image** at the start of a paragraph. Choose a JPEG, PNG, WebP, or AVIF, add a short description in **Alt text**, and click **Insert image**.
+
+The image appears in the editor after upload. The site stores a web-size copy in Cloudflare R2, strips camera metadata, and uses its public URL in the story. The URL works as soon as the photo is uploaded. Save the draft to keep the photo in its body.
+
+Configure the admin server’s `POST_ASSETS_R2_*` variables with a bucket-scoped write credential and an HTTPS public URL for the story image library. See the [environment template](../../.env.example) for the setting names.
 
 ## Choose photos from Kindred
 
