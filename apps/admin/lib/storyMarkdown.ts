@@ -11,6 +11,16 @@ function isSitePath(value: unknown): value is string {
   return typeof value === "string" && /^\/(?![/\\])/.test(value);
 }
 
+export function storyImageUrl(source: string) {
+  return isSitePath(source) ? new URL(source, publicSite).href : source;
+}
+
+export function setStoryImageSource(image: HTMLImageElement, source: string) {
+  image.setAttribute("src", storyImageUrl(source));
+  if (isSitePath(source)) image.dataset.storySource = source;
+  else delete image.dataset.storySource;
+}
+
 export function cleanStoryHtml(html: string) {
   const fragment = DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true },
@@ -27,10 +37,7 @@ export function cleanStoryHtml(html: string) {
   }
   for (const image of fragment.querySelectorAll("img")) {
     const source = image.getAttribute("src");
-    if (isSitePath(source)) {
-      image.dataset.storySource = source;
-      image.src = new URL(source, publicSite).href;
-    }
+    if (source) setStoryImageSource(image, source);
   }
   const container = document.createElement("div");
   container.append(fragment);

@@ -25,9 +25,11 @@ The connection can reopen drafts started through ChatGPT while they are unpublis
 
 ## Upload a photo into the story
 
-Place the cursor where the photo should appear. Click **Image** in the visual toolbar or type **/image** at the start of a paragraph. Choose a JPEG, PNG, WebP, or AVIF, add a short description in **Alt text**, and click **Insert image**.
+Place the cursor where the photo should appear. Click **Image** in the visual toolbar or type **/image** at the start of a paragraph. Choose a JPEG, PNG, WebP, or AVIF, or enter an existing public **Image URL**. Add a short description in **Alt text**, then click **Insert image**.
 
-The image appears in the editor after upload. The site stores a web-size copy in Cloudflare R2, strips camera metadata, and uses its public URL in the story. The URL works as soon as the photo is uploaded. Save the draft to keep the photo in its body.
+When file uploads are configured, you can also paste an image from your clipboard. Click an image in the story to edit its description, replace it, or remove it. **Undo** restores a removed image.
+
+The site stores uploaded files as web-size copies in Cloudflare R2 and strips camera metadata. The public URL works once the upload finishes. Save the draft to keep the photo in its body.
 
 Configure the admin server’s `POST_ASSETS_R2_*` variables with a bucket-scoped write credential and an HTTPS public URL for the story image library. See the [environment template](../../.env.example) for the setting names.
 

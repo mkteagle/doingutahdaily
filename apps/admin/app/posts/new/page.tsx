@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { postAssetStorageConfigured } from "@dud/content-engine/post-assets";
 import { PostEditor } from "@/components/PostEditor";
 
 export default function NewPostPage() {
@@ -8,7 +9,7 @@ export default function NewPostPage() {
         <Link href="/posts" className="font-semibold text-canyon hover:underline">Stories</Link>
         <span aria-hidden="true">/</span> <span>New story</span>
       </header>
-      <PostEditor />
+      <PostEditor canUploadImages={postAssetStorageConfigured()} />
     </div>
   );
 }

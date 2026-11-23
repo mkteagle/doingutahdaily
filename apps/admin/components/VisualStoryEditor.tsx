@@ -3,7 +3,7 @@
 import { Bold, ChevronDown, Heading2, Heading3, Heading4, ImagePlus, Italic, Link2, List, ListOrdered, Quote, Redo2, Type, Undo2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
-import { cleanStoryHtml, storyHtml, storyMarkdown } from "../lib/storyMarkdown";
+import { cleanStoryHtml, setStoryImageSource, storyHtml, storyMarkdown } from "../lib/storyMarkdown";
 import { StoryEditorImageForm } from "./StoryEditorImageForm";
 
 const inlineFormats = [
@@ -53,20 +53,27 @@ function readSlashTrigger(root: HTMLElement) {
 type Props = {
   value: string;
   onChange: (value: string) => void;
-  uploadImage: (image: Blob) => Promise<string>;
+  uploadImage?: (image: Blob) => Promise<string>;
 };
+
+type ImageEdit = { range: Range; file?: File } | { image: HTMLImageElement };
+
+function labelEditorImage(image: HTMLImageElement) {
+  image.tabIndex = 0;
+  image.setAttribute("role", "button");
+  image.setAttribute("aria-label", image.alt ? `Edit image: ${image.alt}` : "Edit image");
+}
 
 export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
   const editable = useRef<HTMLDivElement>(null);
   const lastValue = useRef<string | null>(null);
   const editorSelection = useRef<Range | null>(null);
-  const imageSelection = useRef<Range | null>(null);
   const slashId = useId();
   const [empty, setEmpty] = useState(!value.trim());
   const [activeFormats, setActiveFormats] = useState<string[]>([]);
   const [blockStyle, setBlockStyle] = useState("p");
   const [slash, setSlash] = useState<{ query: string; index: number; left: number; top: number; above: boolean } | null>(null);
-  const [addingImage, setAddingImage] = useState(false);
+  const [imageEdit, setImageEdit] = useState<ImageEdit | null>(null);
   const [addingLink, setAddingLink] = useState(false);
   const [url, setUrl] = useState("");
   const [linkError, setLinkError] = useState("");
@@ -74,14 +81,14 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
   useEffect(() => {
     if (editable.current && value !== lastValue.current) {
       editable.current.innerHTML = storyHtml(value);
+      editable.current.querySelectorAll("img").forEach(labelEditorImage);
       lastValue.current = value;
       editorSelection.current = null;
-      imageSelection.current = null;
       setEmpty(!editable.current.innerHTML.trim());
       setActiveFormats([]);
       setBlockStyle("p");
       setSlash(null);
-      setAddingImage(false);
+      setImageEdit(null);
       setAddingLink(false);
     }
   }, [value]);
@@ -109,6 +116,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
 
   function changed() {
     if (!editable.current) return;
+    editable.current.querySelectorAll<HTMLImageElement>("img:not([tabindex])").forEach(labelEditorImage);
     const markdown = storyMarkdown(editable.current);
     if (markdown === lastValue.current) return;
     lastValue.current = markdown;
@@ -141,7 +149,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
     const selection = focusEditor();
     if (!selection?.rangeCount) return;
     editorSelection.current = selection.getRangeAt(0).cloneRange();
-    setAddingImage(false);
+    setImageEdit(null);
     setUrl("");
     setLinkError("");
     setAddingLink(true);
@@ -172,33 +180,52 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
     setAddingLink(false);
   }
 
-  function startImage() {
-    if (addingImage) return;
+  function startImage(file?: File) {
+    if (imageEdit) return;
     const selection = focusEditor();
     if (!selection?.rangeCount) return;
-    imageSelection.current = selection.getRangeAt(0).cloneRange();
-    imageSelection.current.collapse(false);
+    const range = selection.getRangeAt(0).cloneRange();
+    range.collapse(false);
     setAddingLink(false);
-    setAddingImage(true);
+    setImageEdit({ range, file });
+  }
+
+  function editImage(image: HTMLImageElement) {
+    setAddingLink(false);
+    setSlash(null);
+    setImageEdit({ image });
   }
 
   function closeImage() {
-    const range = imageSelection.current;
-    imageSelection.current = null;
-    setAddingImage(false);
-    focusEditor(range ?? undefined);
+    setImageEdit(null);
+    if (imageEdit && "image" in imageEdit && imageEdit.image.isConnected) imageEdit.image.focus();
+    else focusEditor(imageEdit && "range" in imageEdit ? imageEdit.range : undefined);
   }
 
-  function insertImage(url: string, alt: string) {
-    const range = imageSelection.current;
-    if (!editable.current || !range || !editable.current.contains(range.commonAncestorContainer)) return;
+  function applyImage(photo: { url: string; alt: string } | null) {
+    const root = editable.current;
+    setImageEdit(null);
+    if (!imageEdit || !root) return;
+    const original = "image" in imageEdit ? imageEdit.image : null;
+    const range = "range" in imageEdit ? imageEdit.range : document.createRange();
+    if (original) {
+      if (!root.contains(original)) return;
+      range.selectNode(original);
+    }
+    if (!root.contains(range.commonAncestorContainer)) return;
     focusEditor(range);
-    const image = document.createElement("img");
-    image.src = url;
-    image.alt = alt;
-    document.execCommand("insertHTML", false, image.outerHTML);
-    imageSelection.current = null;
-    setAddingImage(false);
+    if (photo) {
+      const image = document.createElement("img");
+      setStoryImageSource(image, photo.url);
+      image.alt = photo.alt;
+      if (original?.title && (original.dataset.storySource ?? original.getAttribute("src")) === photo.url) {
+        image.title = original.title;
+      }
+      labelEditorImage(image);
+      document.execCommand("insertHTML", false, image.outerHTML);
+    } else {
+      document.execCommand("delete");
+    }
     changed();
   }
 
@@ -293,7 +320,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
         <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={startLink}>
           <Link2 size={16} aria-hidden />Link
         </button>
-        <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={startImage}>
+        <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => startImage()}>
           <ImagePlus size={16} aria-hidden />Image
         </button>
       </div>
@@ -311,7 +338,14 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
           {linkError && <p role="alert">{linkError}</p>}
         </div>
       )}
-      {addingImage && <StoryEditorImageForm uploadImage={uploadImage} onCancel={closeImage} onInsert={insertImage} />}
+      {imageEdit && (
+        <StoryEditorImageForm uploadImage={uploadImage} onCancel={closeImage} onApply={applyImage}
+          initialFile={"file" in imageEdit ? imageEdit.file : undefined}
+          initialImage={"image" in imageEdit ? {
+            url: imageEdit.image.dataset.storySource ?? imageEdit.image.getAttribute("src") ?? "",
+            alt: imageEdit.image.alt,
+          } : undefined} />
+      )}
       <div className="visual-story-writing">
         <div
           ref={editable}
@@ -326,16 +360,35 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
           data-empty={empty || undefined}
           data-placeholder="Start writing your story. Type / for commands."
           onInput={(event) => { changed(); updateSlash(event.nativeEvent); }}
-          onKeyDown={handleSlashKey}
+          onKeyDown={(event) => {
+            if (event.target instanceof HTMLImageElement && (event.key === "Enter" || event.key === " ")) {
+              event.preventDefault();
+              editImage(event.target);
+            } else {
+              handleSlashKey(event);
+            }
+          }}
           onMouseDown={() => setSlash(null)}
+          onClick={(event) => {
+            if (event.target instanceof HTMLImageElement) {
+              event.preventDefault();
+              editImage(event.target);
+            }
+          }}
           onBlur={() => setSlash(null)}
           onPaste={(event) => {
             event.preventDefault();
             const html = event.clipboardData.getData("text/html");
+            const text = event.clipboardData.getData("text/plain");
+            const file = Array.from(event.clipboardData.files).find((entry) => entry.type.startsWith("image/"));
+            if (file && !text.trim()) {
+              startImage(uploadImage ? file : undefined);
+              return;
+            }
             if (html) {
               document.execCommand("insertHTML", false, cleanStoryHtml(html));
             } else {
-              document.execCommand("insertText", false, event.clipboardData.getData("text/plain"));
+              document.execCommand("insertText", false, text);
             }
             changed();
           }}
