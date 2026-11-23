@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { STORY_IMAGE_BYTES, STORY_IMAGE_TYPES } from "../lib/storyImageLimits";
-import { storyImageUrl } from "../lib/storyMarkdown";
+import { isStoryImageUrl, storyImageUrl } from "../lib/storyImageUrl";
 
 async function prepareImage(file: File) {
   if (file.size <= STORY_IMAGE_BYTES) return file;
@@ -30,23 +30,14 @@ async function prepareImage(file: File) {
 
 type Props = {
   uploadImage: (image: Blob) => Promise<string>;
+  purpose?: "inline" | "cover";
   initialImage?: { url: string; alt: string };
   initialFile?: File;
   onApply: (photo: { url: string; alt: string } | null) => void;
   onCancel: () => void;
 };
 
-function isImageUrl(value: string) {
-  if (!value || /[\s\\]/.test(value)) return false;
-  try {
-    const url = new URL(storyImageUrl(value));
-    return url.protocol === "https:" && !url.username && !url.password;
-  } catch {
-    return false;
-  }
-}
-
-export function StoryEditorImageForm({ uploadImage, initialImage, initialFile, onApply, onCancel }: Props) {
+export function StoryEditorImageForm({ uploadImage, purpose = "inline", initialImage, initialFile, onApply, onCancel }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const mounted = useRef(false);
@@ -59,6 +50,8 @@ export function StoryEditorImageForm({ uploadImage, initialImage, initialFile, o
   const [previewFailed, setPreviewFailed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const isCover = purpose === "cover";
+  const applyLabel = isCover ? "Set cover image" : initialImage ? "Save changes" : "Insert image";
 
   useEffect(() => {
     mounted.current = true;
@@ -96,7 +89,7 @@ export function StoryEditorImageForm({ uploadImage, initialImage, initialFile, o
     if (uploading) return;
     const source = url.trim();
     if (!file) {
-      if (source !== initialImage?.url && !isImageUrl(source)) {
+      if (source !== initialImage?.url && !isStoryImageUrl(source)) {
         setError("Enter an HTTPS image URL or a site path such as /images/photo.jpg.");
         return;
       }
@@ -125,7 +118,7 @@ export function StoryEditorImageForm({ uploadImage, initialImage, initialFile, o
         }
       }}>
       <div className="story-editor-image-form">
-        <h3 id={titleId}>{initialImage ? "Edit image" : "Insert image"}</h3>
+        <h3 id={titleId}>{isCover ? "Cover image" : initialImage ? "Edit image" : "Insert image"}</h3>
         <div className="story-image-preview">
           {(filePreview || (!file && previewUrl)) && !previewFailed ? (
             <img className="story-image-thumbnail" src={file ? filePreview : previewUrl}
@@ -149,20 +142,22 @@ export function StoryEditorImageForm({ uploadImage, initialImage, initialFile, o
             }}
             onBlur={() => {
               setPreviewFailed(false);
-              setPreviewUrl(isImageUrl(url.trim()) ? storyImageUrl(url.trim()) : "");
+              setPreviewUrl(isStoryImageUrl(url.trim()) ? storyImageUrl(url.trim()) : "");
             }} />
         </label>
-        <label>
+        {!isCover && <label>
           Alt text
           <input type="text" value={alt} maxLength={160} disabled={uploading} placeholder="Briefly describe the photo"
             onChange={(event) => setAlt(event.target.value)} />
-        </label>
+        </label>}
         {error && <p role="alert">{error}</p>}
         <div className="story-editor-image-actions">
           <button type="button" className="story-image-apply" disabled={(!file && !url.trim()) || uploading} onClick={() => void apply()}>
-            {uploading ? "Uploading…" : initialImage ? "Save changes" : "Insert image"}
+            {uploading ? "Uploading…" : applyLabel}
           </button>
-          {initialImage && <button type="button" className="story-image-remove" disabled={uploading} onClick={() => finish(null)}>Remove image</button>}
+          {initialImage && <button type="button" className="story-image-remove" disabled={uploading} onClick={() => finish(null)}>
+            {isCover ? "Remove cover image" : "Remove image"}
+          </button>}
           <button type="button" disabled={uploading} onClick={cancel}>Cancel</button>
         </div>
       </div>

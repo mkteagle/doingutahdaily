@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { EditorProvider, WysiwygEditor } from "crucible-ui/mdx";
 import "crucible-ui/mdx/styles";
 import "./story-editor.css";
+import { StoryEditorImageForm } from "./StoryEditorImageForm";
 import { VisualStoryEditor } from "./VisualStoryEditor";
+import { storyImageUrl } from "@/lib/storyImageUrl";
 import { storyHtml } from "@/lib/storyMarkdown";
 import {
   Bot,
@@ -53,7 +55,7 @@ function serializePayload(payload: {
   return JSON.stringify(payload);
 }
 
-async function uploadInlineImage(image: Blob) {
+async function uploadStoryImageFile(image: Blob) {
   const response = await fetch("/api/story-images", { method: "POST", body: image });
   const result: { url?: string; error?: string } | null = await response.json().catch(() => null);
   if (response.ok && typeof result?.url === "string") return result.url;
@@ -68,6 +70,7 @@ export function PostEditor({ post }: PostEditorProps) {
   const [content, setContent] = useState(post?.content ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
+  const [coverDialogOpen, setCoverDialogOpen] = useState(false);
   const [published, setPublished] = useState(post?.published ?? false);
   const [scheduledAt, setScheduledAt] = useState(
     toDatetimeLocalValue(post?.scheduledAt)
@@ -554,7 +557,7 @@ export function PostEditor({ post }: PostEditorProps) {
                               <WysiwygEditor value={content} onChange={setContent} placeholder="Start writing your story…" className="relative" />
                             </EditorProvider>
                           </div>
-                        ) : <VisualStoryEditor value={content} onChange={setContent} uploadImage={uploadInlineImage} />}
+                        ) : <VisualStoryEditor value={content} onChange={setContent} uploadImage={uploadStoryImageFile} />}
                       </>
                     )}
                   </div>
@@ -596,27 +599,22 @@ export function PostEditor({ post }: PostEditorProps) {
               </p>
             </div>
 
-            <div>
-              <label htmlFor="cover-image-url" className="text-xs font-semibold text-ink/75">
-                Cover image URL
-              </label>
-              <input
-                id="cover-image-url"
-                type="text"
-                value={coverImage}
-                onChange={(event) => setCoverImage(event.target.value)}
-                placeholder="https://..."
-                className="mt-2 w-full rounded-lg border border-ink/10 bg-sand p-2.5 text-sm text-ink outline-none placeholder:text-ink/25 focus:border-canyon/40"
-              />
+            <section aria-labelledby="cover-image-title">
+              <h2 id="cover-image-title" className="text-xs font-semibold text-ink/75">Cover image</h2>
               {coverImage && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={coverImage}
-                  alt="Cover"
+                  src={storyImageUrl(coverImage)}
+                  alt="Story cover"
                   className="mt-2 h-28 w-full rounded-lg object-cover"
                 />
               )}
-            </div>
+              <button type="button" onClick={() => setCoverDialogOpen(true)}
+                className="mt-2 w-full rounded-lg border border-ink/15 bg-white/75 px-3 py-2.5 text-sm font-semibold text-ink hover:bg-white"
+                aria-haspopup="dialog">
+                {coverImage ? "Change cover image" : "Upload cover image"}
+              </button>
+            </section>
 
             <div>
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-ink/40">
@@ -642,6 +640,15 @@ export function PostEditor({ post }: PostEditorProps) {
           </div>
         </aside>
       </div>
+      {coverDialogOpen && (
+        <StoryEditorImageForm purpose="cover" uploadImage={uploadStoryImageFile}
+          initialImage={coverImage ? { url: coverImage, alt: "" } : undefined}
+          onCancel={() => setCoverDialogOpen(false)}
+          onApply={(photo) => {
+            setCoverImage(photo?.url ?? "");
+            setCoverDialogOpen(false);
+          }} />
+      )}
     </div>
   );
 }

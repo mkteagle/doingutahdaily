@@ -4,16 +4,7 @@ import { toMdast } from "hast-util-to-mdast";
 import { marked } from "marked";
 import { gfmToMarkdown } from "mdast-util-gfm";
 import { toMarkdown } from "mdast-util-to-markdown";
-
-const publicSite = "https://www.doingutahdaily.com";
-
-function isSitePath(value: unknown): value is string {
-  return typeof value === "string" && /^\/(?![/\\])/.test(value);
-}
-
-export function storyImageUrl(source: string) {
-  return isSitePath(source) ? new URL(source, publicSite).href : source;
-}
+import { isSitePath, storyImageUrl } from "./storyImageUrl";
 
 export function setStoryImageSource(image: HTMLImageElement, source: string) {
   image.setAttribute("src", storyImageUrl(source));

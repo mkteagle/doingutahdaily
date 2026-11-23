@@ -43,7 +43,11 @@
       <div><label for="title">Story title</label><input id="title" required maxlength="180"></div>
       <div><label for="summary">Summary</label><textarea id="summary" rows="2" maxlength="300"></textarea></div>
     </div>
-    <img id="cover" alt="Story cover" hidden>
+    <section class="story-editor-layout" aria-labelledby="cover-heading">
+      <h2 id="cover-heading" class="story-editor-label">Cover image</h2>
+      <img id="cover" alt="Story cover" hidden>
+      <button id="change-cover" type="button" aria-haspopup="dialog">Upload cover image</button>
+    </section>
     <div class="story-editor-layout">
       <section id="visual-panel" aria-labelledby="editor-label" class="story-editor-pane"><h2 id="editor-label" class="story-editor-label">Write</h2><div id="visual" class="story-editor-pane"></div></section>
       <div id="source-workspace" class="story-editor-columns" hidden>
@@ -53,6 +57,7 @@
     </div>
     <div class="actions"><button id="save" class="primary">Save draft</button><button id="revise" type="button">Revise with AI</button><button id="mode" type="button">Edit Markdown</button></div>
   </form>
+  <div id="cover-dialog"></div>
   <section id="gallery" hidden><h1 id="album"></h1><p>Chosen photos are copied to the site’s image library.</p><div class="photo-grid" id="photos"></div></section>
   <p id="status" role="status"></p>
   <!-- story-workspace-script -->

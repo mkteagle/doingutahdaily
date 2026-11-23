@@ -1,6 +1,8 @@
 import { App, applyDocumentTheme } from "@modelcontextprotocol/ext-apps";
 import { createRoot } from "react-dom/client";
+import { StoryEditorImageForm } from "../components/StoryEditorImageForm";
 import { VisualStoryEditor } from "../components/VisualStoryEditor";
+import { storyImageUrl } from "../lib/storyImageUrl";
 import { storyHtml } from "../lib/storyMarkdown";
 
 type Draft = {
@@ -30,12 +32,15 @@ const mode = document.querySelector<HTMLButtonElement>("#mode")!;
 const visualEditor = createRoot(document.querySelector("#visual")!);
 const preview = document.querySelector<HTMLElement>("#preview")!;
 const cover = document.querySelector<HTMLImageElement>("#cover")!;
+const coverButton = document.querySelector<HTMLButtonElement>("#change-cover")!;
+const coverDialog = createRoot(document.querySelector("#cover-dialog")!);
 const save = document.querySelector<HTMLButtonElement>("#save")!;
 const revise = document.querySelector<HTMLButtonElement>("#revise")!;
 const status = document.querySelector<HTMLElement>("#status")!;
 const gallery = document.querySelector<HTMLElement>("#gallery")!;
 const photoGrid = document.querySelector<HTMLElement>("#photos")!;
 let draft: Draft | undefined;
+let coverImage: string | null = null;
 
 app.addEventListener("hostcontextchanged", ({ theme }) => {
   if (theme) applyDocumentTheme(theme);
@@ -45,7 +50,7 @@ function renderPreview() {
   preview.innerHTML = storyHtml(markdown.value);
 }
 
-async function uploadInlineImage(image: Blob) {
+async function uploadStoryImageFile(image: Blob) {
   if (!draft) throw new Error("Open a draft to upload an image.");
   const id = draft.id;
   const base64 = await new Promise<string>((resolve, reject) => {
@@ -63,7 +68,7 @@ async function uploadInlineImage(image: Blob) {
 
 function renderVisual() {
   visualEditor.render(<VisualStoryEditor key={draft?.id} value={markdown.value}
-    uploadImage={uploadInlineImage} onChange={(value) => {
+    uploadImage={uploadStoryImageFile} onChange={(value) => {
     markdown.value = value;
     renderVisual();
   }} />);
@@ -76,6 +81,14 @@ function showVisual() {
   renderVisual();
 }
 
+function setCoverImage(url: string | null) {
+  coverImage = url;
+  cover.hidden = !url;
+  if (url) cover.src = storyImageUrl(url);
+  else cover.removeAttribute("src");
+  coverButton.textContent = url ? "Change cover image" : "Upload cover image";
+}
+
 function showDraft(next: Draft) {
   draft = next;
   gallery.hidden = true;
@@ -84,9 +97,8 @@ function showDraft(next: Draft) {
   summary.value = next.summary;
   markdown.value = next.markdown;
   showVisual();
-  cover.hidden = !next.coverImage;
-  if (next.coverImage) cover.src = next.coverImage;
-  else cover.removeAttribute("src");
+  coverDialog.render(null);
+  setCoverImage(next.coverImage);
 }
 
 function askChat(text: string) {
@@ -98,6 +110,15 @@ function askChat(text: string) {
 }
 
 markdown.addEventListener("input", renderPreview);
+coverButton.addEventListener("click", () => {
+  coverDialog.render(<StoryEditorImageForm purpose="cover" uploadImage={uploadStoryImageFile}
+    initialImage={coverImage ? { url: coverImage, alt: "" } : undefined}
+    onCancel={() => coverDialog.render(null)}
+    onApply={(photo) => {
+      setCoverImage(photo?.url ?? null);
+      coverDialog.render(null);
+    }} />);
+});
 mode.addEventListener("click", () => {
   if (visualPanel.hidden) showVisual();
   else {
@@ -110,15 +131,21 @@ mode.addEventListener("click", () => {
 });
 editor.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!draft) return;
-  const changes = { title: title.value, summary: summary.value, markdown: markdown.value };
+  if (!draft || save.disabled) return;
+  const openedDraft = draft;
+  const changes = { title: title.value, summary: summary.value, markdown: markdown.value, coverImage };
+  const coverChange = changes.coverImage === openedDraft.coverImage ? {} : { coverImage: changes.coverImage };
   save.disabled = true;
   status.textContent = "Saving…";
   try {
     const result = await app.callServerTool({
       name: "update_story_draft",
-      arguments: { id: draft.id, revision: draft.revision, ...changes },
+      arguments: {
+        id: openedDraft.id, revision: openedDraft.revision,
+        title: changes.title, summary: changes.summary, markdown: changes.markdown, ...coverChange,
+      },
     });
+    if (draft !== openedDraft) return;
     const next = (result.structuredContent as WorkspaceResult | undefined)?.draft;
     if (result.isError || !next) {
       status.textContent = result.content.find((item) => item.type === "text")?.text ?? "Couldn’t save. Ask ChatGPT to reopen the draft.";
@@ -126,7 +153,8 @@ editor.addEventListener("submit", async (event) => {
     }
     // A save can finish while the author is still typing.
     draft = next;
-    const stillEditing = title.value !== changes.title || summary.value !== changes.summary || markdown.value !== changes.markdown;
+    const stillEditing = title.value !== changes.title || summary.value !== changes.summary ||
+      markdown.value !== changes.markdown || coverImage !== changes.coverImage;
     if (!stillEditing) {
       title.value = next.title;
       summary.value = next.summary;

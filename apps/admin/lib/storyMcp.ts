@@ -8,6 +8,7 @@ import { adminOrigin } from "@/auth";
 import { getKindredAlbum, kindredAlbumConfigured, readKindredPhoto } from "@/lib/kindredPhotos";
 import { createUniquePostSlug } from "@/lib/postDrafts";
 import { STORY_IMAGE_BYTES } from "@/lib/storyImageLimits";
+import { isStoryImageUrl } from "@/lib/storyImageUrl";
 import { uploadStoryImage } from "@/lib/storyImages";
 import workspaceHtml from "virtual:story-workspace";
 
@@ -133,18 +134,21 @@ export function registerStoryTools(server: McpServer) {
       title: draftFields.title.optional(),
       markdown: draftFields.markdown.optional(),
       summary: draftFields.summary.optional(),
+      coverImage: z.string().trim().refine(isStoryImageUrl, "Use an HTTPS image URL or a site path.").nullable().optional(),
     },
     annotations: draftWrite,
     _meta: { ...workspaceMeta, "openai/widgetAccessible": true },
-  }, async ({ id, revision, title, markdown, summary }) => {
-    if (title === undefined && markdown === undefined && summary === undefined) return fail("Provide a title, Markdown, or summary to save.");
-    const post = await postService.updatePost(id, { title, content: markdown, excerpt: summary }, new Date(revision));
+  }, async ({ id, revision, title, markdown, summary, coverImage }) => {
+    if (title === undefined && markdown === undefined && summary === undefined && coverImage === undefined) {
+      return fail("Provide a title, Markdown, summary, or cover image to save.");
+    }
+    const post = await postService.updatePost(id, { title, content: markdown, excerpt: summary, coverImage }, new Date(revision));
     return post ? draftResponse(post, "Revisions saved.") : fail(reopenMessage);
   });
 
   server.registerTool("upload_story_image", {
     title: "Upload an image selected in the story editor",
-    description: "Store an author-selected image in the story image library and return its URL for inline insertion.",
+    description: "Store an author-selected image in the story image library and return its URL for the cover or story body.",
     inputSchema: { id: chatDraftId, image: z.base64().max(4 * Math.ceil(STORY_IMAGE_BYTES / 3)) },
     annotations: { ...draftWrite, openWorldHint: true },
     _meta: { ui: { resourceUri: workspaceUri, visibility: ["app"] }, "openai/visibility": "private", "openai/widgetAccessible": true },

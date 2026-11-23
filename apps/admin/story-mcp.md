@@ -31,6 +31,10 @@ When file uploads are configured, you can also paste an image from your clipboar
 
 The site stores uploaded files as web-size copies in Cloudflare R2 and strips camera metadata. The public URL works once the upload finishes. Save the draft to keep the photo in its body.
 
+## Upload a cover photo
+
+In admin, open **Post Settings**. In ChatGPT, use the **Cover image** section above the story. Click **Upload cover image** or **Change cover image**, choose a file, and click **Set cover image**. In ChatGPT, click **Save draft** to keep the new cover. Admin autosaves draft covers. For a published story, click **Update**.
+
 Production uses the private `doing-utah-daily-story-images` R2 bucket. The [story image Worker](../../infra/story-images-worker/wrangler.jsonc) serves individual image URLs publicly and accepts uploads from the admin server using a shared secret. Use the Worker’s HTTPS URL for `POST_ASSETS_R2_WORKER_URL` and set `POST_ASSETS_R2_WORKER_TOKEN` to the same value as its `STORY_IMAGES_WRITE_TOKEN` secret. Direct S3 settings are available in the [environment template](../../.env.example) for other deployments.
 
 ## Choose photos from Kindred
