@@ -5,7 +5,7 @@ import { INSTAGRAM_URL } from "@/lib/social";
 
 const explore = [
   { label: "Activities", href: "/activities" },
-  { label: "This Weekend", href: "/events" },
+  { label: "Events", href: "/events" },
   { label: "Stories & Guides", href: "/blog" },
   { label: "About", href: "/about" },
   { label: "Share an event", href: "/submit" },
@@ -21,7 +21,7 @@ export function SiteFooter() {
               <MountainMark className="w-14 text-[#e9a181]" /> Doing Utah Daily
             </Link>
             <p className="mt-4 max-w-sm text-[#e0dfd3]">
-              Utah outings, local stories, and weekend ideas for families.
+              Things to do in Utah with kids, shared by a local family.
             </p>
           </div>
           <nav aria-label="Explore" className="grid content-start justify-items-start gap-2">
@@ -31,7 +31,7 @@ export function SiteFooter() {
           </nav>
           <div className="grid content-start justify-items-start gap-3">
             <Link href="/contact" className="hover:underline">Partner with us</Link>
-            <Link href="/newsletter" className="hover:underline">Get the newsletter</Link>
+            <Link href="/newsletter" className="hover:underline">Newsletter signup</Link>
             <a href={INSTAGRAM_URL} className="flex items-center gap-2 hover:underline">
               <Instagram size={16} aria-hidden /> Instagram
             </a>

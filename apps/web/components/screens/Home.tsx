@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowRight, Instagram } from "lucide-react";
 import type { BlogMeta } from "@/types/blog";
 import { InstagramPostCard } from "@/components/Home/InstagramPostCard";
-import { NewsletterForm } from "@/components/NewsletterForm";
 import { INSTAGRAM_URL } from "@/lib/social";
 
 const starts = [
@@ -61,17 +60,17 @@ export function Home({
         </div>
         <div className="field-hero-ridge" aria-hidden="true" />
         <div className="field-hero-content field-container">
-          <h1>Find your<br />{" "}Utah weekend.</h1>
-          <p>Local outings, family-tested tips, and a reason to get outside.</p>
-          <Link href="/events" className="field-button">
-            See this weekend <ArrowRight size={20} aria-hidden />
+          <h1>Things to do<br className="hidden md:block" />{" "}in Utah with kids</h1>
+          <p>Places we love taking our kids, with tips for planning your own outing.</p>
+          <Link href="/activities" className="field-button">
+            Browse activities <ArrowRight size={20} aria-hidden />
           </Link>
         </div>
       </section>
 
       <section className="field-container field-section" aria-labelledby="start-here">
         <div className="field-section-heading">
-          <h2 id="start-here">Start with these</h2>
+          <h2 id="start-here">Find an outing</h2>
         </div>
         <div className="grid gap-6 sm:grid-cols-3">
           {starts.map((start) => (
@@ -127,14 +126,6 @@ export function Home({
           </ul>
         </section>
       )}
-
-      <section className="field-container field-section pb-12 text-center">
-        <div className="rounded-2xl bg-card px-5 py-10 sm:py-14">
-          <h2 className="font-display text-4xl sm:text-5xl">This Weekend in Utah</h2>
-          <p className="mb-6 mt-3 text-muted-foreground">Family-friendly plans delivered to your inbox.</p>
-          <NewsletterForm variant="light" />
-        </div>
-      </section>
     </>
   );
 }

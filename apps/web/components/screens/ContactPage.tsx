@@ -20,7 +20,7 @@ const FEATURES = [
     icon: TrendingUp,
     title: "Extended reach",
     description:
-      "Multi-platform promotion across our blog, newsletter, and social channels.",
+      "Promotion across our blog and social channels.",
   },
 ];
 

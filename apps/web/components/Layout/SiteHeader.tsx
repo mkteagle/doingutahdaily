@@ -8,7 +8,7 @@ import { useTheme } from "@/theme/theme";
 
 const nav = [
   { href: "/activities", label: "Activities" },
-  { href: "/events", label: "This Weekend" },
+  { href: "/events", label: "Events" },
   { href: "/blog", label: "Stories" },
   { href: "/instagram", label: "Instagram" },
 ];

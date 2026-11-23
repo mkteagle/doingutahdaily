@@ -9,8 +9,8 @@ import MDXWrapper from "./MdxWrapper";
 import { ImageBrightnessProvider } from "@/context/ImageBrightnessContext";
 import { SiteLayout } from "@/components/Layout/SiteLayout";
 
-const siteTitle = "Doing Utah Daily | Utah Family Activities & Weekend Plans";
-const siteDescription = "Find family-friendly outings, local tips, and things to do this weekend in Utah.";
+const siteTitle = "Doing Utah Daily | Things to Do in Utah with Kids";
+const siteDescription = "Explore easy hikes, free outings, indoor play, and local events across Utah, with tips from a Utah family.";
 const { openGraph, twitter } = pageMetadata({ path: "/", title: siteTitle, description: siteDescription });
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | Doing Utah Daily"
   },
   description: siteDescription,
-  keywords: ["Utah events", "Utah activities", "family events Utah", "things to do in Utah", "Salt Lake City events", "Utah family fun", "Utah adventures", "weekend plans Utah"],
+  keywords: ["things to do in Utah with kids", "Utah family activities", "Utah events", "free things to do in Utah", "Utah hikes with kids"],
   authors: [{ name: "Doing Utah Daily" }],
   creator: "Doing Utah Daily",
   publisher: "Doing Utah Daily",

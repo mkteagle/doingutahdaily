@@ -3,9 +3,9 @@ import { pageMetadata } from "@/lib/pageMetadata";
 
 export const metadata = pageMetadata({
   path: "/newsletter",
-  title: "This Weekend in Utah — Free Thursday Newsletter",
+  title: "Newsletter Signup",
   description:
-    "Every Thursday morning: the best family-friendly events and activities happening this weekend in Utah. Free, honest, no spam.",
+    "Join the Doing Utah Daily newsletter list for Utah family outing ideas, seasonal guides, and occasional weekend roundups when it launches.",
 });
 
 export default function Page() {

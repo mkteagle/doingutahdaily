@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     if (result.alreadySubscribed) {
       return NextResponse.json({
-        message: "You're already subscribed! See you Thursday.",
+        message: "You're already on the newsletter list.",
         status: "existing",
       });
     }
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message: "You're in! First newsletter drops Thursday morning.",
+        message: "You're on the newsletter list!",
         status: "new",
       },
       { status: 201 }

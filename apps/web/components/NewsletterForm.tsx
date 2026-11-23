@@ -62,6 +62,8 @@ export function NewsletterForm({
         <input
           type="email"
           required
+          aria-label="Email address"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@email.com"
@@ -79,7 +81,7 @@ export function NewsletterForm({
           {submitting ? (
             <Loader2 size={16} className="animate-spin mx-auto" />
           ) : (
-            "Subscribe Free"
+            "Join the list"
           )}
         </button>
       </form>
