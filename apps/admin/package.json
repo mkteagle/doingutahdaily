@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.27",
+    "@better-auth/mcp": "1.7.27",
+    "@better-auth/oauth-provider": "1.7.27",
     "@better-auth/passkey": "1.7.27",
     "@dud/content-engine": "workspace:*",
     "@dud/db": "workspace:*",
@@ -19,7 +21,7 @@
     "@modelcontextprotocol/sdk": "1.32.2",
     "better-auth": "1.7.27",
     "crucible-ui": "1.0.0",
-    "jose": "^6.2.2",
+    "jose": "^6.2.18",
     "lucide-react": "^0.453.0",
     "next": "16.4.6",
     "react": "19.3.1",

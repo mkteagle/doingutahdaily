@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Fingerprint } from "lucide-react";
+import { oauthProviderClient } from "@better-auth/oauth-provider/client";
 import { passkeyClient } from "@better-auth/passkey/client";
 import { createAuthClient } from "better-auth/client";
 
-const authClient = createAuthClient({ plugins: [passkeyClient()] });
+const authClient = createAuthClient({ plugins: [passkeyClient(), oauthProviderClient()] });
 
 export function PasskeyButton({ action }: { action: "authenticate" | "register" }) {
   const [working, setWorking] = useState(false);
@@ -28,7 +29,7 @@ export function PasskeyButton({ action }: { action: "authenticate" | "register" 
       if (registering) {
         setSuccess(true);
         setMessage("Passkey added. You can use it the next time you sign in.");
-      } else {
+      } else if (!result?.data || !("redirect" in result.data && result.data.redirect === true)) {
         window.location.assign("/");
       }
     } catch (error) {

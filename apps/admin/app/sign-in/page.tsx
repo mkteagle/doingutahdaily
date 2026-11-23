@@ -3,11 +3,13 @@ import { LoginButtons } from "@/components/AuthButtons";
 import { PasskeyButton } from "@/components/PasskeyButton";
 import { MountainMark } from "@dud/ui/mountain-mark";
 import { redirect } from "next/navigation";
+import { getMcpOAuthQuery } from "@/lib/mcpOAuthQuery";
 
-export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  if (await getAdminSession()) redirect("/");
-
-  const { error } = await searchParams;
+export default async function SignInPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  const connecting = await getMcpOAuthQuery(params);
+  if (!connecting && await getAdminSession()) redirect("/");
+  const { error } = params;
   const message = error === "access_denied"
     ? "That account isn’t approved for this workspace."
     : error ? "Sign-in couldn’t be completed. Please try again." : null;
@@ -22,7 +24,9 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
       <div className="grid content-center justify-items-center px-6 py-12">
         <div className="w-full max-w-sm">
           <h1 className="admin-heading">Sign in</h1>
-          <p className="mb-6 mt-3 text-ink/75">Use an approved account to open the editorial workspace.</p>
+          <p className="mb-6 mt-3 text-ink/75">{connecting
+            ? "Use your Doing Utah Daily account to continue connecting the story editor."
+            : "Use an approved account to open the editorial workspace."}</p>
           {message && <p role="alert" className="mb-5 rounded-lg bg-red-100 p-3 text-sm text-red-800">{message}</p>}
           <div className="space-y-3">
             {passkeysEnabled && <PasskeyButton action="authenticate" />}

@@ -11,7 +11,7 @@ function ShellInner({ children, passkeysEnabled, adminEmail }: AppShellProps) {
   const pathname = usePathname();
   const { isCollapsed, sidebarWidth } = useSidebar();
 
-  if (pathname === "/sign-in") {
+  if (pathname === "/sign-in" || pathname === "/mcp/approve") {
     return <main className="min-h-dvh bg-sand">{children}</main>;
   }
 

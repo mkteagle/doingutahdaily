@@ -1,7 +1,9 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { mcp } from "@better-auth/mcp";
 import { passkey } from "@better-auth/passkey";
-import { adminAccounts, adminPasskeys, adminSessions, adminUsers, adminVerifications, db } from "@dud/db";
+import { adminAccounts, adminOAuthSchema, adminPasskeys, adminSessions, adminUsers, adminVerifications, db } from "@dud/db";
 import { betterAuth } from "better-auth";
+import { jwt } from "better-auth/plugins";
 import { SignJWT, importPKCS8 } from "jose";
 import { headers } from "next/headers";
 
@@ -70,12 +72,15 @@ const origin = new URL(process.env.BETTER_AUTH_URL || process.env.AUTH_URL || (
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3001"
 ));
 export const adminOrigin = origin.origin;
+export const mcpResource = new URL("/api/mcp", adminOrigin).href;
+export const mcpDraftScope = "drafts:edit";
+export const mcpScopes = [mcpDraftScope, "offline_access"];
 
 export const passkeysEnabled = process.env.AUTH_PASSKEYS_ENABLED === "true" && (
   origin.protocol === "https:" || (origin.protocol === "http:" && origin.hostname === "localhost")
 );
 
-function isApprovedAdmin(user?: { email?: string; emailVerified?: boolean }) {
+export function isApprovedAdmin(user?: { email?: string; emailVerified?: boolean } | null) {
   return user?.emailVerified === true && !!user.email && allowedEmails.has(user.email.toLowerCase());
 }
 
@@ -91,8 +96,14 @@ export const auth = betterAuth({
       account: adminAccounts,
       verification: adminVerifications,
       passkey: adminPasskeys,
+      ...adminOAuthSchema,
     },
   }),
+  disabledPaths: ["/token"],
+  rateLimit: { storage: "database" },
+  advanced: process.env.VERCEL === "1" ? {
+    ipAddress: { ipAddressHeaders: ["x-vercel-forwarded-for"] },
+  } : undefined,
   socialProviders,
   trustedOrigins: socialProviders.apple ? ["https://appleid.apple.com"] : [],
   onAPIError: { errorURL: `${origin.origin}/sign-in` },
@@ -112,12 +123,33 @@ export const auth = betterAuth({
       },
     },
   },
-  plugins: passkeysEnabled ? [passkey({
-    rpID: origin.hostname,
-    rpName: "Doing Utah Daily Admin",
-    origin: origin.origin,
-    registration: { requireSession: true },
-  })] : [],
+  plugins: [
+    jwt({ disableSettingJwtHeader: true }),
+    mcp({
+      loginPage: "/sign-in",
+      consentPage: "/mcp/approve",
+      resource: mcpResource,
+      scopes: mcpScopes,
+      grantTypes: ["authorization_code", "refresh_token"],
+      allowDynamicClientRegistration: true,
+      allowUnauthenticatedClientRegistration: true,
+      clientRegistrationDefaultApplicationType: "infer",
+      clientRegistrationDefaultScopes: mcpScopes,
+      accessTokenExpiresIn: 600,
+      validateRedirectUri(uri, _registeredUris, matches) {
+        if (!matches) return false;
+        const url = new URL(uri);
+        if (url.href === "https://chatgpt.com/connector_platform_oauth_redirect") return true;
+        return url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+      },
+    }),
+    ...(passkeysEnabled ? [passkey({
+      rpID: origin.hostname,
+      rpName: "Doing Utah Daily Admin",
+      origin: origin.origin,
+      registration: { requireSession: true },
+    })] : []),
+  ],
 });
 
 export async function getAdminSession(requestHeaders?: Headers) {

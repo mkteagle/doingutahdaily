@@ -49,19 +49,20 @@ Selecting a photo copies a web-size version to Doing Utah Daily’s public image
 
 ## Connect ChatGPT on the editor’s computer
 
-1. In the Doing Utah Daily admin project’s server environment, set `DUD_MCP_DRAFT_TOKEN` to a random value of at least 32 characters. Deploy admin with the variable configured.
-2. On the editor’s computer, make the same value available as `DUD_MCP_DRAFT_TOKEN` in the environment of the desktop Codex process. Keep the token in local secret configuration and out of chat and source control.
-3. Register the connection from the editor’s computer, then reopen the desktop app.
+1. In the ChatGPT desktop app, go to **Settings → MCP servers → Add server**. Name the server **Doing Utah Daily**, choose **Streamable HTTP**, and enter `https://admin.doingutahdaily.com/api/mcp`.
+2. Save, restart when prompted, then select **Authenticate** next to the server. Sign in with your approved Doing Utah Daily admin account and choose **Allow access**.
+3. In Work or Codex, ask ChatGPT to list your Doing Utah Daily drafts. Open an existing draft or create one. The inline workspace and photo gallery appear when the client supports MCP Apps.
 
-   ```sh
-   codex mcp add doing-utah-daily \
-     --url https://admin.doingutahdaily.com/api/mcp \
-     --bearer-token-env-var DUD_MCP_DRAFT_TOKEN
-   ```
+The Codex CLI uses the same configuration and browser sign-in.
 
-4. In Work/Codex mode, ask ChatGPT to list your Doing Utah Daily drafts. Open an existing draft or create a test draft to try saving. The inline workspace and photo gallery appear when the client supports MCP Apps.
+```sh
+codex mcp add doing-utah-daily --url https://admin.doingutahdaily.com/api/mcp
+codex mcp login doing-utah-daily
+```
 
-If the connection is missing, check `codex mcp list` on that computer. If it appears but the server returns an authorization error, check that the desktop process has the same token as the deployed admin project.
+If you previously added the server with a bearer-token environment variable, remove that entry before adding the OAuth connection. Then reopen the desktop app.
+
+For a new database, apply [the admin OAuth migration](../../packages/db/migrations/003_admin_mcp_oauth.sql) after the Better Auth migration.
 
 ## Connect the Kindred editorial album
 

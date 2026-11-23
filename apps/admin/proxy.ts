@@ -7,7 +7,8 @@ export default async function proxy(req: NextRequest) {
 
   const isCron = nextUrl.pathname === "/api/cron/publish-posts" ||
     nextUrl.pathname === "/api/cron/sync-instagram";
-  if (nextUrl.pathname.startsWith("/api/auth/") || nextUrl.pathname === "/api/mcp" || isCron) {
+  if (nextUrl.pathname.startsWith("/api/auth/") || nextUrl.pathname === "/api/mcp" ||
+      nextUrl.pathname.startsWith("/.well-known/oauth-") || isCron) {
     return NextResponse.next();
   }
 
@@ -23,7 +24,7 @@ export default async function proxy(req: NextRequest) {
     }
   }
 
-  if (session && isPublicPage) {
+  if (session && isPublicPage && !nextUrl.searchParams.has("sig")) {
     return NextResponse.redirect(new URL("/", nextUrl));
   }
 
