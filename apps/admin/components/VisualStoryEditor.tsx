@@ -7,6 +7,7 @@ import type { KeyboardEvent } from "react";
 import { pastedStoryImageUrl } from "../lib/storyImageUrl";
 import { cleanStoryHtml, setStoryImageLayout, setStoryImageSource, storyHtml, storyMarkdown } from "../lib/storyMarkdown";
 import { StoryEditorImageForm, type LoadStoryImageThumbnail, type StoryEditorImage } from "./StoryEditorImageForm";
+import { StoryImageResizeHandles } from "./StoryImageResizeHandles";
 
 const inlineFormats = [
   { label: "Bold", command: "bold", icon: Bold },
@@ -78,6 +79,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage, loadThumbnail 
   const [blockStyle, setBlockStyle] = useState("p");
   const [slash, setSlash] = useState<{ query: string; index: number; left: number; top: number; above: boolean } | null>(null);
   const [imageEdit, setImageEdit] = useState<ImageEdit | null>(null);
+  const [resizeTarget, setResizeTarget] = useState<HTMLImageElement | null>(null);
   const [addingLink, setAddingLink] = useState(false);
   const [url, setUrl] = useState("");
   const [linkError, setLinkError] = useState("");
@@ -93,6 +95,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage, loadThumbnail 
       setBlockStyle("p");
       setSlash(null);
       setImageEdit(null);
+      setResizeTarget(null);
       setAddingLink(false);
     }
   }, [value]);
@@ -206,17 +209,31 @@ export function VisualStoryEditor({ value, onChange, uploadImage, loadThumbnail 
     else focusEditor(imageEdit && "range" in imageEdit ? imageEdit.range : undefined);
   }
 
+  function rangeForImage(image: HTMLImageElement) {
+    if (!editable.current?.contains(image)) return null;
+    const range = document.createRange();
+    range.selectNode(image);
+    return range;
+  }
+
+  function resizeImage(image: HTMLImageElement, width: number) {
+    const range = rangeForImage(image);
+    if (!range || !focusEditor(range)) return;
+    const resized = image.cloneNode() as HTMLImageElement;
+    const ratio = parseStoryImageLayout(image.dataset.storyLayout ?? "")?.ratio;
+    setStoryImageLayout(resized, { size: "custom", width, ratio });
+    document.execCommand("insertHTML", false, resized.outerHTML);
+    setResizeTarget(null);
+    changed();
+  }
+
   function applyImage(photo: StoryEditorImage | null) {
     const root = editable.current;
     setImageEdit(null);
     if (!imageEdit || !root) return;
     const original = "image" in imageEdit ? imageEdit.image : null;
-    const range = "range" in imageEdit ? imageEdit.range : document.createRange();
-    if (original) {
-      if (!root.contains(original)) return;
-      range.selectNode(original);
-    }
-    if (!root.contains(range.commonAncestorContainer)) return;
+    const range = "range" in imageEdit ? imageEdit.range : rangeForImage(imageEdit.image);
+    if (!range || !root.contains(range.commonAncestorContainer)) return;
     focusEditor(range);
     if (photo) {
       const image = document.createElement("img");
@@ -353,7 +370,12 @@ export function VisualStoryEditor({ value, onChange, uploadImage, loadThumbnail 
             layout: parseStoryImageLayout(imageEdit.image.dataset.storyLayout ?? ""),
           } : undefined} />
       )}
-      <div className="visual-story-writing">
+      <div className="visual-story-writing"
+        onPointerOver={({ target }) => {
+          if (target instanceof HTMLImageElement) setResizeTarget(target);
+          else if (target instanceof Element && !target.closest(".story-image-resize")) setResizeTarget(null);
+        }}
+        onPointerLeave={() => setResizeTarget(null)}>
         <div
           ref={editable}
           className="visual-story-content story-prose"
@@ -376,6 +398,9 @@ export function VisualStoryEditor({ value, onChange, uploadImage, loadThumbnail 
             }
           }}
           onMouseDown={() => setSlash(null)}
+          onFocus={({ target }) => {
+            if (target instanceof HTMLImageElement) setResizeTarget(target);
+          }}
           onClick={(event) => {
             if (event.target instanceof HTMLImageElement) {
               event.preventDefault();
@@ -405,6 +430,9 @@ export function VisualStoryEditor({ value, onChange, uploadImage, loadThumbnail 
             changed();
           }}
         />
+        {!imageEdit && resizeTarget?.isConnected && (
+          <StoryImageResizeHandles image={resizeTarget} onResize={resizeImage} />
+        )}
         {slash && (
           <div id={slashId} className="story-slash-menu" role="listbox" aria-label="Story commands"
             data-above={slash.above || undefined} style={{ left: slash.left, top: slash.top }}>
