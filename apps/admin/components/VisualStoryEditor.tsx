@@ -1,10 +1,12 @@
 "use client";
 
+import { parseStoryImageLayout } from "@dud/ui/story-image-layout";
 import { Bold, ChevronDown, Heading2, Heading3, Heading4, ImagePlus, Italic, Link2, List, ListOrdered, Quote, Redo2, Type, Undo2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
-import { cleanStoryHtml, setStoryImageSource, storyHtml, storyMarkdown } from "../lib/storyMarkdown";
-import { StoryEditorImageForm } from "./StoryEditorImageForm";
+import { pastedStoryImageUrl } from "../lib/storyImageUrl";
+import { cleanStoryHtml, setStoryImageLayout, setStoryImageSource, storyHtml, storyMarkdown } from "../lib/storyMarkdown";
+import { StoryEditorImageForm, type LoadStoryImageThumbnail, type StoryEditorImage } from "./StoryEditorImageForm";
 
 const inlineFormats = [
   { label: "Bold", command: "bold", icon: Bold },
@@ -54,9 +56,11 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   uploadImage: (image: Blob) => Promise<string>;
+  loadThumbnail?: LoadStoryImageThumbnail;
 };
 
-type ImageEdit = { range: Range; file?: File } | { image: HTMLImageElement };
+type ImageSource = { file?: File; url?: string };
+type ImageEdit = ({ range: Range } & ImageSource) | { image: HTMLImageElement };
 
 function labelEditorImage(image: HTMLImageElement) {
   image.tabIndex = 0;
@@ -64,7 +68,7 @@ function labelEditorImage(image: HTMLImageElement) {
   image.setAttribute("aria-label", image.alt ? `Edit image: ${image.alt}` : "Edit image");
 }
 
-export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
+export function VisualStoryEditor({ value, onChange, uploadImage, loadThumbnail }: Props) {
   const editable = useRef<HTMLDivElement>(null);
   const lastValue = useRef<string | null>(null);
   const editorSelection = useRef<Range | null>(null);
@@ -180,14 +184,14 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
     setAddingLink(false);
   }
 
-  function startImage(file?: File) {
+  function startImage(source?: ImageSource) {
     if (imageEdit) return;
     const selection = focusEditor();
     if (!selection?.rangeCount) return;
     const range = selection.getRangeAt(0).cloneRange();
     range.collapse(false);
     setAddingLink(false);
-    setImageEdit({ range, file });
+    setImageEdit({ range, ...source });
   }
 
   function editImage(image: HTMLImageElement) {
@@ -202,7 +206,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
     else focusEditor(imageEdit && "range" in imageEdit ? imageEdit.range : undefined);
   }
 
-  function applyImage(photo: { url: string; alt: string } | null) {
+  function applyImage(photo: StoryEditorImage | null) {
     const root = editable.current;
     setImageEdit(null);
     if (!imageEdit || !root) return;
@@ -218,6 +222,7 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
       const image = document.createElement("img");
       setStoryImageSource(image, photo.url);
       image.alt = photo.alt;
+      if (photo.layout) setStoryImageLayout(image, photo.layout);
       if (original?.title && (original.dataset.storySource ?? original.getAttribute("src")) === photo.url) {
         image.title = original.title;
       }
@@ -339,11 +344,13 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
         </div>
       )}
       {imageEdit && (
-        <StoryEditorImageForm uploadImage={uploadImage} onCancel={closeImage} onApply={applyImage}
-          initialFile={"file" in imageEdit ? imageEdit.file : undefined}
+        <StoryEditorImageForm uploadImage={uploadImage} loadThumbnail={loadThumbnail} onCancel={closeImage} onApply={applyImage}
+          initialFile={"range" in imageEdit ? imageEdit.file : undefined}
+          initialUrl={"range" in imageEdit ? imageEdit.url : undefined}
           initialImage={"image" in imageEdit ? {
             url: imageEdit.image.dataset.storySource ?? imageEdit.image.getAttribute("src") ?? "",
             alt: imageEdit.image.alt,
+            layout: parseStoryImageLayout(imageEdit.image.dataset.storyLayout ?? ""),
           } : undefined} />
       )}
       <div className="visual-story-writing">
@@ -382,7 +389,12 @@ export function VisualStoryEditor({ value, onChange, uploadImage }: Props) {
             const text = event.clipboardData.getData("text/plain");
             const file = Array.from(event.clipboardData.files).find((entry) => entry.type.startsWith("image/"));
             if (file && !text.trim()) {
-              startImage(file);
+              startImage({ file });
+              return;
+            }
+            const imageUrl = pastedStoryImageUrl(text);
+            if (imageUrl) {
+              startImage({ url: imageUrl });
               return;
             }
             if (html) {

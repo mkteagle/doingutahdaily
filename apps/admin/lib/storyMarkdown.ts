@@ -1,3 +1,11 @@
+import {
+  parseStoryImageLayout,
+  readStoryImageTitle,
+  storyImageLayoutValue,
+  storyImageStyle,
+  storyImageTitle,
+  type StoryImageLayout,
+} from "@dud/ui/story-image-layout";
 import DOMPurify from "dompurify";
 import { fromDom } from "hast-util-from-dom";
 import { toMdast } from "hast-util-to-mdast";
@@ -10,6 +18,17 @@ export function setStoryImageSource(image: HTMLImageElement, source: string) {
   image.setAttribute("src", storyImageUrl(source));
   if (isSitePath(source)) image.dataset.storySource = source;
   else delete image.dataset.storySource;
+}
+
+export function setStoryImageLayout(image: HTMLImageElement, layout: StoryImageLayout) {
+  const value = storyImageLayoutValue(layout);
+  if (value) {
+    image.dataset.storyLayout = value;
+    image.style.cssText = storyImageStyle(layout);
+  } else {
+    delete image.dataset.storyLayout;
+    image.removeAttribute("style");
+  }
 }
 
 export function cleanStoryHtml(html: string) {
@@ -29,6 +48,12 @@ export function cleanStoryHtml(html: string) {
   for (const image of fragment.querySelectorAll("img")) {
     const source = image.getAttribute("src");
     if (source) setStoryImageSource(image, source);
+    const { title, layout } = readStoryImageTitle(image.title);
+    const imageLayout = layout ?? parseStoryImageLayout(image.dataset.storyLayout ?? "");
+    if (title) image.title = title;
+    else image.removeAttribute("title");
+    if (imageLayout) setStoryImageLayout(image, imageLayout);
+    else delete image.dataset.storyLayout;
   }
   const container = document.createElement("div");
   container.append(fragment);
@@ -47,6 +72,8 @@ export function storyMarkdown(editor: HTMLElement) {
       if (result.type !== "element" || result.tagName !== "img") return;
       const originalSource = result.properties.dataStorySource;
       if (isSitePath(originalSource)) result.properties.src = originalSource;
+      const layout = parseStoryImageLayout(String(result.properties.dataStoryLayout ?? ""));
+      if (layout) result.properties.title = storyImageTitle(String(result.properties.title ?? ""), layout);
     },
   });
   if (tree.type !== "element") return "";

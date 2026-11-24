@@ -17,3 +17,11 @@ export function isStoryImageUrl(value: string) {
     return false;
   }
 }
+
+export function pastedStoryImageUrl(text: string) {
+  const source = text.trim();
+  if (!isStoryImageUrl(source)) return undefined;
+
+  const { pathname } = new URL(storyImageUrl(source));
+  return /\.(?:apng|avif|bmp|gif|ico|jpe?g|png|svg|webp)$/i.test(pathname) ? source : undefined;
+}

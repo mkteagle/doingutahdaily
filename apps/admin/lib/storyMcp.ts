@@ -8,6 +8,7 @@ import { adminOrigin } from "@/auth";
 import { getKindredAlbum, kindredAlbumConfigured, readKindredPhoto } from "@/lib/kindredPhotos";
 import { createUniquePostSlug } from "@/lib/postDrafts";
 import { STORY_IMAGE_BYTES } from "@/lib/storyImageLimits";
+import { loadStoryImageThumbnail } from "@/lib/storyImageThumbnail";
 import { isStoryImageUrl } from "@/lib/storyImageUrl";
 import { uploadStoryImage } from "@/lib/storyImages";
 import workspaceHtml from "virtual:story-workspace";
@@ -158,6 +159,25 @@ export function registerStoryTools(server: McpServer) {
     return result.error
       ? fail(result.error)
       : { content: [{ type: "text", text: "Image uploaded." }], structuredContent: { url: result.url } };
+  });
+
+  server.registerTool("preview_story_image", {
+    title: "Preview an image URL in the story editor",
+    description: "Load a thumbnail for a public image URL entered by the author.",
+    inputSchema: { id: chatDraftId, url: z.string().max(8192).refine(isStoryImageUrl) },
+    annotations: { ...readOnly, openWorldHint: true },
+    _meta: { ui: { resourceUri: workspaceUri, visibility: ["app"] }, "openai/visibility": "private", "openai/widgetAccessible": true },
+  }, async ({ id, url }) => {
+    if (!await postService.getChatDraft(id)) return fail("This story draft is unavailable.");
+    try {
+      const { data, width, height } = await loadStoryImageThumbnail(url);
+      return {
+        content: [{ type: "image", mimeType: "image/webp", data }],
+        structuredContent: { width, height },
+      };
+    } catch {
+      return fail("The image preview could not be loaded.");
+    }
   });
 
   if (!kindredAlbumConfigured()) return;

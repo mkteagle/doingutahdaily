@@ -66,9 +66,22 @@ async function uploadStoryImageFile(image: Blob) {
   throw new Error(error?.text || "The image couldn’t be uploaded. Try again.");
 }
 
+async function loadThumbnail(url: string) {
+  if (!draft) throw new Error("Open a draft to preview an image.");
+  const result = await app.callServerTool({ name: "preview_story_image", arguments: { id: draft.id, url } });
+  const image = result.content.find((item) => item.type === "image" && item.mimeType === "image/webp");
+  const dimensions = result.structuredContent;
+  if (result.isError || image?.type !== "image" || !dimensions || typeof dimensions !== "object" ||
+      !("width" in dimensions) || !("height" in dimensions) ||
+      typeof dimensions.width !== "number" || typeof dimensions.height !== "number") {
+    throw new Error("The image preview could not be loaded.");
+  }
+  return { src: `data:image/webp;base64,${image.data}`, width: dimensions.width, height: dimensions.height };
+}
+
 function renderVisual() {
   visualEditor.render(<VisualStoryEditor key={draft?.id} value={markdown.value}
-    uploadImage={uploadStoryImageFile} onChange={(value) => {
+    uploadImage={uploadStoryImageFile} loadThumbnail={loadThumbnail} onChange={(value) => {
     markdown.value = value;
     renderVisual();
   }} />);
@@ -111,7 +124,7 @@ function askChat(text: string) {
 
 markdown.addEventListener("input", renderPreview);
 coverButton.addEventListener("click", () => {
-  coverDialog.render(<StoryEditorImageForm purpose="cover" uploadImage={uploadStoryImageFile}
+  coverDialog.render(<StoryEditorImageForm purpose="cover" uploadImage={uploadStoryImageFile} loadThumbnail={loadThumbnail}
     initialImage={coverImage ? { url: coverImage, alt: "" } : undefined}
     onCancel={() => coverDialog.render(null)}
     onApply={(photo) => {
